@@ -8,13 +8,22 @@
     "objects": ["water_ice_node", "helium3_node", "iron_node", "titanium_node", "silicon_node", "rare_metals_node", "probe"],
     "animations": ["alex_walking", "maya_walking", "zane_walking", "rin_walking", "medic_walking", "commander_walking"]
   },
+  "_superseded_characters_round1": {
+    "_note": "Round-1 chars were 48px and one suit was too-bright green; user rejected. Kept here for cleanup via Pixellab UI if desired.",
+    "alex":      "85db05fa-62fa-4f68-836d-6f354789802e",
+    "maya":      "fcbff9aa-7069-4b9b-85e3-6c451254c440",
+    "zane":      "3765b4a6-7563-43d2-80bf-213a785a0398",
+    "rin":       "5b3751ce-6f55-42c4-aedb-cdf29bc8684f",
+    "medic":     "09c50e88-2707-4c5a-b951-1b56ae3fb3ae",
+    "commander": "6a0023c0-ddb6-4cc5-ab23-de13cea1dc26"
+  },
   "characters": [
-    { "name": "alex",      "id": "85db05fa-62fa-4f68-836d-6f354789802e", "role": "engineer",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "maya",      "id": "fcbff9aa-7069-4b9b-85e3-6c451254c440", "role": "scientist", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "zane",      "id": "3765b4a6-7563-43d2-80bf-213a785a0398", "role": "botanist",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "rin",       "id": "5b3751ce-6f55-42c4-aedb-cdf29bc8684f", "role": "geologist", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "medic",     "id": "09c50e88-2707-4c5a-b951-1b56ae3fb3ae", "role": "medic",     "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "commander", "id": "6a0023c0-ddb6-4cc5-ab23-de13cea1dc26", "role": "commander", "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
+    { "name": "alex",      "id": "121c1da3-88ca-43b1-9bd1-3ce7b03bcacd", "role": "engineer",  "size": 128, "style": "chibi anime, muted navy/white",        "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "maya",      "id": "d4288316-9b7f-4701-a54d-34fb21ee7e86", "role": "scientist", "size": 128, "style": "chibi anime, muted lavender",         "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "zane",      "id": "0935fdf6-f110-4d67-b9c0-91d0280a3ac2", "role": "botanist",  "size": 128, "style": "chibi anime, muted olive",            "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "rin",       "id": "cd9178be-c7c6-4388-88e9-f2d5a37dbafd", "role": "geologist", "size": 128, "style": "chibi anime, muted ochre",            "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "medic",     "id": "883cd83f-df8a-452a-a192-5cb0b65293d2", "role": "medic",     "size": 128, "style": "chibi anime, off-white + red cross",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "commander", "id": "5ff8007c-7537-491e-bce5-251db9af75c8", "role": "commander", "size": 128, "style": "chibi anime, dark navy + gold trim",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
   ],
   "animations": [],
   "buildings": [

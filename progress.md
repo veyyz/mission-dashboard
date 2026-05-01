@@ -36,4 +36,22 @@
   - Navigation map / pathfinding → Phase 4
 - Files added/changed: 6 new (4 scripts/scenes + 1 test + this log line), 1 modified (project.godot)
 
+## Phase 3: Resources + time + day/night tint
+- Status: completed
+- Implemented:
+  - `scripts/systems/day_night_modulate.gd` — `CanvasModulate` subscribing to `EventBus.phase_changed`; tweens the canvas tint over 0.5s. Phase colors: day `(1.00, 0.98, 0.92)`, twilight `(1.00, 0.70, 0.55)`, night `(0.50, 0.60, 0.80)`
+  - `scripts/ui/debug_hud.gd` + `scenes/ui/DebugHUD.tscn` — top-left CanvasLayer panel showing all 6 resources (current/max + rate), day/time, phase. Subscribes to `EventBus.resource_changed`/`phase_changed`; updates `TimeLabel` per `_process` only
+  - `scenes/world/Ground.tscn` updated to instance `DayNightModulate` (CanvasModulate at root) and `DebugHUD` (CanvasLayer)
+  - `tests/phase_3_test.gd` — verifies the 4 done criteria
+- Build: clean (`logs/phase_3_build.log`)
+- Test: **PASS** (`logs/phase_3_test.log`)
+- Bug fixed in-loop: SceneTree-based test scripts cannot resolve autoload globals (`EventBus`, `ResourceManager`, `TimeManager`) at compile time. Refactored test to fetch them via `root.get_node_or_null("…")` and store as locals. (Affects future phase tests too — same pattern.)
+- Art swap-in pass: no Phase-3-relevant assets ready yet — terrain wang tileset is still in the deferred-retry list. CanvasModulate placeholder colors are fine; swap-in deferred until `regolith_to_rocky` lands.
+- Deferred to later phases:
+  - Resource consumption/production hooks driven by buildings → Phase 5
+  - Resource bar visualization with bars/icons → Phase 6
+  - Pause + speed buttons in UI → Phase 6
+- Files added/changed: 4 new (3 scripts/scenes + 1 test), 1 modified (Ground.tscn)
+
+
 

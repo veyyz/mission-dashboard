@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/debug_hud.gd" id="1_debughud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.051, 0.078, 0.125, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.36, 0.71, 0.84, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="DebugHUD" type="CanvasLayer"]
+script = ExtResource("1_debughud")
+
+[node name="Panel" type="PanelContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 360.0
+offset_bottom = 250.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "LUNAR COLONY — DEBUG"
+theme_override_colors/font_color = Color(0.36, 0.71, 0.84, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="TimeLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Day 0  06:00"
+theme_override_colors/font_color = Color(0.91, 0.93, 0.95, 1)
+
+[node name="PhaseLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Phase: DAY"
+theme_override_colors/font_color = Color(0.91, 0.93, 0.95, 1)
+
+[node name="Sep" type="HSeparator" parent="Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="Resources" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2

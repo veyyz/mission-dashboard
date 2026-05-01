@@ -1,14 +1,19 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/ground.gd" id="1_ground"]
 [ext_resource type="Script" path="res://scripts/crew/crew_member.gd" id="2_crew"]
 [ext_resource type="Script" path="res://scripts/world/placeholder_rock.gd" id="3_rock"]
+[ext_resource type="Script" path="res://scripts/systems/day_night_modulate.gd" id="4_daynight"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DebugHUD.tscn" id="5_debughud"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 8.0
 
 [node name="Ground" type="Node2D"]
 script = ExtResource("1_ground")
+
+[node name="DayNightModulate" type="CanvasModulate" parent="."]
+script = ExtResource("4_daynight")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 
@@ -34,3 +39,5 @@ position = Vector2(60, 30)
 
 [node name="Sprite2D" type="Sprite2D" parent="YSort/Rock"]
 offset = Vector2(0, -10)
+
+[node name="DebugHUD" parent="." instance=ExtResource("5_debughud")]
