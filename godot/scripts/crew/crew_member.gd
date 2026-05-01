@@ -1,48 +1,125 @@
 class_name CrewMember
 extends CharacterBody2D
-## Phase-2 controllable crew. WASD via InputMap actions registered in
-## GameState._setup_input_map(). Roles, nameplates, and selection arrive in
-## Phase 4 — keep this minimal until then.
+## Phase-4 crew. Roles, role-tinted placeholder sprites, NavigationAgent2D for
+## click-to-move, WASD when selected, glow ring under feet to show selection.
+## Real character art swaps in once `art_queue.characters[*].status` flips to
+## ready (handled by the per-phase art swap-in pass).
+
+enum Role {
+	ENGINEER,
+	SCIENTIST,
+	BOTANIST,
+	GEOLOGIST,
+	MEDIC,
+	COMMANDER,
+}
+
+const ROLE_COLOR := {
+	Role.ENGINEER:  Color(0.36, 0.71, 0.84),  # cyan
+	Role.SCIENTIST: Color(0.66, 0.45, 0.85),  # purple
+	Role.BOTANIST:  Color(0.45, 0.78, 0.50),  # muted green
+	Role.GEOLOGIST: Color(0.95, 0.71, 0.30),  # amber
+	Role.MEDIC:     Color(0.92, 0.40, 0.45),  # red
+	Role.COMMANDER: Color(0.95, 0.85, 0.45),  # gold
+}
+
+const ROLE_LABEL := {
+	Role.ENGINEER:  "Engineer",
+	Role.SCIENTIST: "Scientist",
+	Role.BOTANIST:  "Botanist",
+	Role.GEOLOGIST: "Geologist",
+	Role.MEDIC:     "Medic",
+	Role.COMMANDER: "Commander",
+}
 
 const SPEED: float = 140.0
+const ARRIVAL_DISTANCE: float = 4.0
 
 @export var crew_name: String = "Alex"
-@export var role_color: Color = Color(0.36, 0.71, 0.84)  # cyan placeholder
+@export var crew_id: int = 1
+@export var role: Role = Role.ENGINEER
+@export_range(0, 100) var role_skill: int = 80
+
+@export var max_health: int = 100
+@export var max_stamina: int = 100
+
+var current_health: int
+var current_stamina: int
+var current_oxygen: float = 100.0
+var selected: bool = false
 
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var selection_ring: Sprite2D = $SelectionRing
+@onready var nameplate: Label = $Nameplate
+@onready var agent: NavigationAgent2D = $NavigationAgent2D
 
 
 func _ready() -> void:
+	current_health = max_health
+	current_stamina = max_stamina
+
 	if sprite.texture == null:
 		sprite.texture = _build_placeholder_texture()
+	if selection_ring.texture == null:
+		selection_ring.texture = _build_selection_ring_texture()
+	selection_ring.visible = false
+	_apply_nameplate()
 
 
 func _physics_process(_delta: float) -> void:
-	var dir := Vector2.ZERO
-	if Input.is_action_pressed("move_up"):    dir.y -= 1.0
-	if Input.is_action_pressed("move_down"):  dir.y += 1.0
-	if Input.is_action_pressed("move_left"):  dir.x -= 1.0
-	if Input.is_action_pressed("move_right"): dir.x += 1.0
-	if dir != Vector2.ZERO:
-		velocity = dir.normalized() * SPEED
-	else:
-		velocity = Vector2.ZERO
+	var move := Vector2.ZERO
+	var navigating: bool = (
+		agent.target_position != Vector2.ZERO
+		and not agent.is_navigation_finished()
+	)
+	if navigating:
+		var next_pos: Vector2 = agent.get_next_path_position()
+		var to_next: Vector2 = next_pos - global_position
+		if to_next.length() > ARRIVAL_DISTANCE:
+			move = to_next.normalized() * SPEED
+	elif selected:
+		var dir := Vector2.ZERO
+		if Input.is_action_pressed("move_up"):    dir.y -= 1.0
+		if Input.is_action_pressed("move_down"):  dir.y += 1.0
+		if Input.is_action_pressed("move_left"):  dir.x -= 1.0
+		if Input.is_action_pressed("move_right"): dir.x += 1.0
+		if dir != Vector2.ZERO:
+			move = dir.normalized() * SPEED
+	velocity = move
 	move_and_slide()
 
 
-## A 20x28 astronaut silhouette so Phase 2 has something to look at while
-## the Pixellab character art finishes generating in the background.
+func move_to(target: Vector2) -> void:
+	agent.target_position = target
+
+
+func set_selected(value: bool) -> void:
+	selected = value
+	if selection_ring != null:
+		selection_ring.visible = value
+
+
+func _apply_nameplate() -> void:
+	if nameplate == null:
+		return
+	nameplate.text = "%s %d" % [crew_name, role_skill]
+	nameplate.add_theme_color_override("font_color", ROLE_COLOR.get(role, Color(0.91, 0.93, 0.95)))
+	nameplate.add_theme_color_override("font_outline_color", Color(0.07, 0.09, 0.12))
+	nameplate.add_theme_constant_override("outline_size", 4)
+
+
 func _build_placeholder_texture() -> Texture2D:
 	var img := Image.create(20, 28, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
-	# Suit body
+	var role_c: Color = ROLE_COLOR.get(role, Color(0.36, 0.71, 0.84))
+	var suit: Color = role_c.lerp(Color(0.91, 0.93, 0.95), 0.55)
 	for y in range(2, 26):
 		for x in range(2, 18):
-			img.set_pixel(x, y, Color(0.91, 0.93, 0.95))
-	# Visor band
+			img.set_pixel(x, y, suit)
+	# Visor band — saturated role color
 	for y in range(5, 11):
 		for x in range(4, 16):
-			img.set_pixel(x, y, role_color)
+			img.set_pixel(x, y, role_c)
 	# Belt
 	for x in range(2, 18):
 		img.set_pixel(x, 17, Color(0.18, 0.22, 0.28))
@@ -53,4 +130,18 @@ func _build_placeholder_texture() -> Texture2D:
 	for x in range(2, 18):
 		img.set_pixel(x, 1, Color(0.07, 0.09, 0.12))
 		img.set_pixel(x, 26, Color(0.07, 0.09, 0.12))
+	return ImageTexture.create_from_image(img)
+
+
+func _build_selection_ring_texture() -> Texture2D:
+	var img := Image.create(40, 24, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for y in range(0, 24):
+		for x in range(0, 40):
+			var dx: float = float(x - 20) / 18.0
+			var dy: float = float(y - 12) / 10.0
+			var d: float = dx * dx + dy * dy
+			if d <= 1.0 and d >= 0.55:
+				var alpha: float = 0.85 * (1.0 - abs(d - 0.78) * 4.0)
+				img.set_pixel(x, y, Color(0.36, 0.71, 0.84, clampf(alpha, 0.0, 0.85)))
 	return ImageTexture.create_from_image(img)

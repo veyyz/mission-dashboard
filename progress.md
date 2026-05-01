@@ -53,5 +53,30 @@
   - Pause + speed buttons in UI → Phase 6
 - Files added/changed: 4 new (3 scripts/scenes + 1 test), 1 modified (Ground.tscn)
 
+## Phase 4: Full crew (6) + selection + navigation
+- Status: completed
+- Implemented:
+  - `scripts/crew/crew_member.gd` rewritten with `enum Role { ENGINEER, SCIENTIST, BOTANIST, GEOLOGIST, MEDIC, COMMANDER }`, role-tinted placeholder sprite, role-color glow ring, `move_to(target)` setting `NavigationAgent2D.target_position`. WASD when selected; pathfinding overrides WASD when an agent target is active.
+  - `scripts/crew/crew_selection_manager.gd` — polls `Input.is_action_just_pressed("select_crew_N")` per frame (so it works with both real key events and synthetic `Input.action_press`), supports shift-multi-select, dispatches click-to-move on left-click via `_unhandled_input` + `get_global_mouse_position()`. Emits `EventBus.crew_selected` and `EventBus.log_message`.
+  - `scenes/crew/CrewMember.tscn` — packed scene with SelectionRing, Sprite2D, CollisionShape2D, NavigationAgent2D, and a `Label` nameplate (Godot 4 has no `Label2D`; using a Control child of CharacterBody2D, configured via theme overrides for outline/font color).
+  - `scripts/world/ground.gd` extended to spawn 6 crew from a `CREW_ROSTER` constant under `YSort/CrewContainer`, build a `NavigationRegion2D` covering ±2000px (simple rectangular nav polygon — no obstacle baking yet), and attach the Camera2D to crew #1 (Alex). Default selection: Alex.
+  - `scenes/world/Ground.tscn` updated: removed inline CrewMember; CrewContainer (script: `crew_selection_manager.gd`) now lives under YSort.
+  - `tests/phase_4_test.gd` — verifies all five Phase-4 done criteria.
+  - `tests/phase_2_test.gd` — updated to find first `CharacterBody2D` by class instead of by literal name `"CrewMember"` (regression-compatible after the structural change).
+- Build: clean (`logs/phase_4_build.log`), prints `[Ground] Phase 4 ready. Tiles=625  Crew=6`
+- Test: **Phase 2 regression PASS** (`logs/phase_2_regress.log`); **Phase 4 PASS** (`logs/phase_4_test.log`)
+- Bugs fixed in-loop:
+  1. `Label2D` doesn't exist in Godot 4 (only `Label` (Control) and `Label3D`). Switched to `Label` and configured outline via theme overrides.
+  2. `_unhandled_input` doesn't fire from `Input.action_press(...)` (no synthetic event flows through the viewport). Selection manager moved to a `_process` polling pattern so both real and test-driven inputs work.
+  3. Strict-typing inferred `var agent := find_child(...)` to wrong type. Explicitly typed `var agent: NavigationAgent2D = ... as NavigationAgent2D`.
+- Art swap-in pass: 6 character UUIDs from round-2 (128px chibi-anime muted) are queued; `alex` confirmed completed via `get_character` (180×180 canvas, ~108px character — this is Pixellab's ~40% padding behavior, accepted per Option A user decision). Visual swap-in deferred to Phase 6 (HUD crew portraits) or Phase 10 polish — placeholder role-tinted astronauts continue to satisfy Phase 4 done criteria.
+- Deferred to later phases:
+  - Real Pixellab character textures + per-direction facing animation → Phase 6/10
+  - Crew status (health/oxygen/stamina) decay + UI display → Phase 6
+  - Camera follows whichever crew is currently selected (currently fixed to Alex) → Phase 6 or polish
+  - Pathfinding around obstacles (NavigationPolygon currently has no obstacles baked) → Phase 8 (alongside fog of war / props)
+- Files added/changed: 4 new (CrewMember.tscn, crew_selection_manager.gd, phase_4_test.gd, this log entry); 4 modified (crew_member.gd, ground.gd, Ground.tscn, phase_2_test.gd)
+
+
 
 
