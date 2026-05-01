@@ -45,28 +45,13 @@ func tick(seconds: float) -> void:
 
 
 func _engineer_in_reach() -> bool:
-	# Look for a CrewMember whose role is ENGINEER and whose distance is within reach.
-	# Small group lookup — per-frame O(n) is fine for n=6 crew in Phase 5.
+	# CrewMember._ready() registers itself in the "crew" group.
 	for node in get_tree().get_nodes_in_group("crew"):
 		var crew := node as CrewMember
 		if crew == null or crew.role != CrewMember.Role.ENGINEER:
 			continue
 		if crew.global_position.distance_to(global_position) <= ENGINEER_REACH:
 			return true
-	# Fallback: scan parent (CrewContainer) directly if the crew group isn't populated.
-	var parent := get_parent()
-	if parent != null:
-		# Crew typically live under YSort/CrewContainer; the construction site is also under YSort.
-		var ysort := parent.get_parent() if parent is Node else null
-		if ysort != null:
-			for child in ysort.get_children():
-				if child.name == "CrewContainer":
-					for c in child.get_children():
-						var crew := c as CrewMember
-						if crew == null or crew.role != CrewMember.Role.ENGINEER:
-							continue
-						if crew.global_position.distance_to(global_position) <= ENGINEER_REACH:
-							return true
 	return false
 
 

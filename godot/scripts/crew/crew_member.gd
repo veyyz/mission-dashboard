@@ -58,6 +58,9 @@ func _ready() -> void:
 	current_health = max_health
 	current_stamina = max_stamina
 
+	# ConstructionSite uses get_nodes_in_group("crew") to find adjacent engineers.
+	add_to_group("crew")
+
 	if sprite.texture == null:
 		sprite.texture = _build_placeholder_texture()
 	if selection_ring.texture == null:

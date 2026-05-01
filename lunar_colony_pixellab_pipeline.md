@@ -104,7 +104,7 @@ Use `create_isometric_tile` (or `create_tiles_pro` if you want more control) wit
 
 ### Terrain (Wang Tilesets, Chained)
 
-Use `create_topdown_tileset` with `view="low top-down"`, `tile_size={"width": 32, "height": 32}`, `transition_size=0.25`. Chain via `lower_base_tile_id` for visual continuity.
+Use `create_topdown_tileset` with `view="low top-down"`, `tile_size={"width": 64, "height": 64}`, `transition_size=0.25`. Chain via `lower_base_tile_id` for visual continuity.
 
 ```python
 # Base lunar surface variations

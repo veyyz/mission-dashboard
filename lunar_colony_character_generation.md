@@ -6,16 +6,17 @@ A focused art-direction doc for Claude Code when calling Pixellab MCP `create_ch
 
 ## Visual Vision
 
-The crew should feel like **an athletic, optimistic exploration team in next-generation space gear**. Think NASA Artemis program circa 2050 — the suits are sleek and form-fitting (not bulky), with subtle glowing tech accents woven into seams and equipment. Characters look capable and confident but warm and approachable, not grim, not military, not cyberpunk.
+The crew should feel like **a cozy, optimistic exploration team** — cute, capable, slightly chubby/normal proportions, the kind of pixel-art protagonists you'd find in Stardew Valley, Eastward, or Moonlighter rather than Halo or Mass Effect. Think indie space comic, not military sci-fi. The reference (`fq_player.png`) is the canonical look for **Alex** — every other crew member must feel like they came out of the same artist's sketchbook.
 
-The references (`fq_player.png` + `fq_landing_site_characters.png`) establish:
-- **Chibi-leaning proportions** — large expressive head, compact body, ~4 heads tall
-- **Distinctive face details** — visible eyes, hair, sometimes a friendly half-smile
-- **Role-coded color** — each crew member has one dominant hue tied to their role
-- **Warm anchoring details** — red boots on Alex, the green cap on Zane, the yellow hardhat on Rin keep the suits from feeling sterile
-- **Signature props** — wrench, scanner, plant sample, pickaxe — instantly readable role
+Key qualities the reference establishes:
+- **Stylized JRPG proportions** — large expressive head, compact body, ~4–5 heads tall. Direct family with Eastward, Sea of Stars, CrossCode. Use the `stylized` preset; it gives the JRPG/anime sensibility without going full deformed-chibi.
+- **Layered cozy outfits** — visible jacket/vest piece *over* a base spacesuit. This is huge — it makes the characters feel dressed rather than encased. Alex has a navy-blue flight jacket with high collar over a white suit.
+- **Warm human anchor details** — Alex's glossy red boots are the signature element. Every crew member needs an equivalent: a piece in a warm, friendly color or material that humanizes the suit.
+- **Tousled, lived-in hair** — not styled, not slick. Brown messy hair on Alex.
+- **Small simple face** — eye dots, hint of a friendly expression, not over-detailed.
+- **Subtle, not dominant futuristic touches** — small accent lines, a single LED or seam-glow. The character reads as a *person* first, technology second.
 
-**Where we push further:** form-fitting athletic silhouettes (lean, capable, no bulk), subtle cyan/role-color glowing seams along the suit panels, integrated wrist displays or visors, holographic equipment instead of mechanical tools. Still warm, still smiling, still *approachable* — just upgraded by ~30 years.
+**What to avoid in body language:** anything that suggests "athletic," "lean," "fit," "slim," "form-fitting." The reference is a normal cute character, not a fitness model. Let the stylized proportions handle the body — describe clothing and accessories, not physique.
 
 ---
 
@@ -29,7 +30,7 @@ create_character(
     body_type="humanoid",
     n_directions=8,
     size=128,                                         # large canvas for crisp face details + tech accents
-    proportions={"type": "preset", "name": "chibi"},  # matches the reference proportions
+    proportions={"type": "preset", "name": "stylized"}, # JRPG-style — closer to reference than chibi
     outline="single color black outline",
     shading="detailed shading",                       # not "basic" — references have multiple shade levels
     detail="highly detailed",
@@ -39,7 +40,7 @@ create_character(
 )
 ```
 
-If the first batch comes back too cute / too cartoony, drop `proportions` to `{"type": "preset", "name": "stylized"}`. If too realistic / not enough head presence, that's the wrong direction — go back to `chibi`.
+If outputs feel too realistic / heads too small for the JRPG vibe, try `chibi` for that batch. If too deformed / Funko-Pop-like, try `default`. The reference sits between `stylized` and `chibi` — `stylized` is the better starting point.
 
 ---
 
@@ -48,8 +49,9 @@ If the first batch comes back too cute / too cartoony, drop `proportions` to `{"
 Every character description follows the same five-part structure. Parallel structure across descriptions is the strongest cohesion lever Pixellab gives you when you can't lock a seed.
 
 ```
-[ROLE + BUILD + AGE], in [SUIT COLOR/STYLE] with [FUTURISTIC TECH ACCENT],
-[HAIR/FACE DETAIL], [EXPRESSION], [SIGNATURE PROP], retro-futuristic
+[ROLE], in [LAYERED OUTFIT: base suit + colored jacket/garment], [HAIR/FACE
+DETAIL], [EXPRESSION], [WARM ANCHOR DETAIL — boots/cap/hardhat/etc.],
+[OPTIONAL SUBTLE TECH ACCENT], [OPTIONAL SIGNATURE PROP], retro-futuristic
 exploration crew, clean pixel art, friendly approachable
 ```
 
@@ -60,54 +62,53 @@ Always end with `retro-futuristic exploration crew, clean pixel art, friendly ap
 ## Per-Character Prompts
 
 ### Alex — Engineer
+*Canonical reference. Match `fq_player.png` as closely as possible.*
 ```
-young athletic engineer with lean build, in form-fitting white and electric-blue
-spacesuit with glowing cyan circuit-pattern seams, brown tousled hair, warm
-confident smile, holding a sleek silver plasma wrench, red accent boots,
+engineer in white spacesuit with navy-blue flight jacket and high collar,
+brown tousled messy hair, friendly warm smile, glossy red boots, small cyan
+accent stripe along jacket trim, JRPG anime-influenced pixel art,
 retro-futuristic exploration crew, clean pixel art, friendly approachable
 ```
 
 ### Maya — Scientist
 ```
-young athletic female scientist with lean build, in form-fitting violet spacesuit
-with glowing magenta data-line accents along the arms, dark hair in high ponytail,
-small holographic visor across forehead, curious intelligent smile, holding a
-glowing handheld scanner tablet, retro-futuristic exploration crew, clean pixel
-art, friendly approachable
+female scientist in violet bodysuit with darker purple panel seams and high
+collar, dark hair in high ponytail, curious intelligent smile, lavender accent
+boots, holding a glowing handheld scanner tablet, JRPG anime-influenced pixel
+art, retro-futuristic exploration crew, clean pixel art, friendly approachable
 ```
 
 ### Zane — Botanist
 ```
-athletic botanist with lean build, in form-fitting forest-green spacesuit with
-bioluminescent leaf-pattern accents and small green LED on chest, short brown
-hair under green tactical cap, light stubble, gentle warm smile, holding a small
-glowing plant cutting in a clear vial, retro-futuristic exploration crew, clean
-pixel art, friendly approachable
+botanist in white shirt and forest-green work vest over green pants, green
+tactical cap over short brown hair, light stubble, gentle warm smile, dark
+green boots, small green leaf-pattern accent on vest, JRPG anime-influenced
+pixel art, retro-futuristic exploration crew, clean pixel art, friendly
+approachable
 ```
 
 ### Rin — Geologist
 ```
-young athletic female geologist with lean build, in form-fitting amber and
-charcoal spacesuit with glowing orange seam accents, sleek modern yellow hardhat
-with integrated headlamp, determined friendly smile, holding a sonic pickaxe
-with glowing tip, retro-futuristic exploration crew, clean pixel art, friendly
+female geologist in heavy-duty amber-orange jumpsuit with charcoal-grey panels,
+sleek yellow hardhat with integrated headlamp, determined friendly smile, brown
+work boots, holding a sonic pickaxe with glowing tip, JRPG anime-influenced
+pixel art, retro-futuristic exploration crew, clean pixel art, friendly
 approachable
 ```
 
 ### Medic (Phase 5+ unlock)
 ```
-athletic medic with lean build, in form-fitting white spacesuit with glowing
-red caduceus emblem on chest and red seam trim, integrated medical scanner on
-left forearm, short dark hair, calm reassuring smile, holding a small
-holographic medkit, retro-futuristic exploration crew, clean pixel art, friendly
-approachable
+medic in white spacesuit with light-grey medical jacket and red cross emblem
+on chest, short dark hair, calm reassuring smile, white boots with red soles,
+holding a small medkit, JRPG anime-influenced pixel art, retro-futuristic
+exploration crew, clean pixel art, friendly approachable
 ```
 
 ### Commander (Phase 5+ unlock)
 ```
-athletic commander with lean build, in form-fitting dark navy-blue spacesuit
-with gold trim and glowing silver insignia on shoulders, no helmet, short
-silver-grey hair, confident warm smile, hands relaxed at sides, retro-futuristic
+commander in dark navy spacesuit with gold trim and silver shoulder insignia,
+no helmet, short silver-grey hair, confident warm smile, polished black boots,
+hands relaxed at sides, JRPG anime-influenced pixel art, retro-futuristic
 exploration crew, clean pixel art, friendly approachable
 ```
 
@@ -117,27 +118,28 @@ exploration crew, clean pixel art, friendly approachable
 
 These descriptors will pull the output in the wrong direction. Do **not** include them, and watch for outputs that drift this way:
 
+- ❌ "athletic", "lean", "fit", "slim", "form-fitting", "muscular" → fitness-model body language; the reference is a normal cute character
 - ❌ "bulky armor", "heavy armor", "tactical gear" → makes them look military
 - ❌ "ribbed suit", "cables", "wires" → makes them look 1980s Aliens
 - ❌ "mask", "full helmet covering face" → loses the friendliness; we want faces
 - ❌ "grim", "stern", "serious", "battle-hardened" → wrong emotional tone
 - ❌ "neon", "cyberpunk", "dystopian" → too far on the futuristic dial
-- ❌ "realistic", "photorealistic" → loses the pixel-art chibi charm
-- ❌ "anime" → wrong stylistic family; we want stylized pixel art, not anime
+- ❌ "realistic", "photorealistic" → loses the JRPG pixel-art charm
+- ❌ "anime portrait", "anime illustration" → we want anime-*influenced* pixel art (`JRPG anime-influenced pixel art`), not full anime portrait rendering
 - ❌ Specifying exact ages ("25 years old") → the model handles this fine implicitly
 
 ---
 
 ## Animation Prompts
 
-After all six characters are queued, immediately queue animations (no need to wait for character completion). Use the template animations and add `action_description` to reinforce the athletic, confident vibe:
+After all six characters are queued, immediately queue animations (no need to wait for character completion). Use the template animations and add `action_description` to keep the cozy/friendly mood:
 
 ```python
 for char_id in [alex_id, maya_id, zane_id, rin_id, medic_id, commander_id]:
     animate_character(
         character_id=char_id,
         template_animation_id="walking",
-        action_description="walking with confident athletic stride"
+        action_description="walking with a relaxed natural pace"
     )
     animate_character(
         character_id=char_id,
@@ -152,7 +154,7 @@ Optional Phase 5+ animations (do these in a second wave after walking/idle compl
 |---|---|---|
 | `working` | "operating equipment with focused attention" | Engineer at construction sites, Scientist at lab |
 | `interacting` | "examining something carefully with both hands" | Geologist at deposits, Botanist at hydroponics |
-| `running` | "running with athletic urgency" | Emergency events, low-O2 alerts |
+| `running` | "running with quick urgent steps" | Emergency events, low-O2 alerts |
 
 ---
 
@@ -162,13 +164,15 @@ When a character comes back and doesn't hit, do **not** keep blindly retrying. D
 
 | Symptom | Fix |
 |---|---|
-| Too cute / too cartoony / oversized head | Switch `proportions` to `{"type": "preset", "name": "stylized"}` |
-| Suit too plain, no future-tech feel | Add: "with glowing [color] energy lines tracing the suit panels" |
-| Looks too military / too dark | Add: "warm friendly atmosphere, soft lighting, optimistic" |
-| Looks bulky despite "athletic" | Add: "slim form-fitting suit, lean silhouette" |
+| Too deformed / Funko-Pop oversized head | Switch `proportions` to `{"type": "preset", "name": "default"}` |
+| Heads too small, looks too realistic | Switch `proportions` to `{"type": "preset", "name": "chibi"}` |
+| Suit too plain, no future-tech feel | Add: "with subtle glowing [color] accent line along the seams" |
+| Looks too military / too dark | Add: "warm friendly atmosphere, soft lighting, cozy" |
+| Looks like a fitness model / too muscular | Remove any body descriptor; lead with the outfit only |
+| Style feels generic, not JRPG-flavored | Make sure `JRPG anime-influenced pixel art` appears in the prompt |
 | Face is blank or unreadable | At 128 this should be rare — first try regenerating; if still bad, bump to `size=160` for that character |
 | Style doesn't match siblings | Re-read the others' prompts; use more parallel phrasing |
-| Hair/feature wrong | Lead the description with the corrected feature: "**short red hair**, athletic engineer in..." |
+| Hair/feature wrong | Lead the description with the corrected feature: "**short red hair**, engineer in..." |
 
 After 2 failed attempts on the same character, stop and surface the outputs to the human for direction rather than burning more credits.
 
@@ -191,6 +195,8 @@ If any check fails, regenerate the offender(s) using the iteration protocol abov
 ---
 
 ## Output Integration Notes
+
+**World scale:** characters at `size=128` produce sprites ~77px tall. The world tilemap uses **64×64 tiles** (updated from the original 32×32 spec to match this character scale), so a crew member spans roughly 1.2 tiles tall — proportional to the reference screenshots.
 
 Once a character is `completed` in Pixellab:
 
