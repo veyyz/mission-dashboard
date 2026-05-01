@@ -3,27 +3,47 @@
   "_seed": 42,
   "_concurrent_job_limit": 8,
   "_pending_retry": {
-    "buildings": ["hydroponics_bay", "storage_silo", "comms_dish", "research_lab", "mining_drill"],
+    "buildings": ["hydroponics_bay", "storage_silo", "comms_dish", "research_lab", "mining_drill_tile"],
     "terrain": ["regolith_to_rocky"],
     "objects": ["water_ice_node", "helium3_node", "iron_node", "titanium_node", "silicon_node", "rare_metals_node", "probe"],
-    "animations": ["alex_walking", "maya_walking", "zane_walking", "rin_walking", "medic_walking", "commander_walking"]
+    "animations": ["alex_walking", "alex_idle", "maya_walking", "maya_idle", "zane_walking", "zane_idle", "rin_walking", "rin_idle", "medic_walking", "medic_idle", "commander_walking", "commander_idle"]
   },
-  "_superseded_characters_round1": {
-    "_note": "Round-1 chars were 48px and one suit was too-bright green; user rejected. Kept here for cleanup via Pixellab UI if desired.",
-    "alex":      "85db05fa-62fa-4f68-836d-6f354789802e",
-    "maya":      "fcbff9aa-7069-4b9b-85e3-6c451254c440",
-    "zane":      "3765b4a6-7563-43d2-80bf-213a785a0398",
-    "rin":       "5b3751ce-6f55-42c4-aedb-cdf29bc8684f",
-    "medic":     "09c50e88-2707-4c5a-b951-1b56ae3fb3ae",
-    "commander": "6a0023c0-ddb6-4cc5-ab23-de13cea1dc26"
+  "_round_history": {
+    "round_1_size48_basic": {
+      "_note": "Round-1 chars at 48px, basic shading, no style descriptors. User rejected (too small, generic colors).",
+      "alex":      "85db05fa-62fa-4f68-836d-6f354789802e",
+      "maya":      "fcbff9aa-7069-4b9b-85e3-6c451254c440",
+      "zane":      "3765b4a6-7563-43d2-80bf-213a785a0398",
+      "rin":       "5b3751ce-6f55-42c4-aedb-cdf29bc8684f",
+      "medic":     "09c50e88-2707-4c5a-b951-1b56ae3fb3ae",
+      "commander": "6a0023c0-ddb6-4cc5-ab23-de13cea1dc26"
+    },
+    "round_2_size128_anime_muted": {
+      "_note": "Round-2 chars at 128px chibi-anime muted; canvas padded to 180×180. User deleted via Pixellab UI before integration. UUIDs no longer valid server-side.",
+      "alex":      "121c1da3-88ca-43b1-9bd1-3ce7b03bcacd",
+      "maya":      "d4288316-9b7f-4701-a54d-34fb21ee7e86",
+      "zane":      "0935fdf6-f110-4d67-b9c0-91d0280a3ac2",
+      "rin":       "cd9178be-c7c6-4388-88e9-f2d5a37dbafd",
+      "medic":     "883cd83f-df8a-452a-a192-5cb0b65293d2",
+      "commander": "5ff8007c-7537-491e-bce5-251db9af75c8"
+    },
+    "round_3_size64_8dir_lcg_md": {
+      "_note": "Round-3 chars at size=64, 8 directions, generated from `lunar_colony_character_generation.md` (pre-update at 64). User updated md to size=128 mid-generation. alex + maya were deleted via MCP; zane/rin/medic/commander still complete in Pixellab account at size 64 — user can compare or delete via UI.",
+      "alex":      "9faade42-449a-4d59-9ad9-3678aae5cd8b",
+      "maya":      "223aa1ec-baee-4aec-8344-5ad04631e7c6",
+      "zane_still_in_account":      "7c981805-967c-4420-9e2a-f4563263b12b",
+      "rin_still_in_account":       "98e16dee-5bdd-46af-a5b2-8e8b10567c2f",
+      "medic_still_in_account":     "9e83a4cf-f12c-439c-895d-a7f55ba67282",
+      "commander_still_in_account": "b19616b9-5700-4b9b-b830-06d48035a99e"
+    }
   },
   "characters": [
-    { "name": "alex",      "id": "121c1da3-88ca-43b1-9bd1-3ce7b03bcacd", "role": "engineer",  "size": 128, "style": "chibi anime, muted navy/white",        "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "maya",      "id": "d4288316-9b7f-4701-a54d-34fb21ee7e86", "role": "scientist", "size": 128, "style": "chibi anime, muted lavender",         "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "zane",      "id": "0935fdf6-f110-4d67-b9c0-91d0280a3ac2", "role": "botanist",  "size": 128, "style": "chibi anime, muted olive",            "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "rin",       "id": "cd9178be-c7c6-4388-88e9-f2d5a37dbafd", "role": "geologist", "size": 128, "style": "chibi anime, muted ochre",            "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "medic",     "id": "883cd83f-df8a-452a-a192-5cb0b65293d2", "role": "medic",     "size": 128, "style": "chibi anime, off-white + red cross",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "commander", "id": "5ff8007c-7537-491e-bce5-251db9af75c8", "role": "commander", "size": 128, "style": "chibi anime, dark navy + gold trim",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
+    { "name": "alex",      "id": "e4a52616-e8d4-4d2e-b07d-59dac7ffae43", "role": "engineer",  "round": 4, "size": 128, "n_directions": 8, "style": "lunar_colony_character_generation.md verbatim (post-128 update)", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "maya",      "id": "a03d3ef4-b48d-4d0a-80e4-7e895528b116", "role": "scientist", "round": 4, "size": 128, "n_directions": 8, "style": "lunar_colony_character_generation.md verbatim (post-128 update)", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "zane",      "id": "8475982e-4a92-417f-a46c-dd4176b249c6", "role": "botanist",  "round": 4, "size": 128, "n_directions": 8, "style": "lunar_colony_character_generation.md verbatim (post-128 update)", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "rin",       "id": "5a9ac670-3c57-491f-9408-e6a41f228851", "role": "geologist", "round": 4, "size": 128, "n_directions": 8, "style": "lunar_colony_character_generation.md verbatim (post-128 update)", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "medic",     "id": "a5880055-3408-44f3-a348-a6c3f699898b", "role": "medic",     "round": 4, "size": 128, "n_directions": 8, "style": "lunar_colony_character_generation.md verbatim (post-128 update)", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "commander", "id": "4f193f57-6c91-47a7-8876-8625d0319922", "role": "commander", "round": 4, "size": 128, "n_directions": 8, "style": "lunar_colony_character_generation.md verbatim (post-128 update)", "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
   ],
   "animations": [],
   "buildings": [

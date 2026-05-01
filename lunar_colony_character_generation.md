@@ -28,7 +28,7 @@ create_character(
     description=<see per-character section>,
     body_type="humanoid",
     n_directions=8,
-    size=64,                                          # 64 not 48 — enough resolution for face details
+    size=128,                                         # large canvas for crisp face details + tech accents
     proportions={"type": "preset", "name": "chibi"},  # matches the reference proportions
     outline="single color black outline",
     shading="detailed shading",                       # not "basic" — references have multiple shade levels
@@ -166,7 +166,7 @@ When a character comes back and doesn't hit, do **not** keep blindly retrying. D
 | Suit too plain, no future-tech feel | Add: "with glowing [color] energy lines tracing the suit panels" |
 | Looks too military / too dark | Add: "warm friendly atmosphere, soft lighting, optimistic" |
 | Looks bulky despite "athletic" | Add: "slim form-fitting suit, lean silhouette" |
-| Face is blank or unreadable at this size | Bump `size` from 64 → 80 for that character |
+| Face is blank or unreadable | At 128 this should be rare — first try regenerating; if still bad, bump to `size=160` for that character |
 | Style doesn't match siblings | Re-read the others' prompts; use more parallel phrasing |
 | Hair/feature wrong | Lead the description with the corrected feature: "**short red hair**, athletic engineer in..." |
 

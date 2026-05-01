@@ -77,6 +77,57 @@
   - Pathfinding around obstacles (NavigationPolygon currently has no obstacles baked) → Phase 8 (alongside fog of war / props)
 - Files added/changed: 4 new (CrewMember.tscn, crew_selection_manager.gd, phase_4_test.gd, this log entry); 4 modified (crew_member.gd, ground.gd, Ground.tscn, phase_2_test.gd)
 
+## Phase 5: Buildings v1
+- Status: completed
+- Implemented:
+  - **`scripts/autoload/building_database.gd`** — new 7th autoload. Loads `data/buildings.json` once at boot (9 definitions), exposes `has_definition`, `get_definition`, `list_keys`, `get_scene_path` for the 3 v1 buildings.
+  - **`scripts/autoload/resource_manager.gd`** — extended to 13 tracked resources (6 core + silicon/iron/water/rare_metals/samples/helium3/titanium for the secondary economy referenced in `buildings.json`/`recipes.json`). Added `add_to_rate(name, delta)` (additive — buildings stack), `can_afford(cost)`, `deduct(cost)` (atomic — no partial). `_process` now applies `rate_per_min` to `current` per real second, scaled by `TimeManager.time_scale`. Pauses honor `GameState.is_paused`.
+  - **`scripts/buildings/building.gd` (`class_name Building`)** — generic finished building. Reads its definition from `BuildingDatabase`, applies `produces`/`consumes` to ResourceManager rates on `_ready` (and unwinds on `_exit_tree` to prevent leaks). Emits `EventBus.building_completed`. Renders a key-tinted placeholder until real iso-tile art swaps in.
+  - **`scripts/buildings/construction_site.gd` (`class_name ConstructionSite`)** — Node2D with progress bar. `_process` calls `tick(delta)` while an Engineer-role CrewMember is within `ENGINEER_REACH=64px`. Public `tick(seconds)` method for tests/cheats. On reaching 1.0, instantiates the building scene at the same global position and queue_frees itself.
+  - **`scripts/buildings/build_placement_controller.gd` (`class_name BuildPlacementController`)** — `start_placement(key)` enters placement mode and shows a ghost preview tracking the cursor; left-click in placement mode calls `place_building(key, world_pos)` which validates affordability, atomically deducts the cost, snaps to a 32px grid, and instantiates a ConstructionSite. Right-click cancels. The public `place_building` is also the test-facing API.
+  - **3 building scenes**: `scenes/buildings/SolarArray.tscn`, `HabitatModule.tscn`, `MiningDrill.tscn` — each is a `StaticBody2D` with the shared `building.gd` script and a unique `building_key` export. `scenes/buildings/ConstructionSite.tscn` houses the progress bar.
+  - **Build menu UI**: `scenes/ui/BuildMenu.tscn` + `scripts/ui/build_menu.gd` — bottom-left CanvasLayer panel listing 3 v1 buildings with cost tooltips. Click → `placement_controller.start_placement(key)`.
+  - **Ground.tscn** updated to instance `BuildPlacementController` under `YSort` and the `BuildMenu` CanvasLayer with `placement_controller_path = NodePath("../YSort/BuildPlacementController")`.
+  - **`tests/phase_5_test.gd`** — verifies all 7 done criteria.
+- Build: clean (`logs/phase_5_build.log`); BuildingDatabase loads 9 definitions, ResourceManager initializes 13 resources.
+- Test: **PASS** (`logs/phase_5_test.log`)
+- Bug fixed in-loop: GDScript class_name discovery in headless mode is order-sensitive — `BuildPlacementController` could not resolve `ConstructionSite` as a type annotation at parse time. Switched cross-references to typed-as-`Node2D` ducktyping; functionality unchanged.
+- Art swap-in pass: 6 round-4 character UUIDs queued at size=128 / 8 dirs / detailed shading, per the user's updated `lunar_colony_character_generation.md`. Round-3 (size=64) is half-deleted (alex+maya removed via MCP) and half still in the user's Pixellab account for comparison. No buildings/terrain/objects swapped in this phase — placeholder colored rects continue to satisfy done criteria.
+- Deferred to later phases:
+  - Building size grid validation (cost JSON has `size: [W, H]`; ghost only places point objects today) → Phase 8 polish
+  - Engineer auto-pathfind to nearest construction site (currently only ticks while passively in range) → Phase 6/8
+  - Building destruction UX → Phase 9
+  - Visual swap to Pixellab iso tiles for the 5 already-queued building tiles → Phase 6 art pass
+- Files added/changed: 11 new (1 autoload + 3 building scripts + 4 building scenes + 1 UI script + 1 UI scene + 1 test); 3 modified (resource_manager.gd, project.godot, Ground.tscn)
+
+## CHECK-IN at Phase 5
+- **Built:** First runnable prototype is up. Crew (6 with roles + nameplates + selection + nav), resources (13 tracked, day/night cycle drives rates), buildings (3 buildable end-to-end with cost-deduct → ghost preview → engineer-ticks → completion → ResourceManager rate update). Visual fidelity is still placeholder for everything except UI panels.
+- **Run:** `Godot_v4.6.2/Godot_v4.6.2-stable_win64_console.exe --path godot` (or open the editor and F5 from the Godot project at `mission-dashboard/godot/`).
+- **What to verify visually:**
+  - Six role-tinted astronauts with floating role-color nameplates over their heads, glow ring under Alex (selected by default).
+  - Press 1–6: selection ring follows the chosen crew; debug HUD reflects selected crew via `EventBus.log_message`.
+  - WASD: moves the currently-selected crew. Click anywhere on the regolith: every selected crew pathfinds to the click point.
+  - Day/night: world tint slowly cycles warm-white → orange → blue-grey → back. Speed it up by setting `TimeManager.set_time_scale(60.0)` from the remote inspector.
+  - Build menu (bottom-left): click "Solar Array" → ghost rect follows cursor → click on ground → materials/silicon drop in resource bar, ghost replaced by translucent crosshatched ConstructionSite with a progress bar. Move Alex (engineer) within ~64px of it; the bar advances. On full, the construction site is replaced by the placeholder solar-blue panel sprite and `power` rate ticks up by +15/min in the debug HUD.
+- **Known placeholders:**
+  - All sprites (crew, buildings, regolith tiles, rock decal) are runtime-generated colored rectangles — Pixellab art is queued but not yet integrated.
+  - Nameplates are plain Label outlines, not the rounded panels from the screenshots (Phase 6 HUD pass).
+  - Camera fixed to Alex; doesn't follow whichever crew is currently selected (Phase 6).
+  - No obstacle baking — Mining Drill must be placed manually adjacent to the (not-yet-spawned) resource nodes; pathfinding goes straight-line everywhere.
+  - Storage silo / RTG / electrolyzer / hydroponics / comms / research lab buildings exist in the database but are not in the build menu (Phase 8 rounds out the building set).
+  - Win/lose conditions, save/load, events, fog of war — all Phase 8/9.
+- **Deferred items so far** (consolidated):
+  - Real Pixellab character textures + per-direction facing animation → Phase 6 / Phase 10
+  - Crew status (health/oxygen/stamina) decay UI → Phase 6
+  - Camera-follows-selected-crew → Phase 6
+  - Pause + speed buttons in UI → Phase 6
+  - Resource bar with bars/icons → Phase 6
+  - Building size grid validation → Phase 8 polish
+  - Engineer auto-pathfind to construction site → Phase 6/8
+  - Building destruction UX → Phase 9
+- **Halting per autonomous prompt — do not proceed to Phase 6 without human review.**
+
+
 
 
 

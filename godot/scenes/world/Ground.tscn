@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/ground.gd" id="1_ground"]
 [ext_resource type="Script" path="res://scripts/crew/crew_selection_manager.gd" id="2_selman"]
 [ext_resource type="Script" path="res://scripts/world/placeholder_rock.gd" id="3_rock"]
 [ext_resource type="Script" path="res://scripts/systems/day_night_modulate.gd" id="4_daynight"]
 [ext_resource type="PackedScene" path="res://scenes/ui/DebugHUD.tscn" id="5_debughud"]
+[ext_resource type="Script" path="res://scripts/buildings/build_placement_controller.gd" id="6_place"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BuildMenu.tscn" id="7_buildmenu"]
 
 [node name="Ground" type="Node2D"]
 script = ExtResource("1_ground")
@@ -22,9 +24,15 @@ script = ExtResource("2_selman")
 
 [node name="Rock" type="Node2D" parent="YSort"]
 script = ExtResource("3_rock")
-position = Vector2(160, 30)
+position = Vector2(220, 30)
 
 [node name="Sprite2D" type="Sprite2D" parent="YSort/Rock"]
 offset = Vector2(0, -10)
 
+[node name="BuildPlacementController" type="Node2D" parent="YSort"]
+script = ExtResource("6_place")
+
 [node name="DebugHUD" parent="." instance=ExtResource("5_debughud")]
+
+[node name="BuildMenu" parent="." instance=ExtResource("7_buildmenu")]
+placement_controller_path = NodePath("../YSort/BuildPlacementController")
