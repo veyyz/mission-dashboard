@@ -1,0 +1,91 @@
+{
+  "solar_array": {
+    "display_name": "Solar Array",
+    "description": "Generates power during day and twilight phases.",
+    "cost": { "materials": 40, "silicon": 20 },
+    "build_time_seconds": 30,
+    "size": [2, 2],
+    "produces": { "power": 15 },
+    "active_phases": ["day", "twilight"],
+    "icon": "res://assets/sprites/ui/icon_solar.png"
+  },
+  "rtg": {
+    "display_name": "RTG",
+    "description": "Radioisotope thermoelectric generator. Constant power.",
+    "cost": { "materials": 60, "rare_metals": 10 },
+    "build_time_seconds": 60,
+    "size": [1, 1],
+    "produces": { "power": 8 },
+    "active_phases": ["day", "twilight", "night"],
+    "icon": "res://assets/sprites/ui/icon_rtg.png"
+  },
+  "habitat_module": {
+    "display_name": "Habitat Module",
+    "description": "Pressurized living space. O2 regen and sleep slots for crew.",
+    "cost": { "materials": 100 },
+    "build_time_seconds": 90,
+    "size": [3, 3],
+    "produces": { "oxygen": 5 },
+    "consumes": { "power": 4 },
+    "crew_capacity": 4,
+    "icon": "res://assets/sprites/ui/icon_habitat.png"
+  },
+  "electrolyzer": {
+    "display_name": "Electrolyzer",
+    "description": "Splits water ice into oxygen and hydrogen.",
+    "cost": { "materials": 50, "iron": 20 },
+    "build_time_seconds": 45,
+    "size": [2, 2],
+    "produces": { "oxygen": 12 },
+    "consumes": { "power": 8, "water": 4 },
+    "icon": "res://assets/sprites/ui/icon_electrolyzer.png"
+  },
+  "hydroponics_bay": {
+    "display_name": "Hydroponics Bay",
+    "description": "Grows food crops in sealed nutrient tanks.",
+    "cost": { "materials": 80, "silicon": 40 },
+    "build_time_seconds": 60,
+    "size": [3, 2],
+    "produces": { "food": 10 },
+    "consumes": { "power": 6, "water": 2 },
+    "icon": "res://assets/sprites/ui/icon_hydroponics.png"
+  },
+  "storage_silo": {
+    "display_name": "Storage Silo",
+    "description": "Increases storage cap for materials and water.",
+    "cost": { "materials": 30 },
+    "build_time_seconds": 20,
+    "size": [2, 2],
+    "raises_cap": { "materials": 500, "water": 200 },
+    "icon": "res://assets/sprites/ui/icon_silo.png"
+  },
+  "comms_dish": {
+    "display_name": "Comms Dish",
+    "description": "Receives transmissions from Earth, unlocks events.",
+    "cost": { "materials": 70, "rare_metals": 5 },
+    "build_time_seconds": 45,
+    "size": [2, 2],
+    "consumes": { "power": 3 },
+    "icon": "res://assets/sprites/ui/icon_comms.png"
+  },
+  "research_lab": {
+    "display_name": "Research Lab",
+    "description": "Converts collected samples into science points.",
+    "cost": { "materials": 90, "silicon": 30 },
+    "build_time_seconds": 75,
+    "size": [3, 3],
+    "consumes": { "power": 6 },
+    "produces": { "science": 4 },
+    "icon": "res://assets/sprites/ui/icon_lab.png"
+  },
+  "mining_drill": {
+    "display_name": "Mining Drill",
+    "description": "Extracts ore from a resource node. Place on a deposit.",
+    "cost": { "materials": 60, "iron": 20 },
+    "build_time_seconds": 60,
+    "size": [2, 2],
+    "consumes": { "power": 5 },
+    "extracts_from_node": true,
+    "icon": "res://assets/sprites/ui/icon_drill.png"
+  }
+}

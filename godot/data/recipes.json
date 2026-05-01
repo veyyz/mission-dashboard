@@ -1,0 +1,39 @@
+{
+  "extract_water": {
+    "display_name": "Extract Water Ice",
+    "input_resource": "water_ice_node",
+    "output": { "water": 10 },
+    "duration_seconds": 8,
+    "required_role": "geologist"
+  },
+  "extract_iron": {
+    "display_name": "Extract Iron Ore",
+    "input_resource": "iron_node",
+    "output": { "iron": 8 },
+    "duration_seconds": 10,
+    "required_role": "geologist"
+  },
+  "extract_helium3": {
+    "display_name": "Extract Helium-3",
+    "input_resource": "helium3_node",
+    "output": { "helium3": 5 },
+    "duration_seconds": 15,
+    "required_role": "geologist"
+  },
+  "analyze_sample": {
+    "display_name": "Analyze Sample",
+    "input": { "samples": 1 },
+    "output": { "science": 5 },
+    "duration_seconds": 30,
+    "required_building": "research_lab",
+    "required_role": "scientist"
+  },
+  "cultivate_crop": {
+    "display_name": "Cultivate Crop",
+    "input": { "water": 2, "power": 6 },
+    "output": { "food": 10 },
+    "duration_seconds": 60,
+    "required_building": "hydroponics_bay",
+    "required_role": "botanist"
+  }
+}

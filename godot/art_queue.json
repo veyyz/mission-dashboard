@@ -1,0 +1,29 @@
+{
+  "_schema": "Each entry: {name, id, status, integrated, queued_at, notes?}. Update via art swap-in pass each phase.",
+  "_seed": 42,
+  "_concurrent_job_limit": 8,
+  "_pending_retry": {
+    "buildings": ["hydroponics_bay", "storage_silo", "comms_dish", "research_lab", "mining_drill"],
+    "terrain": ["regolith_to_rocky"],
+    "objects": ["water_ice_node", "helium3_node", "iron_node", "titanium_node", "silicon_node", "rare_metals_node", "probe"],
+    "animations": ["alex_walking", "maya_walking", "zane_walking", "rin_walking", "medic_walking", "commander_walking"]
+  },
+  "characters": [
+    { "name": "alex",      "id": "85db05fa-62fa-4f68-836d-6f354789802e", "role": "engineer",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "maya",      "id": "fcbff9aa-7069-4b9b-85e3-6c451254c440", "role": "scientist", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "zane",      "id": "3765b4a6-7563-43d2-80bf-213a785a0398", "role": "botanist",  "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "rin",       "id": "5b3751ce-6f55-42c4-aedb-cdf29bc8684f", "role": "geologist", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "medic",     "id": "09c50e88-2707-4c5a-b951-1b56ae3fb3ae", "role": "medic",     "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "commander", "id": "6a0023c0-ddb6-4cc5-ab23-de13cea1dc26", "role": "commander", "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
+  ],
+  "animations": [],
+  "buildings": [
+    { "name": "landing_module", "id": "72bba641-6010-4467-8a7f-a8a1d4b56f7d", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "solar_array",    "id": "5e011d20-23c1-4f1e-b52c-8d373dd86b6a", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "rtg",            "id": "04a05ce3-0e00-4fc8-83c6-33e1e4553689", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "habitat_module", "id": "d27a4b0c-6a7c-474b-828c-acdf8a42f6a6", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "electrolyzer",   "id": "81dc9a48-e32b-4f22-a7fb-39680a6306d9", "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
+  ],
+  "terrain": [],
+  "objects": []
+}

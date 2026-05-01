@@ -1,0 +1,24 @@
+# Godot 4+ specific
+.godot/
+.import/
+
+# Imported translations (auto-generated)
+*.translation
+
+# Mono/C# (not used but standard)
+.mono/
+data_*/
+mono_crash.*.json
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Save data
+saves/*.json
+!saves/.gdkeep
+
+# IDEs
+.vscode/
+.idea/
+*.swp

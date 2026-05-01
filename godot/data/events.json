@@ -1,0 +1,49 @@
+{
+  "meteor_shower": {
+    "display_name": "Meteor Shower Detected",
+    "description": "Sensors pick up incoming debris. Outdoor structures may take damage.",
+    "trigger_chance_per_day": 0.05,
+    "min_day": 5,
+    "effects": [
+      { "type": "damage_random_outdoor_building", "amount": 25 }
+    ]
+  },
+  "supply_drop": {
+    "display_name": "Resupply from Earth",
+    "description": "An automated capsule arrives with materials.",
+    "trigger_chance_per_day": 0.08,
+    "min_day": 3,
+    "requires_building": "comms_dish",
+    "effects": [
+      { "type": "add_resource", "resource": "materials", "amount": 200 }
+    ]
+  },
+  "equipment_failure": {
+    "display_name": "Equipment Failure",
+    "description": "A random building has broken down and needs repair.",
+    "trigger_chance_per_day": 0.07,
+    "min_day": 4,
+    "effects": [
+      { "type": "disable_random_building" }
+    ]
+  },
+  "solar_flare": {
+    "display_name": "Solar Flare Warning",
+    "description": "Crew exposed to surface during the flare take radiation damage.",
+    "trigger_chance_per_day": 0.04,
+    "min_day": 6,
+    "effects": [
+      { "type": "radiation_pulse", "duration_seconds": 60 }
+    ]
+  },
+  "rescue_signal": {
+    "display_name": "Distress Beacon",
+    "description": "A faint signal from a stranded astronaut. Investigate to recruit.",
+    "trigger_chance_per_day": 0.03,
+    "min_day": 8,
+    "requires_building": "comms_dish",
+    "effects": [
+      { "type": "spawn_rescue_objective" }
+    ]
+  }
+}
