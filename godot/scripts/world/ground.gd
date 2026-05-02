@@ -41,10 +41,34 @@ func _ready() -> void:
 	_paint_ground()
 	_build_navigation_region()
 	_spawn_crew()
-	print("[Ground] Phase 4 ready. Tiles=%d  Crew=%d" % [
+	_spawn_resource_nodes()
+	print("[Ground] Phase 4 ready. Tiles=%d  Crew=%d  Nodes=%d" % [
 		tile_layer.get_used_cells().size(),
 		crew_container.get_child_count(),
+		get_tree().get_nodes_in_group("resource_node").size(),
 	])
+
+
+## Phase-8: spawn six placeholder resource nodes near the landing zone.
+## Real layout will be seeded from `data/orbit_deposits.json` plus the
+## chosen `GameState.selected_landing_tile` once the orbit-map landing
+## flow drives world state (Phase 8/9 polish).
+func _spawn_resource_nodes() -> void:
+	const NODE_LAYOUT: Array = [
+		{"type": "iron",        "amount": 8, "pos": Vector2(180, 60)},
+		{"type": "silicon",     "amount": 6, "pos": Vector2(-180, 60)},
+		{"type": "water_ice",   "amount": 4, "pos": Vector2(60, 220)},
+		{"type": "titanium",    "amount": 5, "pos": Vector2(-60, 220)},
+		{"type": "helium3",     "amount": 3, "pos": Vector2(220, -180)},
+		{"type": "rare_metals", "amount": 2, "pos": Vector2(-220, -180)},
+	]
+	var node_scene: PackedScene = preload("res://scenes/world/ResourceNode.tscn")
+	for entry in NODE_LAYOUT:
+		var rn: Node2D = node_scene.instantiate()
+		rn.deposit_type = entry.type
+		rn.amount = entry.amount
+		rn.position = entry.pos
+		$YSort.add_child(rn)
 
 
 ## Builds a runtime iso TileSet. Real Pixellab Wang regolith tiles swap in

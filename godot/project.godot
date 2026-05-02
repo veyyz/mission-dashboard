@@ -29,6 +29,7 @@ TimeManager="*res://scripts/autoload/time_manager.gd"
 SaveSystem="*res://scripts/autoload/save_system.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
 BuildingDatabase="*res://scripts/autoload/building_database.gd"
+RecipeProcessor="*res://scripts/autoload/recipe_processor.gd"
 
 [display]
 

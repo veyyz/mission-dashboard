@@ -9,6 +9,12 @@ const SCENE_PATHS := {
 	"solar_array":    "res://scenes/buildings/SolarArray.tscn",
 	"habitat_module": "res://scenes/buildings/HabitatModule.tscn",
 	"mining_drill":   "res://scenes/buildings/MiningDrill.tscn",
+	"rtg":            "res://scenes/buildings/RTG.tscn",
+	"electrolyzer":   "res://scenes/buildings/Electrolyzer.tscn",
+	"hydroponics_bay": "res://scenes/buildings/HydroponicsBay.tscn",
+	"storage_silo":   "res://scenes/buildings/StorageSilo.tscn",
+	"comms_dish":     "res://scenes/buildings/CommsDish.tscn",
+	"research_lab":   "res://scenes/buildings/ResearchLab.tscn",
 }
 
 var _defs: Dictionary = {}

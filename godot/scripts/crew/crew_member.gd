@@ -60,6 +60,8 @@ func _ready() -> void:
 
 	# ConstructionSite uses get_nodes_in_group("crew") to find adjacent engineers.
 	add_to_group("crew")
+	# FogOfWar reveals tiles within VISION_RADIUS of any "vision_source" each frame.
+	add_to_group("vision_source")
 
 	if sprite.texture == null:
 		sprite.texture = _build_placeholder_texture()

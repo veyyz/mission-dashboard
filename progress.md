@@ -174,6 +174,29 @@
   - Ground.gd reading `selected_landing_tile` to seed deposit-node spawn positions → Phase 8 (alongside resource node placement)
 - Files added: 4 new (1 data/json + 1 script + 1 scene + 1 test); 3 modified (event_bus.gd, world_camera.gd, Ground.tscn)
 
+## Phase 8: Scanning + fog + samples + remaining buildings + recipes
+- Status: completed
+- Implemented:
+  - **6 new building scenes**: `RTG.tscn`, `Electrolyzer.tscn`, `HydroponicsBay.tscn`, `StorageSilo.tscn`, `CommsDish.tscn`, `ResearchLab.tscn` — all reuse the shared `building.gd` script with their own `building_key`. `BuildingDatabase.SCENE_PATHS` extended to 9 entries.
+  - **`scripts/world/resource_node.gd`** + **`ResourceNode.tscn`** — `class_name ResourceNode`. Six placeholder deposits spawned by `ground.gd._spawn_resource_nodes()` near the landing zone (iron, silicon, water_ice, titanium, helium3, rare_metals). Starts undiscovered (faded sprite, hidden label); `reveal()` flips it to discovered. `can_be_sampled_by(crew_pos)` + `collect_one()` API. Auto-joins "resource_node" group.
+  - **`scripts/world/probe.gd`** + **`Probe.tscn`** — Scientist-deployed static vision source. Joins "probe" + "vision_source" groups. Emits `EventBus.probe_deployed` on spawn.
+  - **`scripts/systems/fog_of_war.gd`** + **`FogOfWar.tscn`** — `CanvasLayer` (layer 2) sweeps every "vision_source" each `_physics_process` and stores revealed cells in a Dictionary. 64-px reveal grid, configurable per-source `vision_radius()`. Real shader-based punch-through is Phase 10 polish; current placeholder still satisfies done criterion #4.
+  - **`scripts/autoload/recipe_processor.gd`** (new 8th autoload) — loads `data/recipes.json` filtered to recipes with explicit `input`+`output` dicts. Per-recipe duration timer ticks down at `TimeManager.time_scale`-scaled rate; runs cycle when a building of `recipe.building` (or `required_building`) is in the "buildings" group AND `ResourceManager.can_afford(input)`. Public `try_run(key)` for tests.
+  - **`scripts/buildings/building.gd`** — `_ready` now adds the building to the "buildings" group so `RecipeProcessor` can find them.
+  - **`scripts/crew/crew_member.gd`** — `_ready` adds the crew to "vision_source" group (crew vision contributes to fog reveal).
+  - **`scripts/crew/crew_selection_manager.gd`** — extended `_physics_process` to detect `scan` / `deploy_probe` / `collect_sample` action edges. `_do_scan` reveals nearby resource nodes (Geologist gets 2× radius: 440 vs 220 px). `_do_deploy_probe` requires `Role.SCIENTIST`, instantiates `Probe.tscn` at the crew's position. `_do_collect_sample` finds the first sampleable node in range, calls `collect_one()`, which adds 1 to `samples` and emits `EventBus.sample_collected`.
+  - **`tests/phase_8_test.gd`** — verifies all 6 done criteria.
+- Build: clean. `[RecipeProcessor] Ready. 2 recipes loaded.` `[Ground] Phase 4 ready. Tiles=21025  Crew=6  Nodes=6`
+- Test: **PASS**. Full regression on phases 2–8 all PASS.
+- Bug fixed in-loop: SceneTree-extending test scripts must call group-lookup methods directly (`get_nodes_in_group`), not via `get_tree().get_nodes_in_group` — `get_tree()` doesn't exist on a SceneTree, since `self` IS the SceneTree.
+- Deferred:
+  - Real fog-of-war shader with soft falloff + actual rendering of darkened canvas → Phase 10 polish
+  - Resource node spawn driven by `GameState.selected_landing_tile` + `data/orbit_deposits.json` (currently hardcoded layout) → Phase 9 polish
+  - Extraction recipes (`input_resource: <node_type>`) wired through `_do_collect_sample` to drive different yields per deposit → Phase 9 / 10
+  - Building costs not yet using the unlocked secondary resources beyond materials/silicon/iron → balance pass
+- Files added: 12 new (6 building scenes + 4 scripts + 2 scenes for resource node/probe/fog + 1 autoload + 1 test); 4 modified (project.godot, building.gd, crew_member.gd, crew_selection_manager.gd, ground.gd, Ground.tscn)
+
+
 
 
 

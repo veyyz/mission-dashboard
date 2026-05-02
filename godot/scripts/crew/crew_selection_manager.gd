@@ -6,6 +6,8 @@ extends Node2D
 ## selection changes.
 
 const MAX_CREW: int = 6
+const SCAN_RADIUS: float = 220.0
+const SCAN_RADIUS_GEOLOGIST: float = 440.0  # 2× per spec §5.4
 
 # Manual rising-edge tracking. Godot's `is_action_just_pressed` is unreliable
 # in headless mode when the action is synthesized via `Input.action_press`
@@ -28,6 +30,69 @@ func _physics_process(_delta: float) -> void:
 		if pressed and not prev:
 			_select(i, multi)
 			return
+	# Phase 8: scan / deploy probe / collect sample, all gated on the
+	# selected crew's role.
+	for action in ["scan", "deploy_probe", "collect_sample"]:
+		var pressed: bool = Input.is_action_pressed(action)
+		var prev: bool = _prev_pressed.get(action, false)
+		_prev_pressed[action] = pressed
+		if pressed and not prev:
+			_invoke_action(action)
+
+
+func _invoke_action(action: String) -> void:
+	var primary: CrewMember = _first_selected()
+	if primary == null:
+		return
+	match action:
+		"scan":           _do_scan(primary)
+		"deploy_probe":   _do_deploy_probe(primary)
+		"collect_sample": _do_collect_sample(primary)
+
+
+func _first_selected() -> CrewMember:
+	for child in get_children():
+		var crew := child as CrewMember
+		if crew != null and crew.selected:
+			return crew
+	return null
+
+
+func _do_scan(crew: CrewMember) -> void:
+	var radius: float = SCAN_RADIUS_GEOLOGIST if crew.role == CrewMember.Role.GEOLOGIST else SCAN_RADIUS
+	var revealed: int = 0
+	for node in get_tree().get_nodes_in_group("resource_node"):
+		var rn: Node2D = node as Node2D
+		if rn == null:
+			continue
+		if rn.global_position.distance_to(crew.global_position) <= radius:
+			if rn.has_method("reveal") and not rn.get("discovered"):
+				rn.reveal()
+				revealed += 1
+	EventBus.log_message.emit(
+		"%s scanned (radius=%d) — revealed %d nodes" % [crew.crew_name, int(radius), revealed],
+		"selection",
+	)
+
+
+func _do_deploy_probe(crew: CrewMember) -> void:
+	if crew.role != CrewMember.Role.SCIENTIST:
+		EventBus.log_message.emit("Probe deploy requires Scientist", "alert")
+		return
+	var probe: Node2D = preload("res://scenes/world/Probe.tscn").instantiate()
+	get_parent().add_child(probe)  # parented under YSort alongside crew
+	probe.global_position = crew.global_position
+
+
+func _do_collect_sample(crew: CrewMember) -> void:
+	for node in get_tree().get_nodes_in_group("resource_node"):
+		var rn: Node2D = node as Node2D
+		if rn == null:
+			continue
+		if rn.has_method("can_be_sampled_by") and rn.can_be_sampled_by(crew.global_position):
+			rn.collect_one()
+			return
+	EventBus.log_message.emit("No deposit in range to sample", "alert")
 
 
 func _unhandled_input(event: InputEvent) -> void:

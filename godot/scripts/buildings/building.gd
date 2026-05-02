@@ -26,6 +26,7 @@ const PLACEHOLDER_SCALE: Vector2 = Vector2(4.0, 4.0)
 func _ready() -> void:
 	rotation = ISO_LEAN_RAD
 	scale = PLACEHOLDER_SCALE
+	add_to_group("buildings")
 	definition = BuildingDatabase.get_definition(building_key)
 	if definition.is_empty():
 		push_warning("[Building] No definition for key '%s'" % building_key)
