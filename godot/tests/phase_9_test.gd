@@ -63,6 +63,8 @@ func _run() -> void:
 	root.add_child(ground)
 	await process_frame
 	await physics_frame
+	event_bus.landing_confirmed.emit(Vector2i.ZERO)
+	await process_frame
 	await physics_frame
 
 	# 1. Lose condition — drop oxygen to 0.

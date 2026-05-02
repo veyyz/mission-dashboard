@@ -33,6 +33,9 @@ func _run() -> void:
 	# Allow _ready, the deferred crew spawn, and NavigationServer to settle.
 	await process_frame
 	await physics_frame
+	# Phase-7 landing flow: crew don't spawn until landing_confirmed.
+	event_bus.landing_confirmed.emit(Vector2i.ZERO)
+	await process_frame
 	await physics_frame
 
 	# 1. Six crew under CrewContainer.

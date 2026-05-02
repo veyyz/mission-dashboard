@@ -23,7 +23,13 @@ func _run() -> void:
 	var ground: Node = packed.instantiate()
 	root.add_child(ground)
 
-	# Allow _ready() / call_deferred() / crew spawn to run.
+	# Allow _ready() / call_deferred() to run.
+	await process_frame
+	await physics_frame
+	# Phase-7 landing flow: crew don't spawn until landing_confirmed.
+	var event_bus := root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.landing_confirmed.emit(Vector2i.ZERO)
 	await process_frame
 	await physics_frame
 

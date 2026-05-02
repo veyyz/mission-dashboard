@@ -44,6 +44,9 @@ func _run() -> void:
 	root.add_child(ground)
 	await process_frame
 	await physics_frame
+	# Phase-7 landing flow: spawn crew + nodes via landing_confirmed.
+	event_bus.landing_confirmed.emit(Vector2i.ZERO)
+	await process_frame
 	await physics_frame
 
 	# 1. Resource nodes spawned.

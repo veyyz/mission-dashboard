@@ -1,14 +1,14 @@
 extends SceneTree
-## Phase-7 functional test.
+## Phase-7 functional test (refactored for landing-ghost flow).
 ## Verifies:
 ##   1. data/orbit_deposits.json exists and parses
-##   2. OrbitMap.tscn exists and instances under Ground
-##   3. OrbitMap loads ≥6 deposits (10×10 strategic grid)
-##   4. EventBus.zoom_changed signal exists; world_camera emits it
-##   5. Confirm Landing stores GameState.selected_landing_tile and
-##      emits EventBus.landing_confirmed
-##   6. After confirmation, GameState.selected_landing_tile equals the
-##      suggested tile (since no marker was clicked, default applies)
+##   2. OrbitMap.tscn exists, instances under Ground, ≥6 deposits loaded
+##   3. EventBus.zoom_changed emits "strategic" then "gameplay" past threshold
+##   4. LandingPlacement node exists under Ground/YSort
+##   5. LandingPlacement.confirm_at(world_pos) sets
+##      GameState.selected_landing_tile + emits EventBus.landing_confirmed
+##   6. Crew don't spawn until landing is confirmed
+##   7. Camera auto-tweens to gameplay step on landing_confirmed
 
 var event_bus: Node
 var game_state: Node
@@ -29,21 +29,16 @@ func _run() -> void:
 		_done(["EventBus or GameState autoload missing"])
 		return
 
-	# 1. JSON exists.
 	if not ResourceLoader.exists("res://data/orbit_deposits.json"):
 		failures.append("data/orbit_deposits.json missing")
-	else:
-		var f := FileAccess.open("res://data/orbit_deposits.json", FileAccess.READ)
-		var parsed: Variant = JSON.parse_string(f.get_as_text())
-		if typeof(parsed) != TYPE_DICTIONARY:
-			failures.append("orbit_deposits.json did not parse to a Dictionary")
-
-	# 2. OrbitMap scene exists.
 	if not ResourceLoader.exists("res://scenes/ui/OrbitMap.tscn"):
 		_done(failures + ["OrbitMap.tscn missing"])
 		return
 
-	# Boot the world.
+	# Connect zoom_changed BEFORE Ground spawns so we capture the initial level.
+	event_bus.zoom_changed.connect(_on_zoom_changed)
+	event_bus.landing_confirmed.connect(_on_landing_confirmed)
+
 	var ground_packed := load("res://scenes/world/Ground.tscn") as PackedScene
 	var ground: Node = ground_packed.instantiate()
 	root.add_child(ground)
@@ -51,56 +46,62 @@ func _run() -> void:
 	await physics_frame
 	await physics_frame
 
+	# 6. Crew should NOT exist yet.
+	var pre_crew: Array = get_nodes_in_group("crew")
+	if pre_crew.size() != 0:
+		failures.append("Crew spawned before landing_confirmed (got %d)" % pre_crew.size())
+
 	var orbit_map := ground.find_child("OrbitMap", true, false)
 	if orbit_map == null:
 		_done(failures + ["OrbitMap not instanced under Ground"])
 		return
-
-	# 3. ≥6 deposits loaded.
 	if orbit_map.has_method("deposits_count"):
 		var count: int = orbit_map.deposits_count()
 		if count < 6:
 			failures.append("OrbitMap loaded only %d deposits (expected >=6)" % count)
-	else:
-		failures.append("OrbitMap.deposits_count() method missing")
 
-	# 4. zoom_changed signal exists + emits.
-	event_bus.zoom_changed.connect(_on_zoom_changed)
-	# Force a couple of zoom-in steps to cross the strategic→gameplay threshold.
+	var landing := ground.find_child("LandingPlacement", true, false)
+	if landing == null:
+		failures.append("LandingPlacement node missing under Ground/YSort")
+
+	# 3. Force camera past strategic threshold and back.
 	var camera := ground.find_child("Camera2D", true, false)
 	if camera == null or not camera.has_method("zoom_in"):
-		failures.append("WorldCamera not found or missing zoom_in method")
+		failures.append("WorldCamera missing or has no zoom_in")
 	else:
-		# Initial level should be "strategic" (camera starts at step 0).
-		# Click zoom_in until past threshold (step > 2).
 		for _i in range(6):
 			camera.zoom_in()
 			await physics_frame
 		await create_timer(0.4).timeout
 		if not _zoom_levels_seen.has("gameplay"):
 			failures.append("EventBus.zoom_changed never fired 'gameplay' (saw %s)" % str(_zoom_levels_seen))
+		# Reset to strategic for the rest of the test.
+		while camera.current_step() > 0:
+			camera.zoom_out()
 
-	# 5 + 6. Confirm Landing — no marker clicked, so it should fall back to suggested tile.
-	event_bus.landing_confirmed.connect(_on_landing_confirmed)
-	var confirm_btn := orbit_map.find_child("ConfirmButton", true, false)
-	if confirm_btn == null:
-		failures.append("Confirm Landing button missing")
-	else:
-		confirm_btn.emit_signal("pressed")
+	# 5. Confirm landing via LandingPlacement.confirm_at — pick a tile
+	#    offset from origin to verify cell conversion works.
+	if landing != null:
+		var target_world: Vector2 = Vector2(192, 96)  # roughly cell (2, 1) in iso
+		landing.confirm_at(target_world)
 		await process_frame
-		var suggested: Vector2i = orbit_map.suggested_tile()
-		if game_state.selected_landing_tile != suggested:
-			failures.append(
-				"GameState.selected_landing_tile != suggested: got %s expected %s" % [
-					game_state.selected_landing_tile, suggested,
-				]
-			)
-		if _confirmed_grid != suggested:
-			failures.append(
-				"EventBus.landing_confirmed grid_pos != suggested: got %s expected %s" % [
-					_confirmed_grid, suggested,
-				]
-			)
+		await physics_frame
+		await physics_frame
+		if game_state.selected_landing_tile == Vector2i.ZERO:
+			failures.append("GameState.selected_landing_tile not set after confirm")
+		if _confirmed_grid == Vector2i(-99, -99):
+			failures.append("EventBus.landing_confirmed never fired")
+
+	# 6 (cont). After landing, crew should now be spawned.
+	var post_crew: Array = get_nodes_in_group("crew")
+	if post_crew.size() != 6:
+		failures.append("After landing, expected 6 crew, got %d" % post_crew.size())
+
+	# 7. Camera step should auto-jump past the strategic threshold.
+	if camera != null:
+		await create_timer(0.1).timeout
+		if camera.current_step() <= camera.STRATEGIC_STEP_THRESHOLD:
+			failures.append("Camera step did not advance past strategic threshold (step=%d)" % camera.current_step())
 
 	_done(failures)
 

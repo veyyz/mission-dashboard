@@ -29,10 +29,18 @@ anchors_preset = 0
 offset_right = 1300.0
 offset_bottom = 1100.0
 
-[node name="Markers" type="Control" parent="Root"]
-anchors_preset = 0
-offset_right = 1300.0
-offset_bottom = 1100.0
+[node name="HintLabel" type="Label" parent="Root"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 120.0
+offset_right = 300.0
+offset_bottom = 152.0
+horizontal_alignment = 1
+text = "Click anywhere on the moon to deploy landing module"
+theme_override_colors/font_color = Color(0.95, 0.71, 0.30, 1)
+theme_override_font_sizes/font_size = 18
 
 [node name="TilePanel" type="PanelContainer" parent="Root"]
 offset_left = 1320.0
@@ -74,10 +82,3 @@ layout_mode = 2
 autowrap_mode = 2
 text = "Recommendation: —"
 theme_override_colors/font_color = Color(0.91, 0.93, 0.95, 1)
-
-[node name="ConfirmButton" type="Button" parent="Root"]
-offset_left = 1320.0
-offset_top = 480.0
-offset_right = 1660.0
-offset_bottom = 540.0
-text = "CONFIRM LANDING"

@@ -21,6 +21,8 @@ const ZOOM_LEVELS: Array[Vector2] = [
 ]
 
 const ANIM_SECONDS: float = 0.22
+const LANDING_ANIM_SECONDS: float = 0.7  # camera fly-in on landing confirm
+const LANDING_TARGET_STEP: int = 7  # gameplay zoom after landing (1.40×)
 const STRATEGIC_CENTER: Vector2 = Vector2.ZERO
 const STRATEGIC_ZOOM: Vector2 = Vector2(0.13, 0.13)  # alias for ground.gd boot setup
 const STRATEGIC_STEP_THRESHOLD: int = 2  # step <= threshold ⇒ strategic level
@@ -29,12 +31,14 @@ var step: int = 0
 var _selected_crew: Node2D = null
 var _tween: Tween
 var _last_level: String = ""
+var _landing_pos: Vector2 = Vector2.INF  # set when landing confirmed; zoom centers on it
 
 
 func _ready() -> void:
 	add_to_group("world_camera")
+	make_current()
 	EventBus.crew_selected.connect(_on_crew_selected)
-	# Fire an initial zoom_changed so subscribers (OrbitMap UI) can sync.
+	EventBus.landing_confirmed.connect(_on_landing_confirmed)
 	_emit_level_changed()
 
 
@@ -74,12 +78,31 @@ func max_step() -> int:
 func _apply_step() -> void:
 	var target_zoom: Vector2 = ZOOM_LEVELS[step]
 	# Lerp the camera position from the strategic origin (step 0) toward the
-	# selected crew (step max). Intermediate steps blend smoothly so the
-	# user gets both more zoom AND more focus on the selected crew per click.
+	# selected crew, the landing site, or the strategic origin in that order.
 	var t: float = float(step) / float(ZOOM_LEVELS.size() - 1)
-	var crew_pos: Vector2 = _selected_crew.global_position if _selected_crew != null else _fallback_crew_pos()
-	var target_pos: Vector2 = STRATEGIC_CENTER.lerp(crew_pos, t)
-	_animate(target_pos, target_zoom)
+	var anchor: Vector2 = _gameplay_anchor()
+	var target_pos: Vector2 = STRATEGIC_CENTER.lerp(anchor, t)
+	_animate(target_pos, target_zoom, ANIM_SECONDS)
+	_emit_level_changed()
+
+
+func _gameplay_anchor() -> Vector2:
+	if _selected_crew != null:
+		return _selected_crew.global_position
+	if _landing_pos != Vector2.INF:
+		return _landing_pos
+	return _fallback_crew_pos()
+
+
+## On landing confirmed, fly the camera from strategic to gameplay range.
+## Skips the per-step Tween animation in favor of a longer "fly-in" feel.
+func _on_landing_confirmed(grid_pos: Vector2i) -> void:
+	# Convert iso cell to world; same math the TileMapLayer uses, but we
+	# don't have a layer reference here — use the diamond-down formula
+	# (cell (a, b) → ((a-b)*W/2, (a+b)*H/2)). Tile size = 64x32.
+	_landing_pos = Vector2(float(grid_pos.x - grid_pos.y) * 32.0, float(grid_pos.x + grid_pos.y) * 16.0)
+	step = LANDING_TARGET_STEP
+	_animate(_landing_pos, ZOOM_LEVELS[step], LANDING_ANIM_SECONDS)
 	_emit_level_changed()
 
 
@@ -103,9 +126,9 @@ func _on_crew_selected(crew_id: int) -> void:
 			return
 
 
-func _animate(target_pos: Vector2, target_zoom: Vector2) -> void:
+func _animate(target_pos: Vector2, target_zoom: Vector2, seconds: float) -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
 	_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	_tween.tween_property(self, "global_position", target_pos, ANIM_SECONDS)
-	_tween.tween_property(self, "zoom", target_zoom, ANIM_SECONDS)
+	_tween.tween_property(self, "global_position", target_pos, seconds)
+	_tween.tween_property(self, "zoom", target_zoom, seconds)
