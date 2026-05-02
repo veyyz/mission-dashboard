@@ -30,6 +30,8 @@ SaveSystem="*res://scripts/autoload/save_system.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
 BuildingDatabase="*res://scripts/autoload/building_database.gd"
 RecipeProcessor="*res://scripts/autoload/recipe_processor.gd"
+EventManager="*res://scripts/autoload/event_manager.gd"
+WinLoseManager="*res://scripts/autoload/win_lose_manager.gd"
 
 [display]
 

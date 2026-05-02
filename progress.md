@@ -196,6 +196,43 @@
   - Building costs not yet using the unlocked secondary resources beyond materials/silicon/iron → balance pass
 - Files added: 12 new (6 building scenes + 4 scripts + 2 scenes for resource node/probe/fog + 1 autoload + 1 test); 4 modified (project.godot, building.gd, crew_member.gd, crew_selection_manager.gd, ground.gd, Ground.tscn)
 
+## Phase 9: Win/lose + events + save/load + CHECK-IN
+- Status: completed
+- Implemented:
+  - **`scripts/autoload/win_lose_manager.gd`** (9th autoload) — listens to `EventBus.resource_changed` (defeat on power/oxygen/food == 0) and `EventBus.mission_day_advanced` (win on 3 consecutive day-checkpoints with positive net rate on all 3 critical resources). Locks itself after firing once. Public `reset()` for new-game flow.
+  - **`scripts/autoload/event_manager.gd`** (10th autoload) — loads `data/events.json` (5 events: meteor_shower, supply_drop, equipment_failure, solar_flare, rescue_signal). On every `EventBus.mission_day_advanced` rolls each event against `trigger_chance_per_day`, gated by `min_day` and optional `requires_building`. Applies the `add_resource` effect immediately; other effects (damage_random_outdoor_building, disable_random_building, radiation_pulse, spawn_rescue_objective) are stubs that emit a log message — full gameplay wiring deferred to Phase 10. Public `try_event(id)` ignores RNG/gating for tests.
+  - **`scripts/autoload/save_system.gd`** — full Phase-9 implementation replacing the Phase-1 stub. `save_game(slot)` builds a Dictionary with sections: `_version`, `game_state` (mode/day/pause/landing tile), `resources` (all 13 with current/max/rate), `time` (minute_of_day/day/scale/phase), `crew` (6 entries with id/name/role/skill/position/health/stamina/oxygen/selected), `buildings` (key + position), `resource_nodes` (type + amount + discovered + position), `probes` (positions), `fog_revealed_cells` (flattened Vector2i list). `load_game(slot)` restores everything in-place — crew + autoloads are mutated, buildings/nodes/probes are torn down + re-instantiated under YSort. Per spec §5.6 the world is unified, so load doesn't reload Ground.
+  - **`EventBus`** new signals: `victory`, `defeat(reason)`, `random_event_fired(event_id, summary)`, `game_saved(slot)`, `game_loaded(slot)`.
+  - **`tests/phase_9_test.gd`** — 6 done-criteria checks: lose on oxygen=0, win on 3 sustainable days, `EventManager.try_event('supply_drop')` adds materials + emits random_event_fired, `save_game` writes a parseable JSON with all sections, round-trip restores power and crew position.
+- Build: clean. `[EventManager] Ready. 5 events loaded.` Test: **PASS** first try. Full regression phases 2–9: all PASS.
+- Deferred:
+  - Win / Lose modal UI screens (per spec — currently signals fire but no full-screen overlay) → Phase 10 polish
+  - Stub-effect events (`damage_random_outdoor_building`, `disable_random_building`, `radiation_pulse`, `spawn_rescue_objective`) → Phase 10 / 11
+  - Autosave every in-game day per spec §5.7 → Phase 10
+  - Save/load slot management UI → Phase 10
+  - Probe + ResourceNode restoration uses tree position not the original spawn parent — adequate for round-trip but may need to honor Y-sort semantics on full session reloads → Phase 10
+- Files added: 4 new (2 autoloads + full save_system rewrite + 1 test); 2 modified (event_bus.gd, project.godot)
+
+## CHECK-IN at Phase 9 (final, per autonomous prompt)
+- **Built:** Mechanically complete colony game. Crew + selection + click-to-move pathfinding (Phase 4), 3 fully-functional buildings end-to-end (Phase 5), 6 more building scenes wired into the database (Phase 8), spec-§8 HUD with 8 separate-scene panels (Phase 6), strategic-zoom orbit map with 7 deposit tiles + Confirm Landing flow (Phase 7), scan/probe/sample actions + fog-of-war placeholder + recipe processor (Phase 8), win condition (3 sustainable days), lose condition (critical resource depletion), 5 random events with chance/min-day gating, full save/load round-trip with 9 state sections (Phase 9). All 8 phase tests + Phase-2/4 regressions consistently PASS.
+- **Run:** open the Godot project at `mission-dashboard/godot/` in Godot 4.6.2 and press F5. Or headlessly: `Godot_v4.6.2-stable_win64_console.exe --path mission-dashboard/godot/`.
+- **What to verify before Phase 10:**
+  - WASD/arrow keys move the selected crew; 1–6 select; Shift+# multi-select; click-to-move on selected crew.
+  - Top-right ± buttons step zoom in 10 increments from full strategic to close gameplay; selecting a different crew at high zoom auto-recenters.
+  - Top-center resource bar shows live values + rates from `EventBus.resource_changed`.
+  - Bottom-left build menu places construction sites; Engineer adjacent advances the bar; on completion the building's produces/consumes apply to ResourceManager rates.
+  - Strategic zoom (zoom step 1–3) shows the orbit-map overlay with grid labels A–J × 1–10, deposit markers, pulsing E5 suggested-landing zone, tooltip + Confirm Landing.
+  - Sit at gameplay zoom long enough for `mission_day_advanced` to fire — debug HUD's day counter ticks; events may roll; if you set a positive net rate on power/oxygen/food and let 3 days pass, victory fires (debug log).
+  - **From the remote inspector** (Debug menu): call `SaveSystem.save_game()` then mutate any state then call `SaveSystem.load_game()` — state restores. JSON file at `%APPDATA%/Godot/app_userdata/Lunar Colony/saves/autosave.json`.
+- **Known placeholders / not in scope for Phase 10**:
+  - All sprite art is still runtime-generated colored rectangles. Round-15 character UUIDs are queued at Pixellab (kid cadets in sleek high-tech exosuits per `lunar_colony_character_generation.md`) plus 5 building iso tiles + 3 extras (kai/noor/tali) — see `art_queue.json`. **Phase 10 art swap-in is the bulk of the work remaining.**
+  - Real fog-of-war shader (currently revealed-cells dictionary only; no actual canvas darkening) → Phase 10.
+  - Win/Lose modal UI overlay (signals fire but no full-screen victory/defeat screen) → Phase 10.
+  - Audio is entirely placeholder (AudioManager stubs from Phase 1) → Phase 10.
+  - Stub event effects → Phase 10/11.
+  - TileMapLayer culling + sprite LOD at strategic zoom → Phase 11 (already on roadmap).
+- **Halting per autonomous prompt — do not start Phase 10. Halt for human review.**
+
 
 
 

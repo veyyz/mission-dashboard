@@ -39,6 +39,13 @@ signal log_message(message: String, category: String)
 signal zoom_changed(level: String)  # "strategic" or "gameplay"
 signal landing_confirmed(grid_pos: Vector2i)
 
+# --- Endgame + events (Phase 9) ---
+signal victory  # 3 in-game days of net-positive on power/oxygen/food
+signal defeat(reason: String)  # power/oxygen/food hit 0
+signal random_event_fired(event_id: String, effect_summary: String)
+signal game_saved(slot: String)
+signal game_loaded(slot: String)
+
 
 func _ready() -> void:
 	print("[EventBus] Ready.")
