@@ -9,7 +9,7 @@
 **Working title:** FutureQuest Lunar Settlement Mission
 **Engine:** Godot 4.6+ (use GDScript, not C#)
 **Genre:** Real-time colony management / survival sim
-**Perspective:** 3/4 top-down (a.k.a. "fake isometric" — orthographic camera, slight pitch, characters and props rendered as pixel-art sprites, ground rendered as a tilemap)
+**Perspective:** True isometric. Use Godot 4's native isometric `TileMap` mode (`tile_shape = 1` Isometric, `tile_layout = 5` Diamond Down). Single seamlessly-zoomable world — there are **no scene transitions** between strategic and gameplay views, only camera zoom. The strategic landing-site selection screen and the close-up gameplay screen are the **same world** at different zoom levels.
 **Target platforms:** Desktop first (Windows/Mac/Linux). Keep mobile in mind but don't optimize for it yet.
 **Art style:** Hand-pixeled, 128 px characters, muted lunar palette (greys, deep blues, warm UI accents in amber and cyan). Reference the attached screenshots for exact tone — dark backdrop, glowing UI panels with rounded corners and 1px highlight strokes, color-coded character name tags.
 
@@ -17,7 +17,7 @@
 
 ## 2. Vision in One Paragraph
 
-The player commands a multiplayer expedition that lands on the Moon and must build a self-sustaining colony before resources run out. The game opens with an orbital strategic map where the player picks a landing site based on resource deposits and terrain. Once landed, the camera drops to a ground-level 3/4 view where the player directly controls crew members (WASD or click-to-move), assigns them to extract resources, deploy probes, run experiments, and construct habitat modules. The fantasy is "Rimworld meets Into the Breach meets Moonlighter" — tactile pixel art, deep systems, but a tighter scope and a clear win condition (build a sustainable colony).
+The player commands a multiplayer expedition that lands on the Moon and must build a self-sustaining colony before resources run out. The game opens **zoomed out** on a single isometric world map where the player picks a landing site based on resource deposits and terrain. Confirming the landing site spawns the crew + landing module on the chosen tile and **smoothly zooms the camera in** — no scene change. From the close-up zoom the player directly controls crew members (WASD or click-to-move), assigns them to extract resources, deploy probes, run experiments, and construct habitat modules. The player can **zoom back out at any time** to see the broader map and re-survey deposits; the strategic UI panels reappear at strategic zoom and fade out as the camera zooms back in. The fantasy is "Rimworld meets Into the Breach meets Moonlighter" — tactile pixel art, deep systems, but a tighter scope and a clear win condition (build a sustainable colony).
 
 ---
 
@@ -46,14 +46,16 @@ Five reference images are attached. Treat them as **canonical** for UI layout, c
 ## 4. Core Gameplay Loop
 
 ```
-Orbit (strategic map)
-  → Pick landing site
-  → Land crew + module
-Ground (real-time, pausable)
+Strategic zoom (camera zoomed out, full world visible)
+  → Browse 10×10 grid (A–J × 1–10), inspect resource deposits and tile data
+  → Pick landing site → camera smooth-zooms in to the chosen tile
+  → Crew + landing module spawn there
+Gameplay zoom (camera zoomed in, real-time, pausable)
   → Move crew, scan, extract, build, research
   → Manage hourly resource tick (power/O₂/food consumption)
   → Day cycle (6:00 → 22:00 → night phase, lower power gen, higher O₂ drain)
   → Mission objectives unlock progressively
+  → Player can zoom out to strategic at any time (and back)
 Endgame
   → Sustainability achieved (positive net rate on power/O₂/food for 3 in-game days) → win
   → Any of power/O₂/food hits 0 → fail state
@@ -111,11 +113,13 @@ var nameplate: Nameplate  # child UI node
 
 Selection: keys `1`–`6` select crew member. Selected crew has a glowing ring under their feet. Multi-select with shift-click. WASD moves selected crew (or just commander); click-to-move issues pathfinding orders to selected crew.
 
+Note: WASD and click-to-move only operate in gameplay zoom; in strategic zoom the same clicks select tiles for landing-site review (or, post-landing, recenter the camera on a tile).
+
 ### 5.3 Building / Construction System
 
 Buildings are `StaticBody2D` scenes with a `Buildable` component. Construction flow:
 1. Player opens build menu (hotbar slots 5–9 or a dedicated build panel).
-2. Selects building type → ghost preview follows cursor, snapped to tilemap grid (32px cells).
+2. Selects building type → ghost preview follows cursor, snapped to the **isometric** tilemap grid (one tile per cell — see §6 for tile dimensions).
 3. Red tint = invalid (collision, off-map, missing resources). Green tint = valid.
 4. Click to place → spawns "construction site" node with a progress bar.
 5. Engineer auto-pathfinds to the site (or player assigns one); construction ticks while engineer is adjacent.
@@ -150,9 +154,18 @@ Use a fog-of-war shader on a `CanvasLayer` above the tilemap. Probes / crew visi
 - Night (22:00–06:00): solar at 0%, O₂ drain +20% outside habitat (suit cooling overhead).
 - Implement as a `TimeManager` autoload emitting `phase_changed(phase)` and `tick(in_game_minutes)`.
 
-### 5.6 Strategic Map (Landing Site Selection)
+### 5.6 Strategic Zoom (Landing Site Selection)
 
-Pre-game scene. A 10×10 grid (A–J × 1–10) overlay on a moon-surface backdrop with Earth in the corner. Resource deposit markers are clickable. Hovering a tile shows: terrain type, hazards, nearby resource access, recommendation. The "suggested landing zone" pulses gently. Confirm Landing transitions to the ground scene with the chosen tile's biome/resource setup applied.
+**Same scene as gameplay.** The Strategic view is the world camera zoomed all the way out, with a UI overlay drawn on top.
+
+- A 10×10 grid (A–J × 1–10) is rendered as a UI overlay above the isometric tilemap.
+- Resource deposit markers are clickable at this zoom; clicking selects the tile and opens the per-tile readout (terrain type, hazards, nearby resource access, recommendation).
+- The "suggested landing zone" pulses gently.
+- Earth renders in the sky/corner of the same world view.
+- **Confirm Landing** spawns the crew + landing module on the chosen tile and triggers a smooth camera zoom-in to gameplay range — no scene change, no asset reload, the same `TileMap` continues to render the same world data.
+- After landing, the player can press a "Zoom out" button (or scroll wheel out to a threshold) to return to strategic zoom; the strategic-only UI panels (Mission Day, Resources Detected, Landing Module info, Terrain Analysis, Hazards, Recommendation) re-fade-in. This is how the player re-surveys deposits or repositions across the map.
+
+This unification means: one persistent world state, one resource manager, one time manager, one save format. Strategic and gameplay are camera modes, not separate game states.
 
 ### 5.7 Save / Load
 
@@ -162,10 +175,18 @@ JSON-based save (use `FileAccess` + `JSON.stringify`). Save: resources, time, cr
 
 ## 6. Technical Stack & Conventions
 
-- **Godot 4.3+**, GDScript, Forward+ renderer (or Compatibility for low-end).
+- **Godot 4.6+**, GDScript, Forward+ renderer (or Compatibility for low-end).
 - **Resolution:** design at 1920×1080 with `viewport` stretch mode + `keep` aspect. Pixel-art assets use `texture_filter = NEAREST` and `snap_2d_transforms_to_pixel = true`.
-- **Tilemap:** single `TileMap` for ground, separate `TileMap` for overlay decals (rocks, dust). 32×32 base tiles with isometric offset trick for the 3/4 look (use 2D nodes — do not use Godot's actual isometric tile mode unless you commit to it fully; the screenshots look like ortho 2D with depth via Y-sort).
-- **Y-sort:** put characters and buildings under a `Node2D` with `y_sort_enabled = true` so closer-to-camera draws on top.
+- **Tilemap (true isometric, committed):**
+  - Use a `TileMapLayer` for the ground; a second `TileMapLayer` for overlay decals (rocks, dust, craters).
+  - `TileSet.tile_shape = 1` (Isometric)
+  - `TileSet.tile_layout = 5` (Diamond Down)
+  - `TileSet.tile_size = Vector2i(W, W/2)` — typical values: `(32, 16)`, `(64, 32)`, `(128, 64)`. We're using `(64, 32)` to match the 128px crew sprite scale.
+  - `TileSetAtlasSource.texture_origin = Vector2i(0, -H/2)` (or whatever offset puts the visible tile face on the diamond floor) — without this, tiles float above grid centers.
+  - Pixellab outputs `block`-shape isometric tiles whose visible face is the top diamond; the texture_origin offset is what aligns those to the iso grid.
+- **Y-sort:** the parent `Node2D` and the iso `TileMapLayer` itself both need `y_sort_enabled = true`. Buildings and crew live as siblings under a Y-sorted parent; their `y_sort_origin` should be set to put their "feet" at the cell floor (not the sprite top).
+- **Camera & zoom:** single `Camera2D` whose `zoom` is animated via `Tween` between strategic and gameplay ranges. Two named zoom presets (`STRATEGIC_ZOOM = Vector2(0.4, 0.4)`, `GAMEPLAY_ZOOM = Vector2(2.0, 2.0)` — tune to taste). Strategic UI panels listen for camera zoom-changed signals and fade themselves in/out. Mouse-wheel scrolls between presets; pressing a UI "zoom out" button snaps back to strategic.
+- **World map size:** single map of ~256×256 iso cells covers the 10×10 strategic grid (each strategic cell = ~25×25 iso cells of detailed terrain). Procedurally generate or pre-author resource deposits per strategic cell.
 - **Input:** define actions in `InputMap`, never check raw key codes in code.
 - **Signals over polling.** Always.
 - **Autoloads:** `GameState`, `ResourceManager`, `TimeManager`, `EventBus`, `SaveSystem`, `AudioManager`.
@@ -244,9 +265,9 @@ Every panel should be its own scene (`HUDPanelResources.tscn`, `HUDPanelCrew.tsc
 - Create the project, set rendering settings, create the folder structure, add placeholder autoloads with stub functions.
 - Make a minimal `Main.tscn` that boots into a black scene with "Lunar Colony" text. Verify it runs.
 
-### Phase 2 — Ground scene + crew movement
-- Tilemap with a basic moon-surface tileset (placeholder colored squares are fine — we'll swap art later).
-- One `CrewMember` you can move with WASD. Camera follows. Y-sort works so the crew sprite passes behind a placeholder rock when it should.
+### Phase 2 — World scene + crew movement
+- Single **isometric** `TileMapLayer` (per §6 settings — `tile_shape=1`, `tile_layout=5`, diamond grid). A placeholder iso tileset (one solid-color block tile generated at runtime is fine) painted across a small patch.
+- One `CrewMember` you can move with WASD. Camera follows. Y-sort works so the crew sprite passes behind a placeholder rock when it should — both the parent Node2D and the TileMapLayer have `y_sort_enabled = true`.
 
 ### Phase 3 — Resources + time
 - `ResourceManager` with all six resources, a debug panel showing current values + rates.
@@ -261,8 +282,12 @@ Every panel should be its own scene (`HUDPanelResources.tscn`, `HUDPanelCrew.tsc
 ### Phase 6 — Full HUD
 - Replace debug panel with the real HUD per Section 8. Match screenshot 4 layout.
 
-### Phase 7 — Strategic map + landing flow
-- Orbit map scene per screenshot 3. Landing site preview per screenshot 2. Hand off chosen tile data to the ground scene.
+### Phase 7 — Strategic zoom + landing flow
+- Camera zoom system with two presets (strategic / gameplay) and `Tween`-animated transitions; mouse-wheel + UI button trigger.
+- Expand the world to the full 10×10 strategic-grid scale (~256×256 iso cells); seed resource deposits per strategic cell from `data/orbit_deposits.json`.
+- Strategic-only UI overlay (Mission Day, Environment, Resources Detected, Landing Module info, Terrain Analysis, Hazards, Recommendation, A–J × 1–10 grid labels, Suggested Landing Zone marker) per `fq_full_world_view.png` — fade in at strategic zoom, fade out at gameplay zoom.
+- Resource deposit markers clickable at strategic zoom; tile-readout panel updates from the clicked tile.
+- "Confirm Landing" spawns crew + landing module on the chosen tile and `Tween`-zooms the camera to gameplay range. Landing is one-shot per session (post-landing, the strategic zoom still works for re-surveying but the Confirm Landing button hides).
 
 ### Phase 8 — Remaining buildings, scanning, fog of war, samples
 - Round out the building set, add R/F/G actions, fog shader, sample → science loop.
@@ -283,6 +308,13 @@ Every panel should be its own scene (`HUDPanelResources.tscn`, `HUDPanelCrew.tsc
 - `NavigationAgent2D` works but you must `await get_tree().physics_frame` once before reading its first path, or you'll get a zero-length path on the first call.
 - Use `Tween` for UI animations, not `AnimationPlayer`, when the animation is dynamic (e.g., resource bar lerps).
 - Y-sort's `y_sort_origin` lets you tweak the "feet" position of multi-tile sprites — set it for buildings so they sort against crew correctly.
+- **Isometric TileMap pitfalls:**
+  - If tiles "float" inside grid cells, your `TileSetAtlasSource.texture_origin` is wrong — for `tile_shape=1` with `tile_size=(64, 32)`, the offset is typically `Vector2i(0, -16)` to anchor the visual top to the diamond floor. Adjust per source if Pixellab's `block`-shape iso tiles render with extra height.
+  - `tile_layout = 5` (Diamond Down) is the layout that matches Pixellab's iso block tiles. Diamond Right (4) inverts the long axis and looks broken with their tile shape.
+  - Use the **Rect Tool (R)** in the TileMap editor when painting iso terrains in corner-matching mode (`terrain_set_0/mode = 0`); the Paint Tool (D) fights the corner system.
+  - Y-sort must be enabled on **both** the parent Node2D and each iso `TileMapLayer`, not just the parent. Without it on the layer, multi-cell buildings sort as a single y position and clip wrong.
+  - Pixellab character sprites are rendered "low top-down" — they composite over an iso tilemap correctly when their `y_sort_origin` puts their feet at `position.y` (not the sprite top).
+- **Camera zoom for unified strategic/gameplay:** animate `Camera2D.zoom` via `Tween`, not by reparenting or reloading scenes. Connect a custom signal (e.g., `EventBus.zoom_changed(level: String)` where level is `"strategic"` or `"gameplay"`) so UI panels know when to fade.
 
 ---
 

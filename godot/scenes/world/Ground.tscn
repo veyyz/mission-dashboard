@@ -20,6 +20,7 @@ script = ExtResource("4_daynight")
 y_sort_enabled = true
 
 [node name="CrewContainer" type="Node2D" parent="YSort"]
+y_sort_enabled = true
 script = ExtResource("2_selman")
 
 [node name="Rock" type="Node2D" parent="YSort"]

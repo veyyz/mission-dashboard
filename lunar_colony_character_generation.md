@@ -10,11 +10,22 @@ The crew should feel like **a cozy, optimistic exploration team** — cute, capa
 
 Key qualities the reference establishes:
 - **Stylized JRPG proportions** — large expressive head, compact body, ~4–5 heads tall. Direct family with Eastward, Sea of Stars, CrossCode. Use the `stylized` preset; it gives the JRPG/anime sensibility without going full deformed-chibi.
-- **Layered cozy outfits** — visible jacket/vest piece *over* a base spacesuit. This is huge — it makes the characters feel dressed rather than encased. Alex has a navy-blue flight jacket with high collar over a white suit.
+- **Layered cozy outfits over a sealed pressure suit** — visible jacket/vest piece *over* a base spacesuit. Alex has a navy-blue flight jacket with high collar over a white pressure suit. The cozy layer is what makes them feel approachable; the pressure suit underneath is what makes them read as astronauts.
 - **Warm human anchor details** — Alex's glossy red boots are the signature element. Every crew member needs an equivalent: a piece in a warm, friendly color or material that humanizes the suit.
 - **Tousled, lived-in hair** — not styled, not slick. Brown messy hair on Alex.
 - **Small simple face** — eye dots, hint of a friendly expression, not over-detailed.
 - **Subtle, not dominant futuristic touches** — small accent lines, a single LED or seam-glow. The character reads as a *person* first, technology second.
+
+**The astronaut tells — every prompt must include these or the model produces casual streetwear:**
+
+The word "spacesuit" alone isn't enough. Without explicit pressure-suit features, Pixellab will read "white spacesuit with navy jacket" as "white clothes under a navy jacket" and ship you a park ranger. Every per-character prompt below includes:
+- `sealed pressure suit with rigid chest module` — locks in the suit silhouette
+- `compact life support backpack` — the unmistakable astronaut tell from any angle
+- `pressure gauntlet gloves` — kills the "regular hands" reading
+- `neck ring visible at collar` — tells the model the jacket sits on a sealed suit, not a t-shirt
+- `pressurized boots` (instead of just "boots") — completes the sealed silhouette
+
+For un-helmeted crew (the canonical look per `fq_player.png`), the helmet doesn't disappear from the design — it's `clipped to belt at hip` for Commander. Other crew can have it implied by the visible neck ring and life support backpack.
 
 **What to avoid in body language:** anything that suggests "athletic," "lean," "fit," "slim," "form-fitting." The reference is a normal cute character, not a fitness model. Let the stylized proportions handle the body — describe clothing and accessories, not physique.
 
@@ -49,11 +60,16 @@ If outputs feel too realistic / heads too small for the JRPG vibe, try `chibi` f
 Every character description follows the same five-part structure. Parallel structure across descriptions is the strongest cohesion lever Pixellab gives you when you can't lock a seed.
 
 ```
-[ROLE], in [LAYERED OUTFIT: base suit + colored jacket/garment], [HAIR/FACE
-DETAIL], [EXPRESSION], [WARM ANCHOR DETAIL — boots/cap/hardhat/etc.],
-[OPTIONAL SUBTLE TECH ACCENT], [OPTIONAL SIGNATURE PROP], retro-futuristic
-exploration crew, clean pixel art, friendly approachable
+top-down 3/4 view game sprite, full body, astronaut [ROLE] wearing a sealed
+[COLOR] pressure suit with rigid chest module, [LAYERED OUTFIT: jacket/vest
+over the suit], neck ring visible at collar, compact life support backpack,
+[HAIR/FACE DETAIL], [EXPRESSION], [WARM ANCHOR DETAIL — pressurized boots in
+warm color], pressure gauntlet gloves, [SUBTLE TECH ACCENT — small LED
+somewhere], JRPG-style game sprite, retro-futuristic exploration crew, clean
+pixel art, friendly approachable
 ```
+
+The bracketed slots are what varies per character. Everything else is constant. **Do not omit the astronaut features** — `sealed pressure suit`, `rigid chest module`, `neck ring`, `life support backpack`, `pressure gauntlet gloves`, `pressurized boots`. These are what stop the model from defaulting to casual streetwear.
 
 Always end with `retro-futuristic exploration crew, clean pixel art, friendly approachable`. Do not vary that suffix.
 
@@ -64,52 +80,68 @@ Always end with `retro-futuristic exploration crew, clean pixel art, friendly ap
 ### Alex — Engineer
 *Canonical reference. Match `fq_player.png` as closely as possible.*
 ```
-engineer in white spacesuit with navy-blue flight jacket and high collar,
-brown tousled messy hair, friendly warm smile, glossy red boots, small cyan
-accent stripe along jacket trim, JRPG anime-influenced pixel art,
-retro-futuristic exploration crew, clean pixel art, friendly approachable
+top-down 3/4 view game sprite, full body, astronaut engineer wearing a sealed
+white pressure suit with rigid chest module, navy-blue flight jacket over the
+suit with high collar resting on the suit's neck ring, compact life support
+backpack, brown tousled messy hair, friendly warm smile, glossy red pressurized
+boots, pressure gauntlet gloves, small cyan LED accent line along jacket trim,
+JRPG-style game sprite, retro-futuristic exploration crew, clean pixel art,
+friendly approachable
 ```
 
 ### Maya — Scientist
 ```
-female scientist in violet bodysuit with darker purple panel seams and high
-collar, dark hair in high ponytail, curious intelligent smile, lavender accent
-boots, holding a glowing handheld scanner tablet, JRPG anime-influenced pixel
-art, retro-futuristic exploration crew, clean pixel art, friendly approachable
+top-down 3/4 view game sprite, full body, astronaut scientist wearing a sealed
+violet pressure suit with rigid chest module and darker purple panel seams,
+high collar resting on the suit's neck ring, compact life support backpack,
+integrated wrist computer with glowing magenta display, dark hair in high
+ponytail, curious intelligent smile, lavender pressurized boots, pressure
+gauntlet gloves, JRPG-style game sprite, retro-futuristic exploration crew,
+clean pixel art, friendly approachable
 ```
 
 ### Zane — Botanist
 ```
-botanist in white shirt and forest-green work vest over green pants, green
+top-down 3/4 view game sprite, full body, astronaut botanist wearing a sealed
+white pressure suit with rigid chest module, forest-green utility vest over
+the suit, neck ring visible at collar, compact life support backpack, green
 tactical cap over short brown hair, light stubble, gentle warm smile, dark
-green boots, small green leaf-pattern accent on vest, JRPG anime-influenced
-pixel art, retro-futuristic exploration crew, clean pixel art, friendly
-approachable
+green pressurized boots, pressure gauntlet gloves, small green LED on vest
+collar, JRPG-style game sprite, retro-futuristic exploration crew, clean
+pixel art, friendly approachable
 ```
 
 ### Rin — Geologist
 ```
-female geologist in heavy-duty amber-orange jumpsuit with charcoal-grey panels,
-sleek yellow hardhat with integrated headlamp, determined friendly smile, brown
-work boots, holding a sonic pickaxe with glowing tip, JRPG anime-influenced
-pixel art, retro-futuristic exploration crew, clean pixel art, friendly
-approachable
+top-down 3/4 view game sprite, full body, astronaut geologist wearing a
+sealed heavy-duty amber-orange pressure suit with rigid chest module and
+charcoal-grey panels, neck ring visible at collar, compact life support
+backpack, sleek yellow hardhat with integrated headlamp, determined friendly
+smile, brown pressurized work boots, pressure gauntlet gloves, small amber
+LED accent on shoulder, JRPG-style game sprite, retro-futuristic exploration
+crew, clean pixel art, friendly approachable
 ```
 
 ### Medic (Phase 5+ unlock)
 ```
-medic in white spacesuit with light-grey medical jacket and red cross emblem
-on chest, short dark hair, calm reassuring smile, white boots with red soles,
-holding a small medkit, JRPG anime-influenced pixel art, retro-futuristic
-exploration crew, clean pixel art, friendly approachable
+top-down 3/4 view game sprite, full body, astronaut medic wearing a sealed
+white pressure suit with rigid chest module and red cross emblem on chest,
+light-grey medical jacket over the suit, neck ring visible at collar, compact
+life support backpack, short dark hair, calm reassuring smile, white
+pressurized boots with red soles, pressure gauntlet gloves, small red LED
+accent on sleeve, JRPG-style game sprite, retro-futuristic exploration crew,
+clean pixel art, friendly approachable
 ```
 
 ### Commander (Phase 5+ unlock)
 ```
-commander in dark navy spacesuit with gold trim and silver shoulder insignia,
-no helmet, short silver-grey hair, confident warm smile, polished black boots,
-hands relaxed at sides, JRPG anime-influenced pixel art, retro-futuristic
-exploration crew, clean pixel art, friendly approachable
+top-down 3/4 view game sprite, full body, astronaut commander wearing a
+sealed dark navy pressure suit with rigid chest module, gold trim and silver
+shoulder insignia, neck ring visible at collar, compact life support backpack,
+helmet clipped to belt at hip, no helmet on head, short silver-grey hair,
+confident warm smile, polished black pressurized boots, pressure gauntlet
+gloves, small gold LED accent on collar, JRPG-style game sprite,
+retro-futuristic exploration crew, clean pixel art, friendly approachable
 ```
 
 ---
@@ -119,13 +151,14 @@ exploration crew, clean pixel art, friendly approachable
 These descriptors will pull the output in the wrong direction. Do **not** include them, and watch for outputs that drift this way:
 
 - ❌ "athletic", "lean", "fit", "slim", "form-fitting", "muscular" → fitness-model body language; the reference is a normal cute character
+- ❌ "bodysuit", "skintight", "catsuit" → these pull straight into fitness-model territory regardless of what color you specify. Always say "spacesuit"
 - ❌ "bulky armor", "heavy armor", "tactical gear" → makes them look military
 - ❌ "ribbed suit", "cables", "wires" → makes them look 1980s Aliens
 - ❌ "mask", "full helmet covering face" → loses the friendliness; we want faces
 - ❌ "grim", "stern", "serious", "battle-hardened" → wrong emotional tone
 - ❌ "neon", "cyberpunk", "dystopian" → too far on the futuristic dial
 - ❌ "realistic", "photorealistic" → loses the JRPG pixel-art charm
-- ❌ "anime portrait", "anime illustration" → we want anime-*influenced* pixel art (`JRPG anime-influenced pixel art`), not full anime portrait rendering
+- ❌ "anime portrait", "anime illustration", "front-facing portrait" → these produce static portraits, not gameplay sprites. Always lead with "top-down 3/4 view game sprite"
 - ❌ Specifying exact ages ("25 years old") → the model handles this fine implicitly
 
 ---
@@ -164,15 +197,18 @@ When a character comes back and doesn't hit, do **not** keep blindly retrying. D
 
 | Symptom | Fix |
 |---|---|
+| Looks like casual streetwear / park ranger / not an astronaut | The astronaut tells are missing from the prompt. Verify all of these are present: `sealed pressure suit`, `rigid chest module`, `neck ring visible at collar`, `compact life support backpack`, `pressure gauntlet gloves`, `pressurized boots` |
+| Suit comes back as a skintight bodysuit / catsuit | Check that the prompt says "sealed pressure suit" not "spacesuit" or "bodysuit" or "jumpsuit" |
+| Front-facing portrait pose instead of game sprite | Verify "top-down 3/4 view game sprite, full body" leads the prompt and "JRPG-style game sprite" is in the suffix |
 | Too deformed / Funko-Pop oversized head | Switch `proportions` to `{"type": "preset", "name": "default"}` |
 | Heads too small, looks too realistic | Switch `proportions` to `{"type": "preset", "name": "chibi"}` |
 | Suit too plain, no future-tech feel | Add: "with subtle glowing [color] accent line along the seams" |
 | Looks too military / too dark | Add: "warm friendly atmosphere, soft lighting, cozy" |
 | Looks like a fitness model / too muscular | Remove any body descriptor; lead with the outfit only |
-| Style feels generic, not JRPG-flavored | Make sure `JRPG anime-influenced pixel art` appears in the prompt |
+| Style feels generic, not JRPG-flavored | Make sure `JRPG-style game sprite` appears in the suffix |
 | Face is blank or unreadable | At 128 this should be rare — first try regenerating; if still bad, bump to `size=160` for that character |
 | Style doesn't match siblings | Re-read the others' prompts; use more parallel phrasing |
-| Hair/feature wrong | Lead the description with the corrected feature: "**short red hair**, engineer in..." |
+| Hair/feature wrong | Lead the description with the corrected feature: "**short red hair**, astronaut engineer wearing..." |
 
 After 2 failed attempts on the same character, stop and surface the outputs to the human for direction rather than burning more credits.
 
