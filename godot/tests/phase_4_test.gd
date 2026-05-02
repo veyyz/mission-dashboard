@@ -87,12 +87,17 @@ func _run() -> void:
 					"agent.target_position != (100,100): got %s" % str(agent.target_position)
 				)
 			# Phase-4 gotcha: must wait at least one physics frame before
-			# reading the agent's first path.
-			await physics_frame
-			await physics_frame
-			var next_pos: Vector2 = agent.get_next_path_position()
+			# reading the agent's first path. With the enlarged 145x145 nav
+			# region, the bake takes a few more frames; wait until the
+			# agent actually has a path or we time out.
+			var next_pos: Vector2 = Vector2.ZERO
+			for _attempt in range(20):
+				await physics_frame
+				next_pos = agent.get_next_path_position()
+				if not next_pos.is_equal_approx(Vector2.ZERO):
+					break
 			if next_pos.is_equal_approx(Vector2.ZERO):
-				failures.append("agent.get_next_path_position() returned Vector2.ZERO")
+				failures.append("agent.get_next_path_position() returned Vector2.ZERO after 20 physics frames")
 
 	_done(failures)
 

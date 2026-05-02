@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/BuildMenu.tscn" id="7_buildmenu"]
 
 [node name="Ground" type="Node2D"]
+rotation = 0.0872665
 script = ExtResource("1_ground")
 
 [node name="DayNightModulate" type="CanvasModulate" parent="."]

@@ -7,8 +7,19 @@ extends Node2D
 
 
 func _ready() -> void:
+	_apply_screen_upright()
 	if sprite.texture == null:
 		sprite.texture = _build_placeholder_texture()
+
+
+# Counter-rotate to cancel the rotated `world_root`'s tilt, so the rock
+# renders vertically on screen while still living in iso world space.
+# Future surface assets: copy this pattern (or the 3 lines below) into
+# your own `_ready`.
+func _apply_screen_upright() -> void:
+	var world := get_tree().get_first_node_in_group("world_root")
+	if world is Node2D:
+		rotation = -(world as Node2D).rotation
 
 
 func _build_placeholder_texture() -> Texture2D:

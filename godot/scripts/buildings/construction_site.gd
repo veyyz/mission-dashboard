@@ -20,12 +20,21 @@ var progress: float = 0.0  # 0.0 to 1.0
 
 
 func _ready() -> void:
+	_apply_screen_upright()
 	definition = BuildingDatabase.get_definition(building_key)
 	build_time_seconds = float(definition.get("build_time_seconds", 30))
 	if sprite.texture == null:
 		sprite.texture = _build_ghost_texture()
 	if progress_bar != null:
 		progress_bar.value = 0.0
+
+
+## Counter-rotate so the construction-site ghost + progress bar render
+## screen-vertical regardless of world tilt.
+func _apply_screen_upright() -> void:
+	var world := get_tree().get_first_node_in_group("world_root")
+	if world is Node2D:
+		rotation = -(world as Node2D).rotation
 
 
 func _process(delta: float) -> void:

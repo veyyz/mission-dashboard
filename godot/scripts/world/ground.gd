@@ -10,8 +10,8 @@ extends Node2D
 
 const TILE_W: int = 64
 const TILE_H: int = 32
-const MAP_RADIUS: int = 12  # cells outward from (0,0)
-const NAV_HALF_EXTENT: float = 2400.0
+const MAP_RADIUS: int = 72  # cells outward from (0,0); 145x145 = 21025 painted cells
+const NAV_HALF_EXTENT: float = 8000.0
 
 const CREW_SCENE := preload("res://scenes/crew/CrewMember.tscn")
 
@@ -26,6 +26,14 @@ const CREW_ROSTER: Array[Dictionary] = [
 
 @onready var tile_layer: TileMapLayer = $TileMapLayer
 @onready var crew_container: Node2D = $YSort/CrewContainer
+
+
+func _enter_tree() -> void:
+	# Tag this rotated container BEFORE any child's _ready runs (Godot fires
+	# _enter_tree top-down but _ready bottom-up). Surface artifacts call
+	# `_apply_screen_upright()` in their own _ready and look this group up;
+	# without registering early they'd find nothing and stay tilted.
+	add_to_group("world_root")
 
 
 func _ready() -> void:
@@ -119,6 +127,10 @@ func _build_navigation_region() -> void:
 
 func _spawn_crew() -> void:
 	var first_crew: CrewMember = null
+	# Counter-rotation so crew sprites + nameplates stay screen-vertical
+	# despite the world being tilted 20° clockwise. Buildings + ground tiles
+	# still inherit the world rotation; only the crew rigs are upright.
+	var counter_rot: float = -rotation
 	for i in range(CREW_ROSTER.size()):
 		var data: Dictionary = CREW_ROSTER[i]
 		var crew: CrewMember = CREW_SCENE.instantiate()
@@ -128,6 +140,7 @@ func _spawn_crew() -> void:
 		crew.role = data.role
 		crew.role_skill = data.skill
 		crew.position = data.pos
+		crew.rotation = counter_rot
 		crew_container.add_child(crew)
 		if first_crew == null:
 			first_crew = crew
@@ -135,7 +148,19 @@ func _spawn_crew() -> void:
 	if first_crew != null:
 		# Default selection: Alex, so WASD has someone to drive at boot.
 		first_crew.set_selected.call_deferred(true)
-		var camera := Camera2D.new()
-		camera.name = "Camera2D"
-		camera.zoom = Vector2(2, 2)
-		first_crew.add_child(camera)
+
+	# Bird's-eye WorldCamera. Strategic zoom = full map. The Zoom In / Out
+	# buttons in `scenes/ui/ZoomControls.tscn` flip between strategic and
+	# gameplay (camera centered on the currently selected crew). Loaded via
+	# preload + .new() instead of `WorldCamera.new()` to dodge GDScript
+	# class_name discovery lag in headless mode.
+	var world_camera_script := preload("res://scripts/world/world_camera.gd")
+	var camera: Camera2D = world_camera_script.new()
+	camera.name = "Camera2D"
+	camera.position = world_camera_script.STRATEGIC_CENTER
+	camera.zoom = world_camera_script.STRATEGIC_ZOOM
+	camera.ignore_rotation = true
+	add_child(camera)
+
+	var zoom_ui: CanvasLayer = preload("res://scenes/ui/ZoomControls.tscn").instantiate()
+	add_child(zoom_ui)

@@ -13,7 +13,7 @@ Key qualities the reference establishes:
 - **Layered cozy outfits over a sealed pressure suit** — visible jacket/vest piece *over* a base spacesuit. Alex has a navy-blue flight jacket with high collar over a white pressure suit. The cozy layer is what makes them feel approachable; the pressure suit underneath is what makes them read as astronauts.
 - **Warm human anchor details** — Alex's glossy red boots are the signature element. Every crew member needs an equivalent: a piece in a warm, friendly color or material that humanizes the suit.
 - **Tousled, lived-in hair** — not styled, not slick. Brown messy hair on Alex.
-- **Small simple face** — eye dots, hint of a friendly expression, not over-detailed.
+- **Friendly faces only — no angry eyebrows, ever.** Every face should read as warm, kind, and approachable. Eyebrows should be **soft and relaxed**, not furrowed, slanted, or angled-down. Words that produce angry eyebrows in pixel art models include: "determined," "fierce," "intense," "stern," "sharp gaze," "piercing," and even "focused" if not paired with a softening word. Always include the phrase `friendly soft eyebrows` somewhere in the expression slot. Always pair any non-smile expression with a smile or grin. Never describe an expression as "of someone mid-thought" or similar — that produces a furrowed brow.
 - **Subtle, not dominant futuristic touches** — small accent lines, a single LED or seam-glow. The character reads as a *person* first, technology second.
 
 **The astronaut tells — every prompt must include these or the model produces casual streetwear:**
@@ -27,7 +27,7 @@ The word "spacesuit" alone isn't enough. Without explicit pressure-suit features
 
 For un-helmeted crew (the canonical look per `fq_player.png`), the helmet doesn't disappear from the design — it's `clipped to belt at hip` for Commander. Other crew can have it implied by the visible neck ring and life support backpack.
 
-**On suit silhouette — angular, not rounded:** the suits should read as constructed from rigid geometric plates with hard panel breaks, not soft organic shapes. Think Apollo-era hard suit with modern faceted styling — angular shoulder pauldrons, knee plates, chest module corners, segmented forearm and shin guards. Keep the softness in the *face and hair*; let the *suit* be hard and angular.
+**On suit silhouette — angular, not rounded:** the suits should read as **distinctly angular hard suits** constructed from rigid geometric plates with hard panel breaks, like Apollo-era hard suits with modern faceted styling. **Sharp** angular shoulder pauldrons, segmented knee plates, geometric chest module, hexagonal or trapezoidal panel breaks, faceted forearm and shin guards. The silhouette should look constructed and mechanical, not soft and organic. Keep the softness in the *face and hair*; let the *suit* be visibly hard, sharp, and angular.
 
 **What to avoid in body language:** anything that suggests "athletic," "lean," "fit," "slim," "form-fitting." The reference is a normal cute character, not a fitness model. Let the stylized proportions handle the body — describe clothing and accessories, not physique.
 
@@ -72,14 +72,20 @@ Skeleton:
 
 ```
 top-down 3/4 view game sprite, full body, [DISTINCT AGE + BUILD + ETHNICITY]
-astronaut [ROLE], [DISTINCT FACE/HAIR DETAIL], [DISTINCT EXPRESSION], wearing
-a sealed angular [COLOR] pressure suit with rigid chest module and geometric
-panel seams, [LAYERED OUTFIT: jacket/vest over the suit], angular shoulder
-pauldrons and segmented knee plates, neck ring visible at collar, compact
-life support backpack, [WARM ANCHOR DETAIL — pressurized boots in warm
-color], pressure gauntlet gloves, [SUBTLE TECH ACCENT — small LED somewhere],
-JRPG-style game sprite, clean pixel art
+astronaut [ROLE], [DISTINCT FACE/HAIR DETAIL], [DISTINCT FRIENDLY EXPRESSION
+WITH friendly soft eyebrows], wearing a sealed angular [COLOR] pressure suit
+with rigid chest module and sharp geometric panel seams, [LAYERED OUTFIT:
+jacket/vest over the suit], hard angular shoulder pauldrons and segmented
+knee plates, neck ring visible at collar, compact life support backpack,
+[WARM ANCHOR DETAIL — pressurized boots in warm color], pressure gauntlet
+gloves, [SUBTLE TECH ACCENT — small LED somewhere], JRPG-style game sprite,
+clean pixel art
 ```
+
+The bracketed slots are what varies per character. Two non-negotiable rules:
+
+1. **Astronaut features are constant** — `sealed angular pressure suit`, `rigid chest module`, `sharp geometric panel seams`, `hard angular shoulder pauldrons and segmented knee plates`, `neck ring`, `life support backpack`, `pressure gauntlet gloves`, `pressurized boots`. Omitting any of these collapses the suit back into casual streetwear.
+2. **Friendly soft eyebrows are constant** — every expression slot must include the literal phrase `friendly soft eyebrows`, and the expression itself must be a smile or grin. No "determined," no "stern," no "sharp gaze." See the iteration guide below.
 
 The bracketed slots are what varies per character. The astronaut features (`sealed pressure suit`, `rigid chest module`, `neck ring`, `life support backpack`, `pressure gauntlet gloves`, `pressurized boots`) are constant — these are what stop the model from defaulting to casual streetwear.
 
@@ -96,73 +102,77 @@ Always end with `retro-futuristic exploration crew, clean pixel art, friendly ap
 ```
 top-down 3/4 view game sprite, full body, young astronaut engineer in his
 mid-twenties with average build, brown tousled messy hair and a few freckles,
-warm easy grin, wearing a sealed angular white pressure suit with rigid chest
-module and geometric panel seams, navy-blue flight jacket over the suit with
-high collar resting on the suit's neck ring, angular shoulder pauldrons and
-segmented knee plates, compact life support backpack, glossy red pressurized
-boots, pressure gauntlet gloves, small cyan LED accent line along jacket trim,
-JRPG-style game sprite, clean pixel art
+warm easy grin with friendly soft eyebrows, wearing a sealed angular white
+pressure suit with rigid chest module and sharp geometric panel seams,
+navy-blue flight jacket over the suit with high collar resting on the suit's
+neck ring, hard angular shoulder pauldrons and segmented knee plates, compact
+life support backpack, glossy red pressurized boots, pressure gauntlet gloves,
+small cyan LED accent line along jacket trim, JRPG-style game sprite, clean
+pixel art
 ```
 
 ### Maya — Scientist
 ```
 top-down 3/4 view game sprite, full body, astronaut scientist in her thirties
-with slim build and East Asian features, sharp intelligent eyes behind small
-round glasses, dark hair pulled into a tight high ponytail, focused half-smile
-of someone mid-thought, wearing a sealed angular violet pressure suit with
-rigid chest module and darker purple geometric panel seams, high collar
-resting on the suit's neck ring, angular shoulder pauldrons and segmented
-knee plates, compact life support backpack, integrated wrist computer with
-glowing magenta display, lavender pressurized boots, pressure gauntlet gloves,
-JRPG-style game sprite, clean pixel art
+with slim build and East Asian features, bright intelligent eyes behind small
+round glasses, dark hair pulled into a tight high ponytail, soft curious
+smile with friendly soft eyebrows, wearing a sealed angular violet pressure
+suit with rigid chest module and sharp darker-purple geometric panel seams,
+high collar resting on the suit's neck ring, hard angular shoulder pauldrons
+and segmented knee plates, compact life support backpack, integrated wrist
+computer with glowing magenta display, lavender pressurized boots, pressure
+gauntlet gloves, JRPG-style game sprite, clean pixel art
 ```
 
 ### Zane — Botanist
 ```
 top-down 3/4 view game sprite, full body, astronaut botanist in his late
-forties with stocky sturdy build and weathered tan skin, salt-and-pepper beard
-and laugh lines around the eyes, gentle paternal smile, short greying brown
-hair under a forest-green tactical cap, wearing a sealed angular white
-pressure suit with rigid chest module and geometric panel seams, forest-green
-utility vest over the suit with bulging seed pockets, angular shoulder
-pauldrons and segmented knee plates, neck ring visible at collar, compact
-life support backpack, dark green pressurized boots, pressure gauntlet gloves,
-small green LED on vest collar, JRPG-style game sprite, clean pixel art
+forties with stocky sturdy build and weathered tan skin, salt-and-pepper
+beard and laugh lines around the eyes, gentle paternal smile with friendly
+soft eyebrows, short greying brown hair, wearing a sealed angular forest-green
+pressure suit with rigid chest module, sharp geometric panel seams and dark
+green accent stripes, hard angular shoulder pauldrons and segmented knee
+plates, neck ring visible at collar, compact life support backpack with small
+plant specimen tubes mounted on the side, dark green pressurized boots,
+pressure gauntlet gloves, small green LED accent on chest module, JRPG-style
+game sprite, clean pixel art
 ```
 
 ### Rin — Geologist
 ```
 top-down 3/4 view game sprite, full body, young astronaut geologist in her
-early twenties with athletic build and South Asian features, determined
-focused expression with a slight smirk, short black undercut hair visible
-beneath a sleek yellow hardhat with integrated headlamp, wearing a sealed
-angular heavy-duty amber-orange pressure suit with rigid chest module and
-charcoal-grey geometric panel seams, angular shoulder pauldrons and segmented
-knee plates, neck ring visible at collar, compact life support backpack,
-brown pressurized work boots, pressure gauntlet gloves, small amber LED
-accent on shoulder, JRPG-style game sprite, clean pixel art
+early twenties with athletic build and South Asian features, bright eager
+expression with a small confident grin and friendly soft eyebrows, short
+black undercut hair visible beneath a sleek yellow hardhat with integrated
+headlamp, wearing a sealed angular heavy-duty amber-orange pressure suit
+with rigid chest module and sharp charcoal-grey geometric panel seams, hard
+angular shoulder pauldrons and segmented knee plates, neck ring visible at
+collar, compact life support backpack, brown pressurized work boots, pressure
+gauntlet gloves, small amber LED accent on shoulder, JRPG-style game sprite,
+clean pixel art
 ```
 
 ### Medic (Phase 5+ unlock)
 ```
 top-down 3/4 view game sprite, full body, astronaut medic in his thirties
 with lean build and dark brown skin, calm reassuring expression with kind
-eyes, short dark coily hair, wearing a sealed angular white pressure suit
-with rigid chest module and geometric panel seams, red cross emblem on chest,
-light-grey medical jacket over the suit, angular shoulder pauldrons and
-segmented knee plates, neck ring visible at collar, compact life support
-backpack, white pressurized boots with red soles, pressure gauntlet gloves,
-small red LED accent on sleeve, JRPG-style game sprite, clean pixel art
+eyes and friendly soft eyebrows, short dark coily hair, wearing a sealed
+angular white pressure suit with rigid chest module, sharp geometric panel
+seams and red cross emblem on chest, light-grey medical jacket over the suit,
+hard angular shoulder pauldrons and segmented knee plates, neck ring visible
+at collar, compact life support backpack, white pressurized boots with red
+soles, pressure gauntlet gloves, small red LED accent on sleeve, JRPG-style
+game sprite, clean pixel art
 ```
 
 ### Commander (Phase 5+ unlock)
 ```
 top-down 3/4 view game sprite, full body, astronaut commander in her late
-fifties with strong build and pale skin lined from years in service, sharp
-authoritative gaze softened by a small confident smile, short silver-grey
-hair in a practical cut, wearing a sealed angular dark navy pressure suit
-with rigid chest module and geometric panel seams, gold trim and silver
-shoulder insignia, angular shoulder pauldrons and segmented knee plates,
+fifties with strong build and pale skin lined from years in service, warm
+confident smile with crinkled friendly soft eyebrows, short silver-grey hair
+in a practical cut, wearing a sealed angular dark navy pressure suit with
+rigid chest module and sharp geometric panel seams, gold trim and silver
+shoulder insignia, hard angular shoulder pauldrons and segmented knee plates,
 neck ring visible at collar, compact life support backpack, helmet clipped
 to belt at hip, no helmet on head, polished black pressurized boots, pressure
 gauntlet gloves, small gold LED accent on collar, JRPG-style game sprite,
@@ -175,6 +185,7 @@ clean pixel art
 
 These descriptors will pull the output in the wrong direction. Do **not** include them, and watch for outputs that drift this way:
 
+- ❌ "determined", "fierce", "intense", "stern", "sharp gaze", "piercing", "focused" (alone) → these all produce furrowed, angled-down, angry-looking eyebrows in pixel art models. Always use a smile or grin and always include the phrase `friendly soft eyebrows`
 - ❌ "athletic", "lean", "fit", "slim", "form-fitting", "muscular" → fitness-model body language; the reference is a normal cute character
 - ❌ "bodysuit", "skintight", "catsuit" → these pull straight into fitness-model territory regardless of what color you specify. Always say "spacesuit"
 - ❌ "bulky armor", "heavy armor", "tactical gear" → makes them look military
@@ -221,6 +232,7 @@ When a character comes back and doesn't hit, do **not** keep blindly retrying. D
 
 | Symptom | Fix |
 |---|---|
+| Character looks angry / scowling / has furrowed eyebrows | Replace any "determined / fierce / intense / focused / sharp" word with a smile or grin variant. Add or strengthen the phrase `friendly soft eyebrows` in the expression slot. If still scowling, replace the entire expression with `warm easy grin with friendly soft eyebrows` |
 | All characters look like siblings / variations of the same person | Each character needs a DISTINCT age, build, ethnicity, hair, and expression — not just a different suit color. Verify each prompt's `[DISTINCT AGE + BUILD + ETHNICITY]` and `[DISTINCT EXPRESSION]` slots actually differ from the others |
 | Suits look too rounded / too organic / not angular enough | Reinforce: "rigid faceted plates with hard panel breaks, mechanical paneling like Apollo hard suit" |
 | Suits look too angular / too robotic / mecha-like | Soften: drop "angular shoulder pauldrons and segmented knee plates" and keep only "geometric panel seams" |

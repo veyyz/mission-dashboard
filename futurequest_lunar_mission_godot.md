@@ -298,6 +298,15 @@ Every panel should be its own scene (`HUDPanelResources.tscn`, `HUDPanelCrew.tsc
 ### Phase 10 — Art, audio, polish
 - Swap placeholder art for final pixel art. Add ambient hum, footstep crunch on regolith, UI clicks. Tweak balancing.
 
+### Phase 11 — Performance & culling
+With the iso world at ~145×145 cells (~21,000 tiles) the strategic-zoom view paints the entire map every frame. At gameplay zoom most of that is off-screen. Items to land in this phase:
+- **TileMapLayer viewport culling** — Godot 4 already culls cells outside the camera's visible rect, but the rect grows huge at strategic zoom. Add a tighter clip rect when at gameplay-zoom steps.
+- **Crew + building visibility distance** — hide (or set `visible = false` on) any `CrewMember` / `Building` / `ConstructionSite` whose `global_position` lies outside `Camera2D.get_screen_center_position()` ± a margin. Gameplay loops still tick (resources, navigation, construction progress); only rendering is suppressed.
+- **Group-tagged scan**: artifacts in group `cullable` get hidden when off-screen. Same convention as `screen_upright`.
+- **Distance-based LOD for sprites** at extreme zoom-out — swap the 128px crew sprite for a small dot/pip at strategic zoom so the strategic view reads as a map view (per `fq_full_world_view.png`).
+- **Strategic-zoom UI overlay**: when zoomed all the way out, hide individual crew/building sprites and replace with the resource-deposit / landing-zone overlay panels (per spec §5.6). Reduces draw calls and matches the reference screenshot.
+- **Profile pass** — verify FPS at all 10 zoom steps with full crew + 30 placed buildings; flag any draw-call hotspots.
+
 ---
 
 ## 10. Specific Godot 4 Gotchas
