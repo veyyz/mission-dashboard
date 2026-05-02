@@ -19,8 +19,15 @@ var progress: float = 0.0  # 0.0 to 1.0
 @onready var progress_bar: ProgressBar = $ProgressLayer/ProgressBar
 
 
+## Tilt + scale the construction-site ghost to match the finished Building
+## so the visual transition at completion doesn't snap.
+const ISO_LEAN_RAD: float = 0.4636476  # atan(32 / 64)
+const PLACEHOLDER_SCALE: Vector2 = Vector2(4.0, 4.0)
+
+
 func _ready() -> void:
-	_apply_screen_upright()
+	rotation = ISO_LEAN_RAD
+	scale = PLACEHOLDER_SCALE
 	definition = BuildingDatabase.get_definition(building_key)
 	build_time_seconds = float(definition.get("build_time_seconds", 30))
 	if sprite.texture == null:
@@ -29,12 +36,6 @@ func _ready() -> void:
 		progress_bar.value = 0.0
 
 
-## Counter-rotate so the construction-site ghost + progress bar render
-## screen-vertical regardless of world tilt.
-func _apply_screen_upright() -> void:
-	var world := get_tree().get_first_node_in_group("world_root")
-	if world is Node2D:
-		rotation = -(world as Node2D).rotation
 
 
 func _process(delta: float) -> void:
@@ -76,9 +77,12 @@ func _complete() -> void:
 		queue_free()
 		return
 	var building: Node2D = packed.instantiate()
-	building.global_position = global_position
-	# Insert into the same parent so YSort treats both consistently.
+	# Insert into the same parent FIRST so the child receives the parent's
+	# transform; then assign global_position. Setting global_position before
+	# add_child is a no-op because the node has no parent transform yet.
+	var spawn_pos: Vector2 = global_position
 	get_parent().add_child(building)
+	building.global_position = spawn_pos
 	queue_free()
 
 

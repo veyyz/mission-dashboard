@@ -13,6 +13,12 @@ extends Node2D
 
 const CONSTRUCTION_SITE_SCENE := preload("res://scenes/buildings/ConstructionSite.tscn")
 
+# Match the iso-diagonal lean + 4× placeholder scale used by ConstructionSite
+# and Building so the hover preview, the placed construction site, and the
+# finished building all share the same on-screen orientation and size.
+const ISO_LEAN_RAD: float = 0.4636476  # atan(TILE_H / TILE_W) for 64×32
+const PLACEHOLDER_SCALE: Vector2 = Vector2(4.0, 4.0)
+
 signal placement_failed(reason: String)
 signal placement_succeeded(building_key: String, grid_pos: Vector2i)
 
@@ -125,6 +131,8 @@ func _ensure_ghost() -> void:
 	_ghost = Sprite2D.new()
 	_ghost.name = "PlacementGhost"
 	_ghost.modulate = Color(0.36, 0.71, 0.84, 0.55)
+	_ghost.rotation = ISO_LEAN_RAD
+	_ghost.scale = PLACEHOLDER_SCALE
 	add_child(_ghost)
 	_ghost.texture = _build_ghost_texture()
 

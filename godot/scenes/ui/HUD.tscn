@@ -1,0 +1,23 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelDayTime.tscn" id="2_dt"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelResources.tscn" id="3_res"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelTutorial.tscn" id="4_tut"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelLog.tscn" id="5_log"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelCrew.tscn" id="6_crew"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelActions.tscn" id="7_act"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelMinimap.tscn" id="8_mm"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/HUDPanelHotbar.tscn" id="9_hb"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="HUDPanelDayTime" parent="." instance=ExtResource("2_dt")]
+[node name="HUDPanelResources" parent="." instance=ExtResource("3_res")]
+[node name="HUDPanelTutorial" parent="." instance=ExtResource("4_tut")]
+[node name="HUDPanelLog" parent="." instance=ExtResource("5_log")]
+[node name="HUDPanelCrew" parent="." instance=ExtResource("6_crew")]
+[node name="HUDPanelActions" parent="." instance=ExtResource("7_act")]
+[node name="HUDPanelMinimap" parent="." instance=ExtResource("8_mm")]
+[node name="HUDPanelHotbar" parent="." instance=ExtResource("9_hb")]

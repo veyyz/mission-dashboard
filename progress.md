@@ -127,6 +127,35 @@
   - Building destruction UX → Phase 9
 - **Halting per autonomous prompt — do not proceed to Phase 6 without human review.**
 
+## Phase 6: Full HUD per Section 8
+- Status: completed
+- Implemented:
+  - **`scenes/ui/HUD.tscn`** — root `CanvasLayer` instancing 8 panel scenes; replaced the old DebugHUD instance in `Ground.tscn`.
+  - **8 panel scenes**, each its own `.tscn` under `scenes/ui/panels/`:
+    - **HUDPanelDayTime** (top-left) — MISSION DAY N + clock + phase, polls `TimeManager` per-frame, subscribes to `EventBus.phase_changed`
+    - **HUDPanelResources** (top-center) — 6 resource entries (power/oxygen/food/materials/science/crew) with glyph + value + `+rate/min`, builds entries dynamically, binds to `EventBus.resource_changed`
+    - **HUDPanelTutorial** (top-right, below ZoomControls) — bullet-list tip panel; F1 toggles visibility (checks both `keycode` and `physical_keycode` for headless-test compatibility)
+    - **HUDPanelLog** (middle-left) — scrollable message list, subscribes to `EventBus.log_message`, color-coded by category, capped at 80 entries with auto-scroll
+    - **HUDPanelCrew** (bottom-left) — auto-populates from `get_tree().get_nodes_in_group("crew")` once the world spawns crew, one toggle Button per crew_id, binds to `EventBus.crew_selected`, click-to-select emits `crew_selected`
+    - **HUDPanelActions** (bottom-center) — 5 quick-action buttons (Move/Scan/Probe/Sample/Crew Menu) with key hints; click handlers stubbed to `log_message` until Phase 8 wires R/F/G/C
+    - **HUDPanelMinimap** (bottom-right) — placeholder ColorRect + Power/O₂ ProgressBars; real minimap dots + fog blackout in Phase 8
+    - **HUDPanelHotbar** (bottom-edge between Crew and Minimap) — 10 toggle slots, polls KEY_0..KEY_9 via `Input.is_key_pressed | is_physical_key_pressed` rising-edge detection in `_physics_process`, exposes `current_slot()`
+  - **`tests/phase_6_test.gd`** — verifies HUD CanvasLayer, all 8 panel scene files exist + are instanced, resource bar updates on `add()`, crew bar press tracks `crew_selected`, hotbar slot 5 selects on KEY_5 press, F1 toggles tutorial visibility
+  - `Ground.tscn` swapped DebugHUD → HUD instance; DebugHUD scene/script left in place but no longer referenced
+- Build: clean (`logs/phase_6_build.log`); `[HUD] Ready. Panels: 8`
+- Test: **PASS** (`logs/phase_6_test.log`); full regression on phases 2/3/4/5 also PASS
+- Bugs fixed in-loop:
+  1. `_input` event matching — `event.keycode` is 0 when only `physical_keycode` is set on `InputEventKey`. Tutorial check now matches either field.
+  2. `Input.is_key_pressed` doesn't see physical-only synthetic events. Hotbar polls both `is_key_pressed | is_physical_key_pressed`.
+- Deferred to later phases:
+  - Real character portraits in crew bar (currently text labels with role-color font) → integration after round-N art lands (Phase 8 art swap-in)
+  - Hotbar slot bindings (build menu, blueprints, flag/marker icons) → Phase 8
+  - Action button R/F/G/C wiring → Phase 8
+  - Strategic-zoom-only top-left panels (Mission Overview / Environment / Resources Detected per `fq_full_world_view.png`) + zoom-driven panel fade → Phase 7
+  - Minimap world map + crew/building dots + fog overlay → Phase 8
+  - Pause + speed buttons → could land in DayTimePanel as Phase 7 polish
+- Files added/changed: 17 new (1 hud + 8 panel scripts + 8 panel scenes + 1 HUD.tscn + 1 test); 1 modified (Ground.tscn)
+
 
 
 

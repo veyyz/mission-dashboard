@@ -15,8 +15,17 @@ var _consumes_applied: Dictionary = {}
 @onready var sprite: Sprite2D = $Sprite2D
 
 
+## Tilt the building to lean along the iso grid's diagonal
+## (atan(TILE_H/TILE_W) for a 2:1 iso = atan(0.5) ≈ 26.57°). With the
+## world also rotated 5°, the on-screen tilt is ~31.6° — visually anchors
+## the building to the iso grid instead of looking screen-upright.
+const ISO_LEAN_RAD: float = 0.4636476  # atan(32 / 64)
+const PLACEHOLDER_SCALE: Vector2 = Vector2(4.0, 4.0)
+
+
 func _ready() -> void:
-	_apply_screen_upright()
+	rotation = ISO_LEAN_RAD
+	scale = PLACEHOLDER_SCALE
 	definition = BuildingDatabase.get_definition(building_key)
 	if definition.is_empty():
 		push_warning("[Building] No definition for key '%s'" % building_key)
@@ -29,12 +38,6 @@ func _ready() -> void:
 	EventBus.building_completed.emit(building_key, _grid_position())
 
 
-## Counter-rotate to cancel the rotated `world_root`'s tilt — buildings
-## render screen-vertical even though they sit on a tilted iso grid.
-func _apply_screen_upright() -> void:
-	var world := get_tree().get_first_node_in_group("world_root")
-	if world is Node2D:
-		rotation = -(world as Node2D).rotation
 
 
 func _exit_tree() -> void:
