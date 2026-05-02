@@ -156,6 +156,25 @@
   - Pause + speed buttons → could land in DayTimePanel as Phase 7 polish
 - Files added/changed: 17 new (1 hud + 8 panel scripts + 8 panel scenes + 1 HUD.tscn + 1 test); 1 modified (Ground.tscn)
 
+## Phase 7: Strategic zoom + landing flow
+- Status: completed
+- Implemented:
+  - **`data/orbit_deposits.json`** — 7 strategic-grid tiles (10×10 system, A–J × 1–10) with resource deposits, terrain, hazards, recommendation. `suggested_landing_tile` = E5 (4, 4).
+  - **`scripts/world/orbit_map.gd`** + **`scenes/ui/OrbitMap.tscn`** — strategic-zoom UI overlay (CanvasLayer). Loads JSON, builds A–J × 1–10 corner labels, builds clickable deposit-marker buttons (color-coded by primary deposit). Suggested landing zone marker pulses via Tween. Click a marker → tooltip panel (terrain / hazards / recommendation) lights up + Confirm Landing enables. Confirm Landing stores `GameState.selected_landing_tile`, emits `EventBus.landing_confirmed`, locks the button to `LANDED`.
+  - **Smooth fade**: visible content lives under a `Root` Control child (CanvasLayer itself has no `modulate`); `EventBus.zoom_changed` Tween-fades `Root.modulate.a` between 1.0 (strategic) and 0.0 (gameplay) over 0.35s. `mouse_filter` flips in sync so clicks pass through to the gameplay world when faded out.
+  - **`EventBus`** new signals: `zoom_changed(level: String)` ("strategic" / "gameplay") and `landing_confirmed(grid_pos: Vector2i)`.
+  - **`WorldCamera`** new `current_level()` + `_emit_level_changed()` — emits `EventBus.zoom_changed` on `_ready` and after every `_apply_step()`. Threshold: `step <= 2 ⇒ strategic` (covers 0.13×, 0.18×, 0.25× zoom levels).
+  - **`Ground.tscn`** instances `OrbitMap` alongside HUD.
+  - **`tests/phase_7_test.gd`** — verifies JSON, scene, ≥6 deposits loaded, `EventBus.zoom_changed` fires on zoom-in past threshold, Confirm Landing falls back to suggested tile when no marker is clicked, GameState gets the right `selected_landing_tile`, and `EventBus.landing_confirmed` carries it.
+- Build: clean. Test: **PASS**. Full regression on phases 2–7: all PASS.
+- Bug fixed in-loop: `CanvasLayer.modulate` doesn't exist (CanvasItem property). Wrapped fade-able content in a `Root` Control child and tweened that.
+- Deferred:
+  - The strategic-zoom-only sidebar panels per `fq_full_world_view.png` (Mission Day repurposed, Environment, Resources Detected, Landing Module, Terrain Analysis, Hazards, Recommendation as separate panels rather than a single tooltip) → Phase 8/10 polish
+  - Camera auto-zoom-in on Confirm Landing (currently only stores the tile + emits signal; the actual camera fly-in is up to the user via the `+` button) → Phase 8 polish
+  - Ground.gd reading `selected_landing_tile` to seed deposit-node spawn positions → Phase 8 (alongside resource node placement)
+- Files added: 4 new (1 data/json + 1 script + 1 scene + 1 test); 3 modified (event_bus.gd, world_camera.gd, Ground.tscn)
+
+
 
 
 

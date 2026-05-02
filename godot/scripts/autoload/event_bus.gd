@@ -35,6 +35,10 @@ signal fog_revealed(grid_pos: Vector2i, radius: int)
 signal hud_panel_toggled(panel_name: String, visible: bool)
 signal log_message(message: String, category: String)
 
+# --- Camera / strategic-vs-gameplay zoom (spec §6 unified-world rewrite) ---
+signal zoom_changed(level: String)  # "strategic" or "gameplay"
+signal landing_confirmed(grid_pos: Vector2i)
+
 
 func _ready() -> void:
 	print("[EventBus] Ready.")

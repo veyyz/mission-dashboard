@@ -1,0 +1,83 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/orbit_map.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="SBF_panel"]
+bg_color = Color(0.051, 0.078, 0.125, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.36, 0.71, 0.84, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="OrbitMap" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1")
+
+[node name="Root" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 1
+
+[node name="GridLabels" type="Control" parent="Root"]
+anchors_preset = 0
+offset_right = 1300.0
+offset_bottom = 1100.0
+
+[node name="Markers" type="Control" parent="Root"]
+anchors_preset = 0
+offset_right = 1300.0
+offset_bottom = 1100.0
+
+[node name="TilePanel" type="PanelContainer" parent="Root"]
+offset_left = 1320.0
+offset_top = 200.0
+offset_right = 1660.0
+offset_bottom = 460.0
+theme_override_styles/panel = SubResource("SBF_panel")
+
+[node name="Margin" type="MarginContainer" parent="Root/TilePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Root/TilePanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="IDLabel" type="Label" parent="Root/TilePanel/Margin/VBox"]
+layout_mode = 2
+text = "TILE —"
+theme_override_colors/font_color = Color(0.36, 0.71, 0.84, 1)
+
+[node name="TerrainLabel" type="Label" parent="Root/TilePanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Terrain: —"
+theme_override_colors/font_color = Color(0.91, 0.93, 0.95, 1)
+
+[node name="HazardsLabel" type="Label" parent="Root/TilePanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Hazards: —"
+theme_override_colors/font_color = Color(0.91, 0.93, 0.95, 1)
+
+[node name="RecoLabel" type="Label" parent="Root/TilePanel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Recommendation: —"
+theme_override_colors/font_color = Color(0.91, 0.93, 0.95, 1)
+
+[node name="ConfirmButton" type="Button" parent="Root"]
+offset_left = 1320.0
+offset_top = 480.0
+offset_right = 1660.0
+offset_bottom = 540.0
+text = "CONFIRM LANDING"

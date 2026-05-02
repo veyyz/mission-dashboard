@@ -23,15 +23,30 @@ const ZOOM_LEVELS: Array[Vector2] = [
 const ANIM_SECONDS: float = 0.22
 const STRATEGIC_CENTER: Vector2 = Vector2.ZERO
 const STRATEGIC_ZOOM: Vector2 = Vector2(0.13, 0.13)  # alias for ground.gd boot setup
+const STRATEGIC_STEP_THRESHOLD: int = 2  # step <= threshold ⇒ strategic level
 
 var step: int = 0
 var _selected_crew: Node2D = null
 var _tween: Tween
+var _last_level: String = ""
 
 
 func _ready() -> void:
 	add_to_group("world_camera")
 	EventBus.crew_selected.connect(_on_crew_selected)
+	# Fire an initial zoom_changed so subscribers (OrbitMap UI) can sync.
+	_emit_level_changed()
+
+
+func current_level() -> String:
+	return "strategic" if step <= STRATEGIC_STEP_THRESHOLD else "gameplay"
+
+
+func _emit_level_changed() -> void:
+	var level: String = current_level()
+	if level != _last_level:
+		_last_level = level
+		EventBus.zoom_changed.emit(level)
 
 
 func zoom_in() -> void:
@@ -65,6 +80,7 @@ func _apply_step() -> void:
 	var crew_pos: Vector2 = _selected_crew.global_position if _selected_crew != null else _fallback_crew_pos()
 	var target_pos: Vector2 = STRATEGIC_CENTER.lerp(crew_pos, t)
 	_animate(target_pos, target_zoom)
+	_emit_level_changed()
 
 
 func _fallback_crew_pos() -> Vector2:

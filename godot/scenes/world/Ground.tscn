@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/ground.gd" id="1_ground"]
 [ext_resource type="Script" path="res://scripts/crew/crew_selection_manager.gd" id="2_selman"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
 [ext_resource type="Script" path="res://scripts/buildings/build_placement_controller.gd" id="6_place"]
 [ext_resource type="PackedScene" path="res://scenes/ui/BuildMenu.tscn" id="7_buildmenu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/OrbitMap.tscn" id="8_orbit"]
 
 [node name="Ground" type="Node2D"]
 rotation = 0.0872665
@@ -36,6 +37,8 @@ offset = Vector2(0, -10)
 script = ExtResource("6_place")
 
 [node name="HUD" parent="." instance=ExtResource("5_hud")]
+
+[node name="OrbitMap" parent="." instance=ExtResource("8_orbit")]
 
 [node name="BuildMenu" parent="." instance=ExtResource("7_buildmenu")]
 placement_controller_path = NodePath("../YSort/BuildPlacementController")
