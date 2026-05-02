@@ -11,7 +11,6 @@ extends Node2D
 ## Test entry point: `place_building(key, world_pos)` bypasses the ghost
 ## preview UI so tests don't need to simulate cursor movement.
 
-const TILE_SIZE: int = 32
 const CONSTRUCTION_SITE_SCENE := preload("res://scenes/buildings/ConstructionSite.tscn")
 
 signal placement_failed(reason: String)
@@ -19,10 +18,17 @@ signal placement_succeeded(building_key: String, grid_pos: Vector2i)
 
 var _active_key: String = ""
 var _ghost: Sprite2D = null
+var _tile_layer: TileMapLayer = null
 
 
 func _ready() -> void:
 	EventBus.building_placed.connect(_on_building_placed)
+	# Find the world's iso TileMapLayer so we can snap to iso cells.
+	# The placement controller lives under YSort which is a sibling of
+	# TileMapLayer under Ground.
+	var ground: Node = get_parent().get_parent()
+	if ground != null:
+		_tile_layer = ground.find_child("TileMapLayer", true, false) as TileMapLayer
 
 
 func is_placing() -> bool:
@@ -87,7 +93,7 @@ func place_building(key: String, world_pos: Vector2) -> Node2D:
 	get_parent().add_child(site)
 	site.global_position = _snap(world_pos)
 
-	var grid_pos := Vector2i(int(site.global_position.x / TILE_SIZE), int(site.global_position.y / TILE_SIZE))
+	var grid_pos: Vector2i = _world_to_cell(world_pos)
 	EventBus.building_placed.emit(key, grid_pos)
 	emit_signal("placement_succeeded", key, grid_pos)
 	if is_placing():
@@ -95,10 +101,22 @@ func place_building(key: String, world_pos: Vector2) -> Node2D:
 	return site
 
 
-func _snap(pos: Vector2) -> Vector2:
-	var sx: float = floorf(pos.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE * 0.5
-	var sy: float = floorf(pos.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE * 0.5
-	return Vector2(sx, sy)
+## Snap to the iso cell under the cursor. Uses the TileMapLayer's
+## local_to_map / map_to_local helpers — handles iso geometry correctly
+## without us hand-rolling the diamond math.
+func _snap(global_pos: Vector2) -> Vector2:
+	if _tile_layer == null:
+		return global_pos
+	var local: Vector2 = _tile_layer.to_local(global_pos)
+	var cell: Vector2i = _tile_layer.local_to_map(local)
+	var snapped_local: Vector2 = _tile_layer.map_to_local(cell)
+	return _tile_layer.to_global(snapped_local)
+
+
+func _world_to_cell(global_pos: Vector2) -> Vector2i:
+	if _tile_layer == null:
+		return Vector2i.ZERO
+	return _tile_layer.local_to_map(_tile_layer.to_local(global_pos))
 
 
 func _ensure_ghost() -> void:

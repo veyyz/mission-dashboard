@@ -15,6 +15,7 @@ script = ExtResource("1_ground")
 script = ExtResource("4_daynight")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
+y_sort_enabled = true
 
 [node name="YSort" type="Node2D" parent="."]
 y_sort_enabled = true

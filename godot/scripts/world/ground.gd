@@ -1,16 +1,17 @@
 extends Node2D
-## Phase-4 ground scene controller.
-## - Builds a placeholder regolith tileset and paints a 25x25 patch.
+## Phase-5.5 ground scene controller — true isometric.
+## - Builds a placeholder iso regolith tileset (`tile_shape = 1` Isometric,
+##   `tile_layout = 5` Diamond Down, `tile_size = Vector2i(64, 32)`) per
+##   `futurequest_lunar_mission_godot.md` §6.
+## - Paints a square cell range that renders as a diamond patch on screen.
 ## - Spawns a NavigationRegion2D covering the playable area for crew pathfinding.
-## - Spawns 6 crew members (one per role) and parents them under the
-##   `CrewSelectionManager` (a.k.a. CrewContainer) so input + selection
-##   logic lives in one place.
-## - Hands a Camera2D to the first crew (Alex) so the existing follow-camera
-##   contract from Phase 2 still holds.
+## - Spawns 6 crew members under `CrewSelectionManager`.
+## - Hands a Camera2D to the first crew (Alex).
 
-const TILE_SIZE: int = 32
-const MAP_RADIUS: int = 12  # cells outward from (0,0); 25x25 painted patch
-const NAV_HALF_EXTENT: float = 2000.0
+const TILE_W: int = 64
+const TILE_H: int = 32
+const MAP_RADIUS: int = 12  # cells outward from (0,0)
+const NAV_HALF_EXTENT: float = 2400.0
 
 const CREW_SCENE := preload("res://scenes/crew/CrewMember.tscn")
 
@@ -38,26 +39,63 @@ func _ready() -> void:
 	])
 
 
+## Builds a runtime iso TileSet. Real Pixellab Wang regolith tiles swap in
+## via the per-phase art swap-in pass once `art_queue.terrain.regolith_to_rocky`
+## lands.
 func _build_placeholder_tileset() -> TileSet:
-	var img := Image.create(TILE_SIZE, TILE_SIZE, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.32, 0.34, 0.38))
-	for x in range(0, TILE_SIZE):
-		for y in range(0, TILE_SIZE):
-			if (x * 7 + y * 13) % 23 == 0:
-				img.set_pixel(x, y, Color(0.27, 0.29, 0.33))
-			elif (x * 5 + y * 3) % 31 == 0:
-				img.set_pixel(x, y, Color(0.38, 0.40, 0.44))
+	var img := _build_diamond_image(Color(0.32, 0.34, 0.38))
 	var tex := ImageTexture.create_from_image(img)
+
 	var ts := TileSet.new()
-	ts.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
+	ts.tile_shape = TileSet.TILE_SHAPE_ISOMETRIC
+	ts.tile_layout = TileSet.TILE_LAYOUT_DIAMOND_DOWN
+	ts.tile_size = Vector2i(TILE_W, TILE_H)
+
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
-	src.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
+	src.texture_region_size = Vector2i(TILE_W, TILE_H)
 	src.create_tile(Vector2i.ZERO)
+
+	# Anchor the diamond top to the cell's top vertex so adjacent cells
+	# tessellate without seams. (Pixellab godot/isometric-tiles doc:
+	# tile_size=(32,16) → texture_origin=(0,-8); we use 64x32 → (0,-16).)
+	var data: TileData = src.get_tile_data(Vector2i.ZERO, 0)
+	data.texture_origin = Vector2i(0, -TILE_H / 2)
+
 	ts.add_source(src, 0)
 	return ts
 
 
+## Procedurally generates a 64x32 diamond filled with `color`, transparent
+## outside the diamond, with sparse speckle for visual interest. Inscribed
+## diamond uses 2:1 aspect ratio per the iso tile_size.
+func _build_diamond_image(color: Color) -> Image:
+	var img := Image.create(TILE_W, TILE_H, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var dark: Color = Color(0.27, 0.29, 0.33)
+	var hl: Color = Color(0.38, 0.40, 0.44)
+	for y in range(TILE_H):
+		# Diamond half-width at this row (2:1 aspect, full at center rows).
+		var dy_from_center: int
+		if y < TILE_H / 2:
+			dy_from_center = TILE_H / 2 - 1 - y
+		else:
+			dy_from_center = y - TILE_H / 2
+		var hw: int = (TILE_W / 2) - dy_from_center * (TILE_W / TILE_H)
+		var start_x: int = TILE_W / 2 - hw
+		var end_x: int = TILE_W / 2 + hw
+		for x in range(maxi(0, start_x), mini(TILE_W, end_x)):
+			var c: Color = color
+			if (x * 5 + y * 7) % 13 == 0:
+				c = dark
+			elif (x * 3 + y * 11) % 17 == 0:
+				c = hl
+			img.set_pixel(x, y, c)
+	return img
+
+
+## Paints a diamond patch of cells. With Diamond Down layout, painting a
+## square coord range around (0,0) renders as a diamond on screen.
 func _paint_ground() -> void:
 	for x in range(-MAP_RADIUS, MAP_RADIUS + 1):
 		for y in range(-MAP_RADIUS, MAP_RADIUS + 1):
