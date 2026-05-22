@@ -135,6 +135,7 @@ Buildings are `StaticBody2D` scenes with a `Buildable` component. Construction f
 - Comms Dish (unlocks events, optional)
 - Research Lab (converts samples → science)
 - Mining Drill (extracts from a resource node)
+- MatterForge (refines stockpiled iron + silicon into bulk materials — 1 iron + 1 silicon per cycle yields 100 materials)
 
 ### 5.4 Exploration & Scanning
 

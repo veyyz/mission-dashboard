@@ -8,6 +8,7 @@ extends Node2D
 const MAX_CREW: int = 6
 const SCAN_RADIUS: float = 220.0
 const SCAN_RADIUS_GEOLOGIST: float = 440.0  # 2× per spec §5.4
+const DEPARTURE_STAGGER: float = 0.35  # sec between each crew's move_to start
 
 # Manual rising-edge tracking. Godot's `is_action_just_pressed` is unreliable
 # in headless mode when the action is synthesized via `Input.action_press`
@@ -98,7 +99,10 @@ func _do_collect_sample(crew: CrewMember) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+		# Move on left double-click. Single-click left-down is reserved for
+		# selection (Phase-9 polish) and to keep trackpad single-tap from
+		# misfiring path commands while panning.
+		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT and mb.double_click:
 			_issue_move(get_global_mouse_position())
 
 
@@ -126,8 +130,24 @@ func _select(crew_id: int, multi: bool) -> void:
 	)
 
 
+## Every selected crew pathfinds independently to the clicked target,
+## with a staggered departure time so a stack of overlapping crew don't
+## all leave as one blob — each subsequent crew starts moving
+## DEPARTURE_STAGGER seconds after the previous one. (User's
+## "follow-the-leader" / convoy-departure pattern.)
 func _issue_move(target: Vector2) -> void:
+	var i: int = 0
 	for child in get_children():
 		var crew := child as CrewMember
 		if crew != null and crew.selected:
-			crew.move_to(target)
+			crew.clear_follow()
+			_stagger_move(crew, target, float(i) * DEPARTURE_STAGGER)
+			i += 1
+
+
+func _stagger_move(crew: CrewMember, target: Vector2, delay: float) -> void:
+	if delay > 0.0:
+		await get_tree().create_timer(delay).timeout
+	if not is_instance_valid(crew) or not crew.selected:
+		return
+	crew.move_to(target)

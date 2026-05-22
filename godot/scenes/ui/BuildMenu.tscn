@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/build_menu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://scripts/ui/floating_panel.gd" id="2_drag"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.051, 0.078, 0.125, 0.92)
@@ -18,10 +19,10 @@ corner_radius_bottom_left = 6
 script = ExtResource("1_menu")
 
 [node name="Panel" type="PanelContainer" parent="."]
-offset_left = 16.0
-offset_top = 280.0
-offset_right = 260.0
-offset_bottom = 470.0
+offset_left = 1640.0
+offset_top = 400.0
+offset_right = 1900.0
+offset_bottom = 720.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
@@ -35,16 +36,33 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Header" type="Label" parent="Panel/Margin/VBox"]
+[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
-text = "BUILD"
-theme_override_colors/font_color = Color(0.36, 0.71, 0.84, 1)
+script = ExtResource("2_drag")
 
-[node name="Buttons" type="VBoxContainer" parent="Panel/Margin/VBox"]
+[node name="Title" type="Label" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BUILD ⠿"
+theme_override_colors/font_color = Color(0.36, 0.71, 0.84, 1)
+mouse_filter = 2
+
+[node name="CollapseButton" type="Button" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+text = "▼"
+custom_minimum_size = Vector2(28, 0)
+flat = true
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Buttons" type="VBoxContainer" parent="Panel/Margin/VBox/Content"]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox/Content"]
 layout_mode = 2
 autowrap_mode = 2
 text = "Pick a building above."

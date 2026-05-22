@@ -1,0 +1,35 @@
+{
+  "_note": "Pixellab character IDs under API key fedae2b2-…. Updated 2026-05-02 after audit. Replaces stale IDs in art_queue.json characters[].",
+  "_account_chars_at_audit": ["alex", "maya", "zane", "tali->rin", "noor->medic", "kai->commander", "echo", "vex", "bolt"],
+  "crew": {
+    "alex":      { "id": "da1e6ec9-9cb7-43c7-a7be-bb2985efa64e", "role": "engineer",  "kind": "human" },
+    "maya":      { "id": "37b827de-154e-4d47-b16d-ab8a2fa8810e", "role": "scientist", "kind": "human" },
+    "zane":      { "id": "81ed2c6f-ffed-46cf-b56e-ff77d8d76ba1", "role": "botanist",  "kind": "human" },
+    "rin":       { "id": "ff48b9e7-f981-49ea-8b72-6e6673dbc402", "role": "geologist", "kind": "human", "account_name": "tali" },
+    "medic":     { "id": "0cf0e58e-b4eb-40eb-a6e4-5bc445e30bf2", "role": "medic",     "kind": "human", "account_name": "noor" },
+    "commander": { "id": "c1d09bbf-e0fd-44c0-b830-b549b4b5ded1", "role": "commander", "kind": "human", "account_name": "kai" },
+    "echo":      { "id": "04bf8a45-affb-43d0-ab5b-02fa599d45c8", "role": "service_unit",      "kind": "robot" },
+    "vex":       { "id": "b8712e7c-df82-463f-a64e-3961da0d7048", "role": "field_unit",        "kind": "robot" },
+    "bolt":      { "id": "516e872c-7765-47b1-a870-7e2ea55ac9c4", "role": "heavy_service",     "kind": "robot" }
+  },
+  "animations_planned": [
+    { "char": "echo", "anim": "walking", "status": "queued_2026-05-02" },
+    { "char": "alex", "anim": "walking", "status": "queued_2026-05-02" },
+    { "char": "maya", "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "zane", "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "rin",  "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "medic", "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "commander", "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "vex",  "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "bolt", "anim": "walking", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "alex", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "maya", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "zane", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "rin",  "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "medic", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "commander", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "echo", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "vex",  "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" },
+    { "char": "bolt", "anim": "breathing-idle", "status": "cancelled_by_user_2026-05-02" }
+  ]
+}

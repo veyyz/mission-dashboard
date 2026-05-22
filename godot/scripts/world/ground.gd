@@ -39,21 +39,23 @@ func _ready() -> void:
 	_build_navigation_region()
 	_spawn_camera()
 	_spawn_zoom_ui()
+	_spawn_resource_nodes()
 	EventBus.landing_confirmed.connect(_on_landing_confirmed)
-	print("[Ground] Phase 7 ready. Tiles=%d  awaiting landing." % tile_layer.get_used_cells().size())
+	print("[Ground] Phase 7 ready. Tiles=%d  Nodes=%d  awaiting landing." % [
+		tile_layer.get_used_cells().size(),
+		get_tree().get_nodes_in_group("resource_node").size(),
+	])
 
 
 ## Programmatic landing entry point. Tests call this directly to skip the
-## ghost-placement UX and spawn crew + nodes at a known location.
+## ghost-placement UX and spawn crew at a known location.
 func confirm_landing_at(world_pos: Vector2) -> void:
 	if _crew_spawned:
 		return
 	_crew_spawned = true
 	_spawn_crew(world_pos)
-	_spawn_resource_nodes(world_pos)
-	print("[Ground] Landing complete. Crew=%d  Nodes=%d  pos=%s" % [
+	print("[Ground] Landing complete. Crew=%d  pos=%s" % [
 		crew_container.get_child_count(),
-		get_tree().get_nodes_in_group("resource_node").size(),
 		world_pos,
 	])
 
@@ -100,22 +102,25 @@ func _spawn_crew(landing_pos: Vector2) -> void:
 		first_crew.set_selected.call_deferred(true)
 
 
-## Phase-8: spawn six placeholder resource nodes around the landing site.
-func _spawn_resource_nodes(landing_pos: Vector2) -> void:
+## Spread 6 resource hotspots across the painted tile diamond (at boot,
+## before landing). Cell coordinates chosen well inside the 145×145
+## painted range so all sit on regolith. Converted to world via the
+## tile layer's map_to_local helper.
+func _spawn_resource_nodes() -> void:
 	const NODE_LAYOUT: Array = [
-		{"type": "iron",        "amount": 8, "offset": Vector2(180, 60)},
-		{"type": "silicon",     "amount": 6, "offset": Vector2(-180, 60)},
-		{"type": "water_ice",   "amount": 4, "offset": Vector2(60, 220)},
-		{"type": "titanium",    "amount": 5, "offset": Vector2(-60, 220)},
-		{"type": "helium3",     "amount": 3, "offset": Vector2(220, -180)},
-		{"type": "rare_metals", "amount": 2, "offset": Vector2(-220, -180)},
+		{"type": "iron",        "amount": 12, "cell": Vector2i(-50, -10)},
+		{"type": "silicon",     "amount": 10, "cell": Vector2i( 50, -10)},
+		{"type": "water_ice",   "amount":  8, "cell": Vector2i(-15, -45)},
+		{"type": "titanium",    "amount":  9, "cell": Vector2i( 15, -45)},
+		{"type": "helium3",     "amount":  7, "cell": Vector2i(-15,  45)},
+		{"type": "rare_metals", "amount":  5, "cell": Vector2i( 15,  45)},
 	]
 	var node_scene: PackedScene = preload("res://scenes/world/ResourceNode.tscn")
 	for entry in NODE_LAYOUT:
 		var rn: Node2D = node_scene.instantiate()
 		rn.deposit_type = entry.type
 		rn.amount = entry.amount
-		rn.position = landing_pos + entry.offset
+		rn.position = tile_layer.map_to_local(entry.cell)
 		$YSort.add_child(rn)
 
 

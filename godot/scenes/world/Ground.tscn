@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/ground.gd" id="1_ground"]
 [ext_resource type="Script" path="res://scripts/crew/crew_selection_manager.gd" id="2_selman"]
@@ -10,6 +10,10 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/OrbitMap.tscn" id="8_orbit"]
 [ext_resource type="PackedScene" path="res://scenes/world/FogOfWar.tscn" id="9_fog"]
 [ext_resource type="Script" path="res://scripts/world/landing_placement.gd" id="10_land"]
+[ext_resource type="Texture2D" path="res://assets/sprites/world/crater_terrain_xl.png" id="11_terrain_tex"]
+[ext_resource type="Script" path="res://scripts/world/terrain_overlay.gd" id="12_terrain"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TerrainDebugSlider.tscn" id="13_terrain_dbg"]
+[ext_resource type="Script" path="res://scripts/world/grid_overlay.gd" id="14_grid"]
 
 [node name="Ground" type="Node2D"]
 rotation = 0.0872665
@@ -20,6 +24,13 @@ script = ExtResource("4_daynight")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 y_sort_enabled = true
+
+[node name="TerrainOverlay" type="Sprite2D" parent="."]
+texture = ExtResource("11_terrain_tex")
+script = ExtResource("12_terrain")
+
+[node name="GridOverlay" type="Node2D" parent="."]
+script = ExtResource("14_grid")
 
 [node name="YSort" type="Node2D" parent="."]
 y_sort_enabled = true
@@ -46,6 +57,8 @@ script = ExtResource("10_land")
 [node name="OrbitMap" parent="." instance=ExtResource("8_orbit")]
 
 [node name="FogOfWar" parent="." instance=ExtResource("9_fog")]
+
+[node name="TerrainDebugSlider" parent="." instance=ExtResource("13_terrain_dbg")]
 
 [node name="BuildMenu" parent="." instance=ExtResource("7_buildmenu")]
 placement_controller_path = NodePath("../YSort/BuildPlacementController")

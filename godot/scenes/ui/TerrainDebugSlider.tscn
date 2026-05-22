@@ -1,0 +1,131 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/terrain_debug_slider.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/floating_panel.gd" id="2_drag"]
+
+[sub_resource type="StyleBoxFlat" id="SBF_panel"]
+bg_color = Color(0.051, 0.078, 0.125, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.95, 0.71, 0.30, 0.7)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="TerrainDebugSlider" type="CanvasLayer"]
+script = ExtResource("1")
+
+[node name="Panel" type="PanelContainer" parent="."]
+offset_left = 1620.0
+offset_top = 16.0
+offset_right = 1900.0
+offset_bottom = 380.0
+theme_override_styles/panel = SubResource("SBF_panel")
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+script = ExtResource("2_drag")
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TERRAIN DEBUG ⠿"
+theme_override_colors/font_color = Color(0.95, 0.71, 0.30, 1)
+mouse_filter = 2
+
+[node name="CollapseButton" type="Button" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+text = "▼"
+custom_minimum_size = Vector2(28, 0)
+flat = true
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="RotLabel" type="Label" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+text = "rotation: 313°"
+theme_override_font_sizes/font_size = 11
+
+[node name="RotSlider" type="HSlider" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+min_value = 0.0
+max_value = 360.0
+step = 1.0
+value = 313.0
+
+[node name="ScaleXLabel" type="Label" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+text = "scale_x: 1.42"
+theme_override_font_sizes/font_size = 11
+
+[node name="ScaleXSlider" type="HSlider" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+min_value = 0.25
+max_value = 4.0
+step = 0.01
+value = 1.42
+
+[node name="ScaleYLabel" type="Label" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+text = "scale_y: 2.08"
+theme_override_font_sizes/font_size = 11
+
+[node name="ScaleYSlider" type="HSlider" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+min_value = 0.25
+max_value = 4.0
+step = 0.01
+value = 2.08
+
+[node name="ShearXLabel" type="Label" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+text = "shear_x: 0.03"
+theme_override_font_sizes/font_size = 11
+
+[node name="ShearXSlider" type="HSlider" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+min_value = -1.5
+max_value = 1.5
+step = 0.01
+value = 0.03
+
+[node name="ShearYLabel" type="Label" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+text = "shear_y: 0.04"
+theme_override_font_sizes/font_size = 11
+
+[node name="ShearYSlider" type="HSlider" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+min_value = -1.5
+max_value = 1.5
+step = 0.01
+value = 0.04
+
+[node name="OpacityLabel" type="Label" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+text = "opacity: 1.00"
+theme_override_font_sizes/font_size = 11
+
+[node name="OpacitySlider" type="HSlider" parent="Panel/Margin/VBox/Content"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.0

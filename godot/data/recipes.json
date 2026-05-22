@@ -4,21 +4,28 @@
     "input_resource": "water_ice_node",
     "output": { "water": 10 },
     "duration_seconds": 8,
-    "required_role": "geologist"
+    "building": "mining_drill"
   },
   "extract_iron": {
     "display_name": "Extract Iron Ore",
     "input_resource": "iron_node",
     "output": { "iron": 8 },
     "duration_seconds": 10,
-    "required_role": "geologist"
+    "building": "mining_drill"
   },
   "extract_helium3": {
     "display_name": "Extract Helium-3",
     "input_resource": "helium3_node",
     "output": { "helium3": 5 },
     "duration_seconds": 15,
-    "required_role": "geologist"
+    "building": "mining_drill"
+  },
+  "forge_materials": {
+    "display_name": "Forge Materials",
+    "input": { "iron": 1, "silicon": 1 },
+    "output": { "materials": 100 },
+    "duration_seconds": 8,
+    "building": "matter_forge"
   },
   "analyze_sample": {
     "display_name": "Analyze Sample",

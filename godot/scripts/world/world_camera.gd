@@ -27,11 +27,16 @@ const STRATEGIC_CENTER: Vector2 = Vector2.ZERO
 const STRATEGIC_ZOOM: Vector2 = Vector2(0.13, 0.13)  # alias for ground.gd boot setup
 const STRATEGIC_STEP_THRESHOLD: int = 2  # step <= threshold ⇒ strategic level
 
+enum CameraMode { FOLLOW, PAN }
+
 var step: int = 0
+var mode: CameraMode = CameraMode.FOLLOW
 var _selected_crew: Node2D = null
 var _tween: Tween
 var _last_level: String = ""
 var _landing_pos: Vector2 = Vector2.INF  # set when landing confirmed; zoom centers on it
+var _panning: bool = false
+var _last_mouse_pos: Vector2 = Vector2.INF
 
 
 func _ready() -> void:
@@ -77,13 +82,33 @@ func max_step() -> int:
 
 func _apply_step() -> void:
 	var target_zoom: Vector2 = ZOOM_LEVELS[step]
-	# Lerp the camera position from the strategic origin (step 0) toward the
-	# selected crew, the landing site, or the strategic origin in that order.
-	var t: float = float(step) / float(ZOOM_LEVELS.size() - 1)
-	var anchor: Vector2 = _gameplay_anchor()
-	var target_pos: Vector2 = STRATEGIC_CENTER.lerp(anchor, t)
+	var target_pos: Vector2 = global_position
+	if mode == CameraMode.FOLLOW:
+		# At strategic zoom, sit at map origin so the whole map shows.
+		# Past the threshold, anchor fully on the gameplay anchor (selected
+		# crew / landing site / first crew). No lerp blend — user expected
+		# FOLLOW to actually center.
+		if step <= STRATEGIC_STEP_THRESHOLD:
+			target_pos = STRATEGIC_CENTER
+		else:
+			target_pos = _gameplay_anchor()
 	_animate(target_pos, target_zoom, ANIM_SECONDS)
 	_emit_level_changed()
+
+
+func set_mode(m: int) -> void:
+	mode = m
+
+
+func current_mode() -> int:
+	return mode
+
+
+func toggle_mode() -> void:
+	mode = CameraMode.PAN if mode == CameraMode.FOLLOW else CameraMode.FOLLOW
+	# In FOLLOW, immediately re-anchor to the selected crew at the current step.
+	if mode == CameraMode.FOLLOW:
+		_apply_step()
 
 
 func _gameplay_anchor() -> Vector2:
@@ -114,14 +139,66 @@ func _fallback_crew_pos() -> Vector2:
 	return first.global_position
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event
+		if mb.pressed:
+			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+				zoom_in()
+				get_viewport().set_input_as_handled()
+			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				zoom_out()
+				get_viewport().set_input_as_handled()
+	elif event is InputEventMagnifyGesture:
+		# Trackpad pinch (macOS / touchscreen).
+		var mg: InputEventMagnifyGesture = event
+		if mg.factor > 1.0:
+			zoom_in()
+		elif mg.factor < 1.0:
+			zoom_out()
+		get_viewport().set_input_as_handled()
+	elif event is InputEventPanGesture:
+		# Trackpad two-finger pan → world pan (laptop without middle mouse).
+		var pg: InputEventPanGesture = event
+		var world_root: Node = get_tree().get_first_node_in_group("world_root")
+		var world_rot: float = (world_root as Node2D).rotation if world_root is Node2D else 0.0
+		global_position += pg.delta.rotated(world_rot) / zoom
+		get_viewport().set_input_as_handled()
+
+
+func _process(_delta: float) -> void:
+	# Pan via middle/right-mouse drag — only in PAN mode. FOLLOW mode owns
+	# the camera position and continuously tracks the selected crew below.
+	var pressed: bool = mode == CameraMode.PAN and (
+		Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE)
+		or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
+	)
+	var current: Vector2 = get_viewport().get_mouse_position()
+	if pressed and _last_mouse_pos != Vector2.INF:
+		var screen_delta: Vector2 = current - _last_mouse_pos
+		var world_root: Node = get_tree().get_first_node_in_group("world_root")
+		var world_rot: float = (world_root as Node2D).rotation if world_root is Node2D else 0.0
+		var world_delta: Vector2 = screen_delta.rotated(world_rot) / zoom
+		global_position -= world_delta
+	_last_mouse_pos = current if pressed else Vector2.INF
+
+	# FOLLOW mode: every frame, snap to the selected crew so the camera
+	# tracks them as they walk. Tween-busy check removed — the position
+	# snap overrides the tween's position channel; zoom still animates
+	# (Tween's zoom channel runs independently).
+	if mode == CameraMode.FOLLOW \
+			and step > STRATEGIC_STEP_THRESHOLD \
+			and _selected_crew != null:
+		global_position = _selected_crew.global_position
+
+
 func _on_crew_selected(crew_id: int) -> void:
 	for node in get_tree().get_nodes_in_group("crew"):
 		if node.has_method("get") and node.get("crew_id") == crew_id:
 			_selected_crew = node
-			# Re-apply the current step so the camera re-centers on the new
-			# selection — at high zoom the previous crew is off-screen
-			# otherwise.
-			if step > 0:
+			# Auto-recenter only in FOLLOW mode. PAN mode preserves user's
+			# manual camera position when crew selection changes.
+			if mode == CameraMode.FOLLOW and step > 0:
 				_apply_step()
 			return
 

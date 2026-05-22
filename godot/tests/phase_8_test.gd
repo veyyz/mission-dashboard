@@ -64,8 +64,15 @@ func _run() -> void:
 	if geologist == null:
 		failures.append("Geologist not found in crew group")
 	else:
-		# Move Rin to a position with a node nearby and run scan.
-		geologist.global_position = Vector2(150, 60)  # near iron node at (180, 60)
+		# Move Rin onto an iron node. Find iron's actual global_position
+		# (Ground is rotated 5° so cell→world has a tilt offset).
+		var iron_node: Node2D = null
+		for n in nodes:
+			if n.deposit_type == "iron":
+				iron_node = n
+				break
+		if iron_node != null:
+			geologist.global_position = iron_node.global_position
 		geologist.set_selected(true)
 		await physics_frame
 		var manager := ground.find_child("CrewContainer", true, false)

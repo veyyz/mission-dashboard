@@ -1,0 +1,9 @@
+.claude/
+godot/logs/
+
+# large binaries (user manages separately)
+Godot_v4.6.2/
+*.exe
+
+# large art assets (user manages separately)
+godot/assets/sprites/

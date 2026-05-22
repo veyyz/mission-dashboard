@@ -7,7 +7,7 @@ extends Node2D
 ## fires `EventBus.building_completed` (the building's own `_ready` does the
 ## emit).
 
-const ENGINEER_REACH: float = 64.0  # pixels — generous grid-cell radius
+const ENGINEER_REACH: float = 128.0  # pixels — generous grid-cell radius
 
 @export var building_key: String = "solar_array"
 
@@ -15,25 +15,58 @@ var definition: Dictionary = {}
 var build_time_seconds: float = 30.0
 var progress: float = 0.0  # 0.0 to 1.0
 
+const BUILDING_SPRITE_ROOT := "res://assets/sprites/buildings/"
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var progress_bar: ProgressBar = $ProgressLayer/ProgressBar
 
 
-## Tilt + scale the construction-site ghost to match the finished Building
-## so the visual transition at completion doesn't snap.
-const ISO_LEAN_RAD: float = 0.4636476  # atan(32 / 64)
-const PLACEHOLDER_SCALE: Vector2 = Vector2(4.0, 4.0)
+## Iso projection identical to finished Building. Footprint comes from
+## buildings.json `footprint_cells` field; defaults to 6.
+const DEFAULT_CELLS_PER_SIDE: float = 6.0
+const TILE_HALF_W: float = 32.0
+const TILE_HALF_H: float = 16.0
+
+var cells_per_side: float = DEFAULT_CELLS_PER_SIDE
 
 
 func _ready() -> void:
-	rotation = ISO_LEAN_RAD
-	scale = PLACEHOLDER_SCALE
+	add_to_group("construction_sites")
 	definition = BuildingDatabase.get_definition(building_key)
-	build_time_seconds = float(definition.get("build_time_seconds", 30))
+	cells_per_side = float(definition.get("footprint_cells", DEFAULT_CELLS_PER_SIDE))
+	# Temporary: 1s build time for all buildings (testing).
+	build_time_seconds = 1.0
 	if sprite.texture == null:
-		sprite.texture = _build_ghost_texture()
+		var real := _load_building_texture()
+		if real != null:
+			sprite.texture = real
+			# Grayscale shader + slight transparency so the site reads as
+			# "under construction" and crew behind it stays visible.
+			sprite.material = _make_grayscale_material()
+			sprite.modulate = Color(1, 1, 1, 1.0)
+		else:
+			sprite.texture = _build_ghost_texture()
+	_apply_iso_transform()
+	_position_progress_bar()
+	_setup_block()
 	if progress_bar != null:
 		progress_bar.value = 0.0
+
+
+func _apply_iso_transform() -> void:
+	if sprite.texture == null:
+		return
+	var img: Vector2 = sprite.texture.get_size()
+	if img.x <= 0.0 or img.y <= 0.0:
+		return
+	# Scale ONLY the sprite (not the body). Fit within iso diamond bounding
+	# box so tall sprites don't overflow the footprint. Feet anchored to
+	# body origin.
+	var footprint_w: float = cells_per_side * TILE_HALF_W * 2.0
+	var footprint_h: float = cells_per_side * TILE_HALF_H * 2.0
+	var s: float = min(footprint_w / img.x, footprint_h / img.y)
+	sprite.scale = Vector2(s, s)
+	sprite.offset = Vector2(0, -img.y * 0.5)
 
 
 
@@ -84,6 +117,81 @@ func _complete() -> void:
 	get_parent().add_child(building)
 	building.global_position = spawn_pos
 	queue_free()
+
+
+func _position_progress_bar() -> void:
+	# Anchor ProgressLayer just above the sprite top in body-local coords.
+	# Sprite is feet-anchored at body origin and extends UP by img.y * scale.
+	if sprite.texture == null:
+		return
+	var img: Vector2 = sprite.texture.get_size()
+	var sprite_top_y: float = -img.y * sprite.scale.y
+	var layer: Control = $ProgressLayer
+	if layer != null:
+		layer.position = Vector2(-32, sprite_top_y - 14)
+
+
+## Same inset rule as Building so crew has a walkable perimeter around the
+## site too (matches completed-building behavior).
+const BLOCK_INSET_TILES: float = 1.0
+
+
+func _block_diamond_points() -> PackedVector2Array:
+	var inset: float = BLOCK_INSET_TILES
+	var inner_cells: float = max(cells_per_side - inset, 0.0)
+	var hw: float = inner_cells * TILE_HALF_W
+	var hh: float = inner_cells * TILE_HALF_H
+	var cy: float = -cells_per_side * TILE_HALF_H
+	return PackedVector2Array([
+		Vector2(0, cy + hh),
+		Vector2(hw, cy),
+		Vector2(0, cy - hh),
+		Vector2(-hw, cy),
+	])
+
+
+func _setup_block() -> void:
+	# StaticBody2D + CollisionShape2D + NavigationObstacle2D using the inset
+	# diamond — crew can walk on the outer 1-tile ring of the visual footprint.
+	if has_node("StaticBody2D"):
+		return
+	var body := StaticBody2D.new()
+	body.name = "StaticBody2D"
+	body.collision_layer = 1
+	body.collision_mask = 0
+	var col := CollisionShape2D.new()
+	var diamond := ConvexPolygonShape2D.new()
+	diamond.points = _block_diamond_points()
+	col.shape = diamond
+	body.add_child(col)
+	add_child(body)
+	var obs := NavigationObstacle2D.new()
+	obs.name = "NavObstacle"
+	obs.affect_navigation_mesh = true
+	obs.vertices = _block_diamond_points()
+	add_child(obs)
+
+
+func _make_grayscale_material() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	var sh := Shader.new()
+	sh.code = """
+shader_type canvas_item;
+void fragment() {
+	vec4 c = texture(TEXTURE, UV);
+	float gray = dot(c.rgb, vec3(0.299, 0.587, 0.114));
+	COLOR = vec4(vec3(gray), c.a);
+}
+"""
+	mat.shader = sh
+	return mat
+
+
+func _load_building_texture() -> Texture2D:
+	var path := "%s%s.png" % [BUILDING_SPRITE_ROOT, building_key]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 
 func _build_ghost_texture() -> Texture2D:

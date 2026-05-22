@@ -4,25 +4,39 @@ extends PanelContainer
 ## EventBus.resource_changed and updates only the affected entry.
 
 const RESOURCE_ORDER: Array[String] = [
-	"power", "oxygen", "food", "materials", "science", "crew",
+	"power", "oxygen", "food", "water",
+	"materials", "iron", "silicon", "rare_metals",
+	"helium3", "samples", "science", "crew",
 ]
 
 const RESOURCE_GLYPH := {
-	"power":     "⚡",
-	"oxygen":    "O₂",
-	"food":      "🌱",
-	"materials": "▣",
-	"science":   "🧪",
-	"crew":      "👥",
+	"power":       "⚡",
+	"oxygen":      "O₂",
+	"food":        "🌱",
+	"water":       "💧",
+	"materials":   "▣",
+	"iron":        "Fe",
+	"silicon":     "Si",
+	"rare_metals": "Au",
+	"helium3":     "He³",
+	"samples":     "📦",
+	"science":     "🧪",
+	"crew":        "👥",
 }
 
 const RESOURCE_COLOR := {
-	"power":     Color(0.95, 0.71, 0.30),
-	"oxygen":    Color(0.36, 0.81, 0.95),
-	"food":      Color(0.45, 0.78, 0.50),
-	"materials": Color(0.70, 0.72, 0.75),
-	"science":   Color(0.66, 0.45, 0.85),
-	"crew":      Color(0.95, 0.71, 0.30),
+	"power":       Color(0.95, 0.71, 0.30),
+	"oxygen":      Color(0.36, 0.81, 0.95),
+	"food":        Color(0.45, 0.78, 0.50),
+	"water":       Color(0.40, 0.70, 0.95),
+	"materials":   Color(0.70, 0.72, 0.75),
+	"iron":        Color(0.85, 0.45, 0.40),
+	"silicon":     Color(0.50, 0.85, 0.55),
+	"rare_metals": Color(0.95, 0.71, 0.30),
+	"helium3":     Color(0.66, 0.45, 0.85),
+	"samples":     Color(0.55, 0.65, 0.80),
+	"science":     Color(0.66, 0.45, 0.85),
+	"crew":        Color(0.95, 0.71, 0.30),
 }
 
 @onready var hbox: HBoxContainer = $Margin/HBox

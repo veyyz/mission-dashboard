@@ -28,6 +28,7 @@ mouse_filter = 1
 anchors_preset = 0
 offset_right = 1300.0
 offset_bottom = 1100.0
+mouse_filter = 2
 
 [node name="HintLabel" type="Label" parent="Root"]
 anchors_preset = 5

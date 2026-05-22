@@ -15,6 +15,7 @@ const SCENE_PATHS := {
 	"storage_silo":   "res://scenes/buildings/StorageSilo.tscn",
 	"comms_dish":     "res://scenes/buildings/CommsDish.tscn",
 	"research_lab":   "res://scenes/buildings/ResearchLab.tscn",
+	"matter_forge":   "res://scenes/buildings/MatterForge.tscn",
 }
 
 var _defs: Dictionary = {}

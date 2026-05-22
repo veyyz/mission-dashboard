@@ -37,13 +37,22 @@
     ]
   },
   "rescue_signal": {
-    "display_name": "Distress Beacon",
-    "description": "A faint signal from a stranded astronaut. Investigate to recruit.",
-    "trigger_chance_per_day": 0.03,
-    "min_day": 8,
+    "display_name": "Distress Beacon — Rescued Astronaut",
+    "description": "A faint signal led the crew to a stranded astronaut. They join the colony.",
+    "trigger_chance_per_day": 0.10,
+    "min_day": 4,
     "requires_building": "comms_dish",
     "effects": [
-      { "type": "spawn_rescue_objective" }
+      { "type": "add_resource", "resource": "crew", "amount": 1 }
+    ]
+  },
+  "recruit_volunteer": {
+    "display_name": "Volunteer Cadet Inbound",
+    "description": "Mission control sends a cadet on the next supply window.",
+    "trigger_chance_per_day": 0.08,
+    "min_day": 2,
+    "effects": [
+      { "type": "add_resource", "resource": "crew", "amount": 1 }
     ]
   }
 }

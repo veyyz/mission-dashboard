@@ -5,6 +5,7 @@
     "cost": { "materials": 40, "silicon": 20 },
     "build_time_seconds": 30,
     "size": [2, 2],
+    "footprint_cells": 6,
     "produces": { "power": 15 },
     "active_phases": ["day", "twilight"],
     "icon": "res://assets/sprites/ui/icon_solar.png"
@@ -25,6 +26,7 @@
     "cost": { "materials": 100 },
     "build_time_seconds": 90,
     "size": [3, 3],
+    "footprint_cells": 12,
     "produces": { "oxygen": 5 },
     "consumes": { "power": 4 },
     "crew_capacity": 4,
@@ -87,5 +89,15 @@
     "consumes": { "power": 5 },
     "extracts_from_node": true,
     "icon": "res://assets/sprites/ui/icon_drill.png"
+  },
+  "matter_forge": {
+    "display_name": "MatterForge",
+    "description": "Refines iron + silicon into bulk materials. 1 of each per cycle yields 100 materials.",
+    "cost": { "materials": 80, "iron": 30, "silicon": 30 },
+    "build_time_seconds": 60,
+    "size": [3, 3],
+    "footprint_cells": 8,
+    "consumes": { "power": 10 },
+    "icon": "res://assets/sprites/ui/icon_matter_forge.png"
   }
 }

@@ -32,8 +32,24 @@ const ROLE_LABEL := {
 	Role.COMMANDER: "Commander",
 }
 
+const CREW_SPRITE_ROOT := "res://assets/sprites/crew/"
+const CREW_FOLDER := {
+	Role.ENGINEER:  "alex",
+	Role.SCIENTIST: "maya",
+	Role.BOTANIST:  "zane",
+	Role.GEOLOGIST: "rin",
+	Role.MEDIC:     "medic",
+	Role.COMMANDER: "commander",
+}
+
 const SPEED: float = 140.0
 const ARRIVAL_DISTANCE: float = 4.0
+
+# 8-way folder names indexed by atan2 wedge (Godot screen-space: y is down,
+# angle 0 = +x = east, angle PI/2 = +y = south).
+const DIRS := ["east", "south-east", "south", "south-west",
+               "west", "north-west", "north", "north-east"]
+const WALKING_FPS: float = 8.0
 
 @export var crew_name: String = "Alex"
 @export var crew_id: int = 1
@@ -48,7 +64,18 @@ var current_stamina: int
 var current_oxygen: float = 100.0
 var selected: bool = false
 
+# Follow-the-leader: when multi-crew move issued, the first selected becomes
+# the leader and pathfinds to the target. Followers track the leader's
+# position + a stored offset, recomputed every physics frame so the squad
+# maintains formation as the leader walks.
+var follow_leader: CrewMember = null
+var follow_offset: Vector2 = Vector2.ZERO
+
+var _last_dir: String = "south"
+var _use_animated: bool = false
+
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var anim_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var selection_ring: Sprite2D = $SelectionRing
 @onready var nameplate: Label = $Nameplate
 @onready var agent: NavigationAgent2D = $NavigationAgent2D
@@ -63,8 +90,25 @@ func _ready() -> void:
 	# FogOfWar reveals tiles within VISION_RADIUS of any "vision_source" each frame.
 	add_to_group("vision_source")
 
-	if sprite.texture == null:
-		sprite.texture = _build_placeholder_texture()
+	var sf := _build_sprite_frames()
+	if sf != null:
+		anim_sprite.sprite_frames = sf
+		# Real 180x180 canvas with character feet near bottom. Anchor feet to
+		# body origin so y-sort matches the visible feet (consistent with
+		# buildings, otherwise crew renders behind same-feet-y objects).
+		var first_tex: Texture2D = sf.get_frame_texture("idle_south", 0)
+		if first_tex != null:
+			anim_sprite.offset = Vector2(0, -first_tex.get_height() / 2)
+		anim_sprite.play("idle_%s" % _last_dir)
+		anim_sprite.visible = true
+		sprite.visible = false
+		_use_animated = true
+	else:
+		if sprite.texture == null:
+			sprite.texture = _build_placeholder_texture()
+		sprite.visible = true
+		anim_sprite.visible = false
+		_use_animated = false
 	if selection_ring.texture == null:
 		selection_ring.texture = _build_selection_ring_texture()
 	selection_ring.visible = false
@@ -72,6 +116,11 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	# Follow-the-leader: re-target leader's current position each frame so
+	# followers track a moving leader.
+	if follow_leader != null and is_instance_valid(follow_leader) and follow_leader != self:
+		move_to(follow_leader.global_position + follow_offset)
+
 	var move := Vector2.ZERO
 	var navigating: bool = (
 		agent.target_position != Vector2.ZERO
@@ -93,9 +142,28 @@ func _physics_process(_delta: float) -> void:
 	velocity = move
 	move_and_slide()
 
+	if _use_animated:
+		var moving: bool = velocity.length() > 1.0
+		var dir_name := _vel_to_dir(velocity, moving)
+		var action := "walking" if moving else "idle"
+		var anim := "%s_%s" % [action, dir_name]
+		if anim_sprite.animation != anim:
+			anim_sprite.play(anim)
+		_last_dir = dir_name
+
 
 func move_to(target: Vector2) -> void:
 	agent.target_position = target
+
+
+func follow(leader: CrewMember, offset: Vector2) -> void:
+	follow_leader = leader
+	follow_offset = offset
+
+
+func clear_follow() -> void:
+	follow_leader = null
+	follow_offset = Vector2.ZERO
 
 
 func set_selected(value: bool) -> void:
@@ -111,6 +179,55 @@ func _apply_nameplate() -> void:
 	nameplate.add_theme_color_override("font_color", ROLE_COLOR.get(role, Color(0.91, 0.93, 0.95)))
 	nameplate.add_theme_color_override("font_outline_color", Color(0.07, 0.09, 0.12))
 	nameplate.add_theme_constant_override("outline_size", 4)
+
+
+func _load_crew_texture() -> Texture2D:
+	var folder: String = CREW_FOLDER.get(role, "")
+	if folder == "":
+		return null
+	var path := "%s%s/rotations/south.png" % [CREW_SPRITE_ROOT, folder]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
+
+
+func _build_sprite_frames() -> SpriteFrames:
+	var folder: String = CREW_FOLDER.get(role, "")
+	if folder == "":
+		return null
+	var base := "%s%s/" % [CREW_SPRITE_ROOT, folder]
+	# Cheap existence probe — if south rotation absent, no folder yet.
+	if not ResourceLoader.exists("%srotations/south.png" % base):
+		return null
+	var sf := SpriteFrames.new()
+	sf.remove_animation("default")
+	for d in DIRS:
+		var idle := "idle_%s" % d
+		sf.add_animation(idle)
+		sf.set_animation_loop(idle, true)
+		var rot_path := "%srotations/%s.png" % [base, d]
+		if ResourceLoader.exists(rot_path):
+			sf.add_frame(idle, load(rot_path))
+
+		var walk := "walking_%s" % d
+		sf.add_animation(walk)
+		sf.set_animation_loop(walk, true)
+		sf.set_animation_speed(walk, WALKING_FPS)
+		for i in range(6):
+			var f := "%sanimations/walking/%s/frame_%03d.png" % [base, d, i]
+			if ResourceLoader.exists(f):
+				sf.add_frame(walk, load(f))
+	return sf
+
+
+func _vel_to_dir(v: Vector2, moving: bool) -> String:
+	if not moving:
+		return _last_dir
+	# Godot screen-space: angle 0 = east, +PI/2 = south (y-down).
+	var idx: int = int(round(v.angle() / (PI / 4.0)))
+	if idx < 0:
+		idx += 8
+	return DIRS[idx % 8]
 
 
 func _build_placeholder_texture() -> Texture2D:

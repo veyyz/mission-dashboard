@@ -8,35 +8,111 @@ extends StaticBody2D
 
 @export var building_key: String = "solar_array"
 
+const BUILDING_SPRITE_ROOT := "res://assets/sprites/buildings/"
+
 var definition: Dictionary = {}
 var _produces_applied: Dictionary = {}
 var _consumes_applied: Dictionary = {}
+var _is_real_sprite: bool = false
 
 @onready var sprite: Sprite2D = $Sprite2D
 
 
-## Tilt the building to lean along the iso grid's diagonal
-## (atan(TILE_H/TILE_W) for a 2:1 iso = atan(0.5) ≈ 26.57°). With the
-## world also rotated 5°, the on-screen tilt is ~31.6° — visually anchors
-## the building to the iso grid instead of looking screen-upright.
-const ISO_LEAN_RAD: float = 0.4636476  # atan(32 / 64)
-const PLACEHOLDER_SCALE: Vector2 = Vector2(4.0, 4.0)
+## Iso projection: image rect renders as an iso diamond covering
+## cells_per_side × cells_per_side tiles. Per-building override comes from
+## buildings.json `footprint_cells` field; defaults to 6.
+const DEFAULT_CELLS_PER_SIDE: float = 6.0
+const TILE_HALF_W: float = 32.0
+const TILE_HALF_H: float = 16.0
+
+var cells_per_side: float = DEFAULT_CELLS_PER_SIDE
 
 
 func _ready() -> void:
-	rotation = ISO_LEAN_RAD
-	scale = PLACEHOLDER_SCALE
 	add_to_group("buildings")
 	definition = BuildingDatabase.get_definition(building_key)
+	cells_per_side = float(definition.get("footprint_cells", DEFAULT_CELLS_PER_SIDE))
+	if sprite.texture == null:
+		var real := _load_building_texture()
+		if real != null:
+			sprite.texture = real
+			_is_real_sprite = true
+		else:
+			sprite.texture = _build_placeholder_texture()
+	_apply_iso_transform()
+	_setup_footprint_collision()
+	_setup_navigation_obstacle()
 	if definition.is_empty():
 		push_warning("[Building] No definition for key '%s'" % building_key)
 		return
 
-	if sprite.texture == null:
-		sprite.texture = _build_placeholder_texture()
-
 	_apply_rates()
 	EventBus.building_completed.emit(building_key, _grid_position())
+
+
+func _apply_iso_transform() -> void:
+	if sprite.texture == null:
+		return
+	var img: Vector2 = sprite.texture.get_size()
+	if img.x <= 0.0 or img.y <= 0.0:
+		return
+	# Scale ONLY the sprite (not the body). Fit within the iso diamond
+	# bounding box (cells × 64 wide, cells × 32 tall) so tall sprites don't
+	# overflow the footprint. Feet anchored to body origin.
+	var footprint_w: float = cells_per_side * TILE_HALF_W * 2.0
+	var footprint_h: float = cells_per_side * TILE_HALF_H * 2.0
+	var s: float = min(footprint_w / img.x, footprint_h / img.y)
+	sprite.scale = Vector2(s, s)
+	sprite.offset = Vector2(0, -img.y * 0.5)
+
+
+## Inset (in tiles) shrinking the BLOCKING diamond inside the visual one,
+## leaving a walkable perimeter of `BLOCK_INSET_TILES` cells around the
+## building's interior. Visual size unchanged.
+const BLOCK_INSET_TILES: float = 1.0
+
+
+func _block_diamond_points() -> PackedVector2Array:
+	# Inner diamond centered in the visual diamond, shrunk by BLOCK_INSET_TILES
+	# tiles per side. Visual diamond has bottom apex at body origin and center
+	# at y = -cells_per_side * TILE_HALF_H.
+	var inset: float = BLOCK_INSET_TILES
+	var inner_cells: float = max(cells_per_side - inset, 0.0)
+	var hw: float = inner_cells * TILE_HALF_W
+	var hh: float = inner_cells * TILE_HALF_H
+	var cy: float = -cells_per_side * TILE_HALF_H
+	return PackedVector2Array([
+		Vector2(0, cy + hh),
+		Vector2(hw, cy),
+		Vector2(0, cy - hh),
+		Vector2(-hw, cy),
+	])
+
+
+func _setup_footprint_collision() -> void:
+	var col: CollisionShape2D = $CollisionShape2D
+	if col == null:
+		return
+	var diamond := ConvexPolygonShape2D.new()
+	diamond.points = _block_diamond_points()
+	col.shape = diamond
+
+
+func _setup_navigation_obstacle() -> void:
+	if has_node("NavObstacle"):
+		return
+	var obs := NavigationObstacle2D.new()
+	obs.name = "NavObstacle"
+	obs.affect_navigation_mesh = true
+	obs.vertices = _block_diamond_points()
+	add_child(obs)
+
+
+func _load_building_texture() -> Texture2D:
+	var path := "%s%s.png" % [BUILDING_SPRITE_ROOT, building_key]
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 
 
