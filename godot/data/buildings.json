@@ -96,7 +96,7 @@
     "cost": { "materials": 80, "iron": 30, "silicon": 30 },
     "build_time_seconds": 60,
     "size": [3, 3],
-    "footprint_cells": 8,
+    "footprint_cells": 16,
     "consumes": { "power": 10 },
     "icon": "res://assets/sprites/ui/icon_matter_forge.png"
   }

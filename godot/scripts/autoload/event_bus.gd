@@ -47,5 +47,10 @@ signal game_saved(slot: String)
 signal game_loaded(slot: String)
 
 
+# --- Gamepad (generic BT pad: 1 stick + 3 buttons) ---
+signal pad_mode_changed(mode: int)  # PadInput.PadMode
+signal pad_connected(connected: bool, device_name: String)
+
+
 func _ready() -> void:
 	print("[EventBus] Ready.")

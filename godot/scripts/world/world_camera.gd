@@ -32,6 +32,12 @@ enum CameraMode { FOLLOW, PAN }
 var step: int = 0
 var mode: CameraMode = CameraMode.FOLLOW
 var _selected_crew: Node2D = null
+## Last crew actually selected. Survives a deselect so free explore can snap
+## back to somebody.
+var _last_crew: Node2D = null
+## True while the gamepad free-explore slot is active, so leaving it can
+## restore FOLLOW without clobbering a PAN the player picked themselves.
+var _free_explore: bool = false
 var _tween: Tween
 var _last_level: String = ""
 var _landing_pos: Vector2 = Vector2.INF  # set when landing confirmed; zoom centers on it
@@ -160,9 +166,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventPanGesture:
 		# Trackpad two-finger pan → world pan (laptop without middle mouse).
 		var pg: InputEventPanGesture = event
-		var world_root: Node = get_tree().get_first_node_in_group("world_root")
-		var world_rot: float = (world_root as Node2D).rotation if world_root is Node2D else 0.0
-		global_position += pg.delta.rotated(world_rot) / zoom
+		pan_by(pg.delta)
 		get_viewport().set_input_as_handled()
 
 
@@ -175,11 +179,8 @@ func _process(_delta: float) -> void:
 	)
 	var current: Vector2 = get_viewport().get_mouse_position()
 	if pressed and _last_mouse_pos != Vector2.INF:
-		var screen_delta: Vector2 = current - _last_mouse_pos
-		var world_root: Node = get_tree().get_first_node_in_group("world_root")
-		var world_rot: float = (world_root as Node2D).rotation if world_root is Node2D else 0.0
-		var world_delta: Vector2 = screen_delta.rotated(world_rot) / zoom
-		global_position -= world_delta
+		# Drag pulls the world with the cursor, so the camera moves opposite.
+		pan_by(-(current - _last_mouse_pos))
 	_last_mouse_pos = current if pressed else Vector2.INF
 
 	# FOLLOW mode: every frame, snap to the selected crew so the camera
@@ -192,10 +193,49 @@ func _process(_delta: float) -> void:
 		global_position = _selected_crew.global_position
 
 
+## Move the camera by a screen-space delta, converting to world space through
+## the world root's rotation (Ground.tscn is rotated while the camera runs with
+## `ignore_rotation`) and the current zoom. Shared by mouse drag, trackpad pan,
+## and the gamepad free-explore stick.
+func pan_by(screen_delta: Vector2) -> void:
+	# A deliberate pan outranks a zoom/recenter animation still in flight —
+	# otherwise the tween writes global_position back every frame and the pan
+	# goes nowhere. Snap zoom to the step it was heading for so killing the
+	# tween doesn't strand it mid-interpolation.
+	if _tween != null and _tween.is_valid():
+		_tween.kill()
+		zoom = ZOOM_LEVELS[step]
+	var world_root: Node = get_tree().get_first_node_in_group("world_root")
+	var world_rot: float = (world_root as Node2D).rotation if world_root is Node2D else 0.0
+	global_position += screen_delta.rotated(world_rot) / zoom
+
+
+## Leave free explore: re-lock FOLLOW onto the last crew and re-anchor.
+func recenter_on_last_crew() -> void:
+	_free_explore = false
+	if _selected_crew == null and _last_crew != null and is_instance_valid(_last_crew):
+		_selected_crew = _last_crew
+	mode = CameraMode.FOLLOW
+	_apply_step()
+
+
 func _on_crew_selected(crew_id: int) -> void:
+	# crew_id 0 = nobody (gamepad free-explore slot). Drop the follow target,
+	# otherwise FOLLOW keeps snapping to a crew that is no longer selected.
+	if crew_id == 0:
+		_selected_crew = null
+		_free_explore = true
+		mode = CameraMode.PAN
+		return
 	for node in get_tree().get_nodes_in_group("crew"):
 		if node.has_method("get") and node.get("crew_id") == crew_id:
 			_selected_crew = node
+			_last_crew = node
+			# Leaving free explore re-locks FOLLOW. A PAN the player chose
+			# themselves is left alone.
+			if _free_explore:
+				_free_explore = false
+				mode = CameraMode.FOLLOW
 			# Auto-recenter only in FOLLOW mode. PAN mode preserves user's
 			# manual camera position when crew selection changes.
 			if mode == CameraMode.FOLLOW and step > 0:

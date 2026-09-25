@@ -6,7 +6,8 @@ extends SceneTree
 ##   3. place_building("solar_array", pos) deducts materials + silicon
 ##   4. ConstructionSite spawns at the placement
 ##   5. Calling site.tick(build_time + 1) completes construction → building_completed fires
-##   6. After completion, ResourceManager.power rate reflects the SolarArray's produces
+##   6. After completion, ResourceManager.power rate reflects the SolarArray produces
+##   7. Any crew role — not just ENGINEER — advances a construction site
 
 var event_bus: Node
 var resource_manager: Node
@@ -140,6 +141,43 @@ func _run() -> void:
 				before_power_rate, after_power_rate,
 			]
 		)
+
+	# 8. Any role can build — the ENGINEER gate on construction was removed.
+	# Park a non-Engineer next to a fresh site and check the bar advances.
+	resource_manager.add("materials", 500.0)
+	resource_manager.add("silicon", 500.0)
+	var site2 = placement.place_building("solar_array", Vector2(600, 600))
+	if site2 == null:
+		failures.append("place_building returned null for the any-role check")
+	else:
+		# Duck-typed on purpose: naming `CrewMember` in a SceneTree test script
+		# trips GDScript's order-sensitive class_name discovery in headless mode
+		# and Ground._spawn_crew then silently spawns zero crew. Same reason
+		# build_placement_controller.gd types ConstructionSite as Node2D.
+		const ROLE_ENGINEER: int = 0
+		var builder: Node2D = null
+		for node in get_nodes_in_group("crew"):
+			if int(node.get("role")) != ROLE_ENGINEER:
+				builder = node as Node2D
+				break
+		if builder == null:
+			failures.append("No non-Engineer crew available for the any-role check")
+		else:
+			# Keep every Engineer well clear so only the non-Engineer is in reach.
+			for node in get_nodes_in_group("crew"):
+				if int(node.get("role")) == ROLE_ENGINEER:
+					(node as Node2D).global_position = Vector2(-5000, -5000)
+			builder.global_position = site2.global_position
+			var progress_before: float = site2.progress
+			await process_frame
+			await process_frame
+			var advanced: bool = not is_instance_valid(site2) or site2.progress > progress_before
+			if not advanced:
+				failures.append(
+					"Non-Engineer %s (role=%s) did not advance construction" % [
+						str(builder.get("crew_name")), str(builder.get("role")),
+					]
+				)
 
 	# Restore time scale so we don't leak state.
 	if time_manager != null:

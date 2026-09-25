@@ -14,13 +14,21 @@ const NAV_HALF_EXTENT: float = 8000.0
 
 const CREW_SCENE := preload("res://scenes/crew/CrewMember.tscn")
 
+## `role` is a CrewMember.Role int. `art` overrides the role's default sprite
+## folder — required for the SPECIALIST block, since they all share a role.
 const CREW_ROSTER: Array[Dictionary] = [
-	{"name": "Alex",  "role": 0, "skill": 88, "offset": Vector2(  0,   0)},  # ENGINEER
-	{"name": "Maya",  "role": 1, "skill": 92, "offset": Vector2( 48,   0)},  # SCIENTIST
-	{"name": "Zane",  "role": 2, "skill": 78, "offset": Vector2( 96,   0)},  # BOTANIST
-	{"name": "Rin",   "role": 3, "skill": 85, "offset": Vector2(  0,  48)},  # GEOLOGIST
-	{"name": "Cora",  "role": 4, "skill": 81, "offset": Vector2( 48,  48)},  # MEDIC
-	{"name": "Voss",  "role": 5, "skill": 90, "offset": Vector2( 96,  48)},  # COMMANDER
+	{"name": "Alex",     "role": 0, "skill": 88, "art": "",         "offset": Vector2(  0,   0)},  # ENGINEER
+	{"name": "Maddie",   "role": 1, "skill": 92, "art": "",         "offset": Vector2( 48,   0)},  # SCIENTIST
+	{"name": "Marrin",   "role": 2, "skill": 78, "art": "",         "offset": Vector2( 96,   0)},  # BOTANIST
+	{"name": "Preston",  "role": 3, "skill": 85, "art": "",         "offset": Vector2(  0,  48)},  # GEOLOGIST
+	{"name": "Thorin",   "role": 4, "skill": 81, "art": "",         "offset": Vector2( 48,  48)},  # MEDIC
+	{"name": "Vera",     "role": 5, "skill": 90, "art": "",         "offset": Vector2( 96,  48)},  # COMMANDER
+	{"name": "Rainbow",  "role": 6, "skill": 76, "art": "rainbow",  "offset": Vector2(  0,  96)},  # SPECIALIST
+	{"name": "Rush",     "role": 6, "skill": 83, "art": "rush",     "offset": Vector2( 48,  96)},  # SPECIALIST
+	{"name": "Mister E", "role": 6, "skill": 79, "art": "mistere",  "offset": Vector2( 96,  96)},  # SPECIALIST
+	{"name": "PrimeMax", "role": 6, "skill": 87, "art": "primemax", "offset": Vector2(  0, 144)},  # SPECIALIST
+	{"name": "Brandon",  "role": 6, "skill": 84, "art": "brandon",  "offset": Vector2( 48, 144)},  # SPECIALIST
+	{"name": "Athena",   "role": 6, "skill": 89, "art": "athena",   "offset": Vector2( 96, 144)},  # SPECIALIST
 ]
 
 @onready var tile_layer: TileMapLayer = $TileMapLayer
@@ -93,6 +101,7 @@ func _spawn_crew(landing_pos: Vector2) -> void:
 		crew.crew_id = i + 1
 		crew.role = data.role
 		crew.role_skill = data.skill
+		crew.sprite_folder = data.get("art", "")
 		crew.position = landing_pos + data.offset
 		crew.rotation = counter_rot
 		crew_container.add_child(crew)

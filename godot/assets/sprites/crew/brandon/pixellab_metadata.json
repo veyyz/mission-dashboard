@@ -1,0 +1,36 @@
+{
+  "group_id": "c413a62f-4b96-4eac-984a-6e7312469b09",
+  "states": [
+    {
+      "character": {
+        "id": "37e278b1-70ed-4845-b1b0-b86996e60934",
+        "name": "Idle",
+        "prompt": "Create a full-body 64-bit-style pixel-art video game character sprite with a transparent background.\n\nThe character is a confident anime-inspired young man with spiky icy-white/silver hair, pale skin, a slight confident smirk, and bright glowing red eyes. A sleek black visor/blindfold is angled across his eyes, and he is lifting one edge of it with his right hand so one glowing red eye is clearly visible.\n\nHe wears a futuristic cybernetic shark suit built entirely around a red, black, and electric-blue color palette. Avoid white or silver clothing panels; white should primarily appear in his hair and the shark's teeth.\n\nShark hood\nThe oversized hood is shaped like the head and open mouth of a mechanical shark. The shark head faces forward around the character's head, with a large upper jaw, rows of sharp triangular teeth surrounding his face, a dorsal fin, side fins, and glowing red mechanical shark eyes. The shark exterior is predominantly black with vivid electric-blue armor edges and bright red glowing details.\n\nOutfit\nGive him an oversized futuristic black streetwear jacket/hoodie integrated into the shark armor. The clothing should have:\n\nBlack as the dominant color\nElectric-blue armor plates and trim\nBright red glowing lines and accents\nShark-fin-shaped armor pieces along the shoulders, arms, hips, and legs\nLoose black tactical/cargo pants\nFuturistic belts, buckles, straps, chains, and small geometric armor pieces\nA large mechanical shark tail extending behind him\nNo large white section on the chest or jacket\nHis left hand rests casually inside a pocket while his right hand lifts his visor. His stance should feel relaxed, powerful, and confident.\n\nShoes\nGive him chunky Jordan 4 Retro\u2013inspired high-top sneakers. The shoes are predominantly black and red with electric-blue accent details, recognizable by the chunky layered panels, mesh sections, lace wings, thick midsoles, and retro basketball-shoe silhouette.\n\nArt style\nRender the entire character as a 64-bit-e",
+        "size": {
+          "width": 164,
+          "height": 244
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-12T00:30:21.001697+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-12T00:33:54.992009"
+}

@@ -54,7 +54,7 @@ func _run() -> void:
 	if nodes.size() < 6:
 		failures.append("Expected ≥6 resource nodes, got %d" % nodes.size())
 
-	# 2. Scan reveals nodes near a Geologist (Rin = crew_id 4).
+	# 2. Scan reveals nodes near a Geologist (Preston = crew_id 4).
 	var crew_list: Array = get_nodes_in_group("crew")
 	var geologist: Node2D = null
 	for c in crew_list:
@@ -64,7 +64,7 @@ func _run() -> void:
 	if geologist == null:
 		failures.append("Geologist not found in crew group")
 	else:
-		# Move Rin onto an iron node. Find iron's actual global_position
+		# Move Preston onto an iron node. Find iron's actual global_position
 		# (Ground is rotated 5° so cell→world has a tilt offset).
 		var iron_node: Node2D = null
 		for n in nodes:

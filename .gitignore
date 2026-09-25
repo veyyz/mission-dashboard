@@ -5,5 +5,3 @@ godot/logs/
 Godot_v4.6.2/
 *.exe
 
-# large art assets (user manages separately)
-godot/assets/sprites/

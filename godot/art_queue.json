@@ -6,7 +6,7 @@
     "buildings": ["hydroponics_bay", "storage_silo", "comms_dish", "research_lab", "mining_drill_tile"],
     "terrain": ["regolith_to_rocky"],
     "objects": ["water_ice_node", "helium3_node", "iron_node", "titanium_node", "silicon_node", "rare_metals_node", "probe"],
-    "animations": ["alex_walking", "alex_idle", "maya_walking", "maya_idle", "zane_walking", "zane_idle", "rin_walking", "rin_idle", "medic_walking", "medic_idle", "commander_walking", "commander_idle"]
+    "animations": ["alex_walking", "alex_idle", "maddie_walking", "maddie_idle", "marrin_walking", "marrin_idle", "preston_walking", "preston_idle", "thorin_walking", "thorin_idle", "vera_walking", "vera_idle"]
   },
   "_round_history": {
     "round_1_size48_basic":             { "_note": "rejected — too small / generic colors. Deleted." },
@@ -20,11 +20,11 @@
   },
   "characters": [
     { "name": "alex",      "id": "fae34c5a-b5df-4831-94d7-140f30956384", "role": "engineer",  "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "lunar_colony_character_generation.md verbatim — distinct age/build/ethnicity/expression + angular suit + astronaut tells. Suffix: 'JRPG-style game sprite, clean pixel art' only", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "maya",      "id": "f3d5cd12-eade-4617-a982-98922fb1203b", "role": "scientist", "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "30s, slim, East Asian, glasses + ponytail, focused half-smile", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "zane",      "id": "77926287-e870-41bb-b10b-2ecf750dbe92", "role": "botanist",  "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "late 40s, stocky, weathered tan, salt-pepper beard, paternal smile", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "rin",       "id": "9ee1c7c8-27f4-4a68-9ff6-b4e09efd7e42", "role": "geologist", "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "early 20s, athletic, South Asian, undercut, smirk", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "medic",     "id": "a1301531-0a77-4ce2-86d9-e4552e8a8191", "role": "medic",     "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "30s, lean, dark brown skin, coily hair, calm reassuring", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
-    { "name": "commander", "id": "01673cba-74a3-4ef0-a7d9-5f654ffb392d", "role": "commander", "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "late 50s, strong, pale-lined, silver-grey practical cut, authoritative softened by smile", "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
+    { "name": "maddie",    "id": "f3d5cd12-eade-4617-a982-98922fb1203b", "role": "scientist", "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "30s, slim, East Asian, glasses + ponytail, focused half-smile", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "marrin",    "id": "77926287-e870-41bb-b10b-2ecf750dbe92", "role": "botanist",  "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "late 40s, stocky, weathered tan, salt-pepper beard, paternal smile", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "preston",   "id": "9ee1c7c8-27f4-4a68-9ff6-b4e09efd7e42", "role": "geologist", "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "early 20s, athletic, South Asian, undercut, smirk", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "thorin",    "id": "a1301531-0a77-4ce2-86d9-e4552e8a8191", "role": "medic",     "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "30s, lean, dark brown skin, coily hair, calm reassuring", "status": "queued", "integrated": false, "queued_at": "2026-05-01" },
+    { "name": "vera",      "id": "01673cba-74a3-4ef0-a7d9-5f654ffb392d", "role": "commander", "round": 9, "size": 128, "n_directions": 8, "proportions": "stylized", "style": "late 50s, strong, pale-lined, silver-grey practical cut, authoritative softened by smile", "status": "queued", "integrated": false, "queued_at": "2026-05-01" }
   ],
   "animations": [],
   "buildings": [

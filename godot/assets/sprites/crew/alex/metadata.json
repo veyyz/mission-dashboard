@@ -1,0 +1,97 @@
+{
+  "character": {
+    "id": "da1e6ec9-9cb7-43c7-a7be-bb2985efa64e",
+    "name": "alex",
+    "prompt": "top-down 3/4 view game sprite, full body, cadet engineer with slight compact build, smooth unlined face, with chubby cheeks and a few freckles across the nose, short swept brown side-fringe haircut neatly framing the forehead, big bright blue eyes, warm easy grin with friendly soft eyebrows, matte even skin tone, neutral pale complexion, wearing a sleek high-tech white exosuit with sharply faceted armor plates and crisp panel breaks, hexagonal chest module with multiple bevel edges, glowing-cyan seam lines tracing every panel, navy-blue flight jacket over the suit with high collar resting on the suit's neck ring, sharp triangular shoulder pauldrons, segmented knee plates with diagonal cuts, geometric forearm guards with raised vents, beveled shin armor with hard angled edges, neck ring visible at collar, low-profile life support backpack with angled vents and visible coolant lines, glossy red pressurized boots, pressure gauntlet gloves, small cyan LED accent line along jacket trim, JRPG-style game sprite, clean pixel art",
+    "size": {
+      "width": 180,
+      "height": 180
+    },
+    "template_id": "mannequin",
+    "directions": 8,
+    "view": "low top-down",
+    "created_at": "2026-05-02T05:43:38.1075+00:00"
+  },
+  "frames": {
+    "rotations": {
+      "south": "rotations/south.png",
+      "south-east": "rotations/south-east.png",
+      "east": "rotations/east.png",
+      "north-east": "rotations/north-east.png",
+      "north": "rotations/north.png",
+      "north-west": "rotations/north-west.png",
+      "west": "rotations/west.png",
+      "south-west": "rotations/south-west.png"
+    },
+    "animations": {
+      "walking_with_relaxed_natural_pace-208ff5cd": {
+        "south-east": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-east/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-east/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-east/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-east/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-east/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-east/frame_005.png"
+        ],
+        "north": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north/frame_005.png"
+        ],
+        "east": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/east/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/east/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/east/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/east/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/east/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/east/frame_005.png"
+        ],
+        "north-west": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-west/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-west/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-west/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-west/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-west/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-west/frame_005.png"
+        ],
+        "north-east": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-east/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-east/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-east/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-east/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-east/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/north-east/frame_005.png"
+        ],
+        "south": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south/frame_005.png"
+        ],
+        "south-west": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-west/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-west/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-west/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-west/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-west/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/south-west/frame_005.png"
+        ],
+        "west": [
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/west/frame_000.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/west/frame_001.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/west/frame_002.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/west/frame_003.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/west/frame_004.png",
+          "animations/walking_with_relaxed_natural_pace-208ff5cd/west/frame_005.png"
+        ]
+      }
+    }
+  },
+  "export_version": "2.0",
+  "export_date": "2026-05-02T08:30:30.732124"
+}

@@ -7,7 +7,7 @@ const TIPS: Array[String] = [
 	"Press 1–6 to select crew (Shift+# to multi-select)",
 	"Click on the ground to send selected crew there",
 	"Build menu (bottom-left) places construction sites",
-	"Engineer (Alex) ticks the construction bar when adjacent",
+	"Any crew member ticks the construction bar when adjacent",
 	"+ / − (top-right) zoom the camera in 10 steps",
 	"Press F1 to hide this guide",
 ]

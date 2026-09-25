@@ -1,0 +1,36 @@
+{
+  "group_id": "d4493a3c-f434-46e4-a93e-80a0882b5618",
+  "states": [
+    {
+      "character": {
+        "id": "8a74a942-5fe1-4e19-9fe3-b7ba6eb192ed",
+        "name": "Idle",
+        "prompt": "A mysterious supernatural ninja assassin standing in a powerful, imposing stance. He wears layered, completely black tactical robes and lightweight armor with angular, faceted surfaces and subtle variations in dark charcoal tones. His upper body is wrapped in overlapping armored fabric, with a high collar and mask covering most of his face, leaving only a pair of intensely glowing crimson-red eyes visible beneath his wild, spiky black hair. His hair is unnaturally long and chaotic, with individual locks curling and twisting outward like living shadows.\n\nHis arms are covered in oversized, flowing sleeves and reinforced armor, leading to dark armored gloves. Strange red, eye-like symbols glow from the palms of both hands. Wisps of black smoke and shadow constantly curl around his arms, shoulders, hands, legs, and hair, giving the impression that his body is partially made from living darkness. His wide, layered trousers hang heavily around his legs, creating a dramatic silhouette, while additional shadowy tendrils emerge from beneath the clothing and trail toward the ground. His feet are covered by heavy, angular black boots.\n\nThe character has an intimidating, silent, otherworldly presence. His entire design is dominated by black and dark-gray tones, with the glowing red eyes and palm symbols providing the only vivid color. The overall appearance should feel like a powerful shadow warrior, supernatural assassin, and mysterious dark-fantasy villain.",
+        "size": {
+          "width": 160,
+          "height": 244
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-12T00:02:35.708714+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-12T00:32:16.690343"
+}

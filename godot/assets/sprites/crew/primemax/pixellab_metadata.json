@@ -1,0 +1,36 @@
+{
+  "group_id": "fad19941-36df-487e-a351-22196d1fd565",
+  "states": [
+    {
+      "character": {
+        "id": "3018254c-b2b4-4460-8b83-defcf37625fe",
+        "name": "Idle",
+        "prompt": "A young, mysterious futuristic space traveler with a slim athletic build, pale skin, and a serious, emotionless expression. His sharp eyes are framed by thick dreadlocks that alternate between deep black and bright white, with several locks falling across his forehead. Small black markings decorate his face, including a cross-like symbol beneath one eye, while long silver cross earrings hang from both ears.\n\nHe wears an elaborate black-and-white outfit combining cyberpunk streetwear, gothic fashion, military utility gear, and futuristic astronaut aesthetics. A thick metallic collar surrounds his neck, while multiple silver chains and cross pendants layer across his black shirt. His oversized hooded jacket features padded shoulders, reinforced panels, numerous straps, buckles, clips, and utility attachments. The jacket is primarily black with dramatic distressed white streaks and futuristic planetary patches on the sleeves.\n\nHis hands are covered in black tactical gloves decorated with metallic hardware and white cross symbols. In one hand he carries a large futuristic astronaut helmet with a glossy black spherical visor, thick silver-white frame, mechanical clasps, vents, and other advanced components.\n\nHis lower body is dressed in extremely oversized black cargo pants covered with utility pockets, straps, chains, buckles, clips, padlocks, and long hanging attachments. Bold white stripes and cross markings contrast against the dark fabric. The pants bunch heavily around his ankles, leading into enormous futuristic high-top sneakers with chunky platform soles, black-and-white panels, reinforced construction, and white laces.\n\nThe overall design combines gothic, cyberpunk, futuristic streetwear, and space-explorer aesthetics, with an almost entirely black, white, and metallic-silver color palette. The countless straps, chains, buckles, pockets, crosses, and mechanical details create a highly layered, intricate appearance. He looks like a stylish young space operative ",
+        "size": {
+          "width": 136,
+          "height": 176
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-12T00:15:45.039665+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-12T00:33:29.703058"
+}

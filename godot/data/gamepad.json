@@ -1,0 +1,17 @@
+{
+  "_comment": "Generic Bluetooth pad: 1 analog stick + 3 usable buttons. Indices are RAW (the pad has no SDL mapping), so Godot's JOY_BUTTON_A/B/X/Y names do not describe it. Remap the pad by editing this file only.",
+  "device": 0,
+  "axis_x": 0,
+  "axis_y": 1,
+  "deadzone": 0.22,
+  "invert_y": false,
+  "button_cancel": 2,
+  "button_confirm": 3,
+  "button_mode": 4,
+  "cursor_speed_min": 600.0,
+  "cursor_speed_max": 1700.0,
+  "cursor_ramp_seconds": 0.6,
+  "camera_pan_speed": 900.0,
+  "double_tap_seconds": 0.28,
+  "debug_probe": false
+}

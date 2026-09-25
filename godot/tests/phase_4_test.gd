@@ -1,9 +1,9 @@
 extends SceneTree
 ## Phase-4 functional test.
 ## Verifies:
-##   1. Six CrewMember instances under CrewContainer
+##   1. The full CrewMember roster under CrewContainer
 ##   2. Each has unique crew_name, a Role enum value, role_skill in [70, 95]
-##   3. select_crew_3 input action emits EventBus.crew_selected with crew_id == 3
+##   3. cycle_crew (Tab) advances the focus ring and emits EventBus.crew_selected
 ##   4. crew.move_to(Vector2(100, 100)) sets NavigationAgent2D.target_position
 ##   5. After 2 physics frames, agent.get_next_path_position() != Vector2.ZERO
 
@@ -38,7 +38,7 @@ func _run() -> void:
 	await process_frame
 	await physics_frame
 
-	# 1. Six crew under CrewContainer.
+	# 1. Full roster under CrewContainer (6 original + 5 specialists).
 	var container := ground.find_child("CrewContainer", true, false)
 	if container == null:
 		_done(["CrewContainer missing"])
@@ -47,8 +47,8 @@ func _run() -> void:
 	for child in container.get_children():
 		if child is CharacterBody2D:
 			crew_list.append(child)
-	if crew_list.size() != 6:
-		failures.append("Expected 6 crew under CrewContainer, got %d" % crew_list.size())
+	if crew_list.size() != 12:
+		failures.append("Expected 12 crew under CrewContainer, got %d" % crew_list.size())
 
 	# 2. Unique names, valid roles, role_skill in [70, 95].
 	var seen_names: Dictionary = {}
@@ -62,19 +62,23 @@ func _run() -> void:
 		seen_ids[c.crew_id] = true
 		if c.role_skill < 70 or c.role_skill > 95:
 			failures.append("crew %s skill %d outside [70, 95]" % [c.crew_name, c.role_skill])
-		# Role is the CrewMember.Role enum (0..5)
-		if c.role < 0 or c.role > 5:
+		# Role is the CrewMember.Role enum (0..6, SPECIALIST appended last)
+		if c.role < 0 or c.role > 6:
 			failures.append("crew %s role enum out of range: %d" % [c.crew_name, c.role])
 
-	# 3. select_crew_3 emits EventBus.crew_selected with id == 3.
+	# 3. cycle_crew (Tab) walks the focus ring and emits EventBus.crew_selected.
+	# Replaces the old select_crew_1..6 number keys, which stopped scaling once
+	# the roster outgrew the number row.
+	# Crew 1 is selected at spawn, so the first Tab lands on crew 2.
+	# `_on_crew_selected` records only the first emission.
 	event_bus.crew_selected.connect(_on_crew_selected)
-	Input.action_press("select_crew_3")
+	Input.action_press("cycle_crew")
 	await physics_frame
 	await physics_frame
-	Input.action_release("select_crew_3")
+	Input.action_release("cycle_crew")
 	await physics_frame
-	if _selected_id != 3:
-		failures.append("EventBus.crew_selected: expected id=3, got %d" % _selected_id)
+	if _selected_id != 2:
+		failures.append("cycle_crew from crew 1: expected id=2, got %d" % _selected_id)
 
 	# 4 & 5. move_to and NavigationAgent2D.
 	if crew_list.size() > 0:

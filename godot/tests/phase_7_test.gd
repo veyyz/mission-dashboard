@@ -94,8 +94,11 @@ func _run() -> void:
 
 	# 6 (cont). After landing, crew should now be spawned.
 	var post_crew: Array = get_nodes_in_group("crew")
-	if post_crew.size() != 6:
-		failures.append("After landing, expected 6 crew, got %d" % post_crew.size())
+	var expected_crew: int = 12  # 6 original roles + 6 SPECIALIST
+	if post_crew.size() != expected_crew:
+		failures.append(
+			"After landing, expected %d crew, got %d" % [expected_crew, post_crew.size()]
+		)
 
 	# 7. Camera step should auto-jump past the strategic threshold.
 	if camera != null:

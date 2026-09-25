@@ -12,6 +12,10 @@ enum Role {
 	GEOLOGIST,
 	MEDIC,
 	COMMANDER,
+	## Appended last so the existing role ints stay stable in save files.
+	## Specialists can scan and build like everyone else; they cannot deploy
+	## probes (crew_selection_manager.gd gates that on SCIENTIST).
+	SPECIALIST,
 }
 
 const ROLE_COLOR := {
@@ -21,6 +25,7 @@ const ROLE_COLOR := {
 	Role.GEOLOGIST: Color(0.95, 0.71, 0.30),  # amber
 	Role.MEDIC:     Color(0.92, 0.40, 0.45),  # red
 	Role.COMMANDER: Color(0.95, 0.85, 0.45),  # gold
+	Role.SPECIALIST: Color(0.62, 0.68, 0.78),  # steel grey
 }
 
 const ROLE_LABEL := {
@@ -30,17 +35,25 @@ const ROLE_LABEL := {
 	Role.GEOLOGIST: "Geologist",
 	Role.MEDIC:     "Medic",
 	Role.COMMANDER: "Commander",
+	Role.SPECIALIST: "Specialist",
 }
 
 const CREW_SPRITE_ROOT := "res://assets/sprites/crew/"
+## Default art folder per role, used by the original six. Anyone sharing a
+## role (every SPECIALIST does) must set `sprite_folder` instead.
 const CREW_FOLDER := {
 	Role.ENGINEER:  "alex",
-	Role.SCIENTIST: "maya",
-	Role.BOTANIST:  "zane",
-	Role.GEOLOGIST: "rin",
-	Role.MEDIC:     "medic",
-	Role.COMMANDER: "commander",
+	Role.SCIENTIST: "maddie",
+	Role.BOTANIST:  "marrin",
+	Role.GEOLOGIST: "preston",
+	Role.MEDIC:     "thorin",
+	Role.COMMANDER: "vera",
 }
+
+## Pixellab exports come off the generator at whatever canvas the prompt
+## produced — the roster spans 92x136 to 164x244 — so every crew sprite is
+## scaled to this on-screen height. 180 matches the original six.
+const TARGET_SPRITE_HEIGHT: float = 180.0
 
 const SPEED: float = 140.0
 const ARRIVAL_DISTANCE: float = 4.0
@@ -55,6 +68,9 @@ const WALKING_FPS: float = 8.0
 @export var crew_id: int = 1
 @export var role: Role = Role.ENGINEER
 @export_range(0, 100) var role_skill: int = 80
+## Art folder under CREW_SPRITE_ROOT. Overrides the role default, which is how
+## several crew can share a role and still look different.
+@export var sprite_folder: String = ""
 
 @export var max_health: int = 100
 @export var max_stamina: int = 100
@@ -85,7 +101,7 @@ func _ready() -> void:
 	current_health = max_health
 	current_stamina = max_stamina
 
-	# ConstructionSite uses get_nodes_in_group("crew") to find adjacent engineers.
+	# ConstructionSite uses get_nodes_in_group("crew") to find adjacent builders.
 	add_to_group("crew")
 	# FogOfWar reveals tiles within VISION_RADIUS of any "vision_source" each frame.
 	add_to_group("vision_source")
@@ -99,6 +115,12 @@ func _ready() -> void:
 		var first_tex: Texture2D = sf.get_frame_texture("idle_south", 0)
 		if first_tex != null:
 			anim_sprite.offset = Vector2(0, -first_tex.get_height() / 2)
+			# Normalize to one on-screen height. `offset` is applied before
+			# scale, so anchoring the feet above still holds after scaling.
+			var h: float = float(first_tex.get_height())
+			if h > 0.0:
+				var s: float = TARGET_SPRITE_HEIGHT / h
+				anim_sprite.scale = Vector2(s, s)
 		anim_sprite.play("idle_%s" % _last_dir)
 		anim_sprite.visible = true
 		sprite.visible = false
@@ -131,14 +153,17 @@ func _physics_process(_delta: float) -> void:
 		var to_next: Vector2 = next_pos - global_position
 		if to_next.length() > ARRIVAL_DISTANCE:
 			move = to_next.normalized() * SPEED
-	elif selected:
-		var dir := Vector2.ZERO
-		if Input.is_action_pressed("move_up"):    dir.y -= 1.0
-		if Input.is_action_pressed("move_down"):  dir.y += 1.0
-		if Input.is_action_pressed("move_left"):  dir.x -= 1.0
-		if Input.is_action_pressed("move_right"): dir.x += 1.0
+	elif selected and not PadInput.suppresses_crew_movement():
+		# `get_vector` keeps keyboard input at full magnitude while letting a
+		# gamepad stick drive analog speed off the same four actions.
+		var dir: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 		if dir != Vector2.ZERO:
-			move = dir.normalized() * SPEED
+			# `dir` is in screen space; the world root is rotated (Ground.tscn
+			# `rotation = 0.0872665`) while the camera sets `ignore_rotation`,
+			# so convert screen -> world the same way the camera pan does
+			# (world_camera.gd `pan_by`). Without this, screen-up walks 5 off.
+			var world_rot: float = _world_rotation()
+			move = dir.rotated(world_rot) * SPEED * minf(dir.length(), 1.0)
 	velocity = move
 	move_and_slide()
 
@@ -181,8 +206,13 @@ func _apply_nameplate() -> void:
 	nameplate.add_theme_constant_override("outline_size", 4)
 
 
+## Art folder for this crew: the per-crew override wins, else the role default.
+func _art_folder() -> String:
+	return sprite_folder if sprite_folder != "" else CREW_FOLDER.get(role, "")
+
+
 func _load_crew_texture() -> Texture2D:
-	var folder: String = CREW_FOLDER.get(role, "")
+	var folder: String = _art_folder()
 	if folder == "":
 		return null
 	var path := "%s%s/rotations/south.png" % [CREW_SPRITE_ROOT, folder]
@@ -192,7 +222,7 @@ func _load_crew_texture() -> Texture2D:
 
 
 func _build_sprite_frames() -> SpriteFrames:
-	var folder: String = CREW_FOLDER.get(role, "")
+	var folder: String = _art_folder()
 	if folder == "":
 		return null
 	var base := "%s%s/" % [CREW_SPRITE_ROOT, folder]
@@ -217,6 +247,11 @@ func _build_sprite_frames() -> SpriteFrames:
 			var f := "%sanimations/walking/%s/frame_%03d.png" % [base, d, i]
 			if ResourceLoader.exists(f):
 				sf.add_frame(walk, load(f))
+		# No walk frames yet (static-only character): reuse the idle rotation so
+		# the crew stays visible and faces the right way while moving, just
+		# without a walk cycle.
+		if sf.get_frame_count(walk) == 0 and ResourceLoader.exists(rot_path):
+			sf.add_frame(walk, load(rot_path))
 	return sf
 
 
@@ -267,3 +302,11 @@ func _build_selection_ring_texture() -> Texture2D:
 				var alpha: float = 0.85 * (1.0 - abs(d - 0.78) * 4.0)
 				img.set_pixel(x, y, Color(0.36, 0.71, 0.84, clampf(alpha, 0.0, 0.85)))
 	return ImageTexture.create_from_image(img)
+
+
+## Rotation of the world root (Ground.tscn is rotated ~5 degrees while the
+## camera runs with `ignore_rotation`), used to convert screen-space input
+## direction into world-space velocity. Mirrors world_camera.gd `pan_by`.
+func _world_rotation() -> float:
+	var world_root: Node = get_tree().get_first_node_in_group("world_root")
+	return (world_root as Node2D).rotation if world_root is Node2D else 0.0

@@ -1,5 +1,5 @@
 extends PanelContainer
-## Bottom-center quick-actions strip. Five buttons (Move / Scan / Probe /
+## 24Bottom-center quick-actions strip. Five buttons (Move / Scan / Probe /
 ## Sample / Crew Menu) with key hints. Phase-6 wiring is visual only —
 ## click handlers fire EventBus.log_message stubs; the real R/F/G action
 ## logic lands in Phase 8.

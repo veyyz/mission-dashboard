@@ -239,3 +239,97 @@
 
 
 
+
+## Gamepad support (generic Bluetooth pad: 1 stick + 3 buttons)
+- Status: completed
+- Hardware target: basic BT pad, one 360° analog stick + three usable buttons, enumerating with **raw unmapped indices** (`buttons[2]` cancel, `buttons[3]` confirm, `buttons[4]` stick-click). No SDL mapping, so `JOY_BUTTON_A/B/X/Y` do not describe it — every binding is by integer index from data.
+- Control scheme — two modes, toggled by stick click:
+  - **CREW**: stick walks the selected crew (analog). `[3]` fires the role context action (Scientist → deploy probe, else sample if a deposit is in range, else scan). `[2]` advances a 7-slot focus ring: crew 1→2→…→6→**free explore**→1.
+  - **Free explore** (7th slot): nobody selected, camera forced to `PAN`, stick flies the camera. Crew walking stops by itself because `crew_member.gd` only reads the stick while `selected`. `[3]` snaps back to the last crew.
+  - **CURSOR**: stick drives an on-screen cursor that warps the real mouse, so every existing pointer consumer works untouched — build menu, ghost placement, demolish, landing confirm, zoom buttons, sliders, panel drag. `[3]` is left click (press/release mirrored so hold-drag works; double-tap sets `double_click` for click-to-move), `[2]` is right click.
+- Implemented:
+  - **`data/gamepad.json`** (new) — device/axis/button indices, deadzone, cursor speed ramp, pan speed, double-tap window, `debug_probe`. The only remap surface; no remap UI.
+  - **`scripts/autoload/game_state.gd`** — loads the pad config (forward-compatible, merged over a `PAD_DEFAULTS` fallback) and gained `_setup_joypad_bindings()`. Stick axes are added to the **existing** `move_up/down/left/right` actions, so crew walking is analog for free; three new actions `pad_confirm` / `pad_cancel` / `pad_mode` carry the joypad buttons. `InputMap.action_set_deadzone` drops the move actions from Godot's default 0.5 to 0.22 (a cheap pad drifts). `_add_event_once` keeps re-running the setup idempotent.
+  - **`scripts/autoload/pad_input.gd`** (new 11th autoload) — mode state, virtual cursor, click synthesis, hint label. `PROCESS_MODE_ALWAYS` so the cursor survives pause. Owns a `CanvasLayer` at layer 100 with a runtime-generated arrow texture (no art dependency, same approach as `build_placement_controller._build_ghost_texture`) and a bottom-centre hint line that prints the actual configured button numbers. Manual prev-frame edge tracking, matching the `is_action_just_pressed`-is-unreliable note in `crew_selection_manager.gd:13-17`.
+  - **`scripts/crew/crew_selection_manager.gd`** — joins group `crew_manager`; new `cycle_focus(step)` (7-slot ring, free-explore slot emits `crew_selected(0)`), `has_selection()`, `deselect_all()`, `invoke_context_action() -> bool` (false ⇒ free explore ⇒ PadInput recenters instead). `_do_collect_sample` split so `_find_sampleable()` can be probed without emitting the "no deposit" alert. `_select` now records `_focus_slot` so number keys and the crew panel keep the ring in step.
+  - **`scripts/world/world_camera.gd`** — `pan_by(screen_delta)` extracted from the inlined drag math and now shared by mouse drag, trackpad pan gesture and the free-explore stick. `recenter_on_last_crew()` + `_last_crew` + `_free_explore`. `_on_crew_selected(0)` clears the follow target and switches to `PAN` (previously it fell through the loop and left `_selected_crew` stale); returning to a crew restores `FOLLOW` only if free explore put it in `PAN`.
+  - **`scripts/crew/crew_member.gd`** — the four `is_action_pressed` branches collapsed into `Input.get_vector(...)` (analog on a stick, unit on keys), gated by `PadInput.suppresses_crew_movement()` so the stick doesn't walk crew while it's driving the cursor.
+  - **`scripts/autoload/event_bus.gd`** — `pad_mode_changed(mode)`, `pad_connected(connected, device_name)`.
+  - **`tests/gamepad_test.gd`** (new) — 8 checks: button/axis bindings match the JSON, deadzone applied, setup idempotent, mode toggle + signal, cursor moves and clamps, synthetic click places a building and right-click cancels, the full 7-slot ring, free-explore pan moves the camera and no crew, keyboard movement regression.
+- Bug fixed in-loop: a pan issued while a zoom/recenter `Tween` was still in flight went nowhere — the tween rewrote `global_position` every frame. `pan_by` now kills the tween and snaps `zoom` to `ZOOM_LEVELS[step]` so deliberate input outranks the animation. This also affected existing mouse-drag panning during a zoom step.
+- Fixed alongside: crew movement was applying a **screen-space** direction as **world-space** velocity. `Ground.tscn` sets `rotation = 0.0872665` (5°) while `ground.gd` sets `camera.ignore_rotation = true`, so screen-up walked 5° off. `crew_member.gd` now rotates the input direction by the world root's rotation, the same conversion `pan_by` does. Pre-existing on keyboard; noticed because the stick made it obvious.
+- Build: clean (`[PadInput] Ready. Pad connected: false`). 180-frame headless boot of `Ground.tscn` produces no warnings or errors.
+- Test: **PASS**. Full regression phases 2–9: all PASS.
+- Deferred:
+  - Pad-native zoom — reachable by clicking the `ZoomControls` buttons in CURSOR mode. Stick/chord zoom not wired.
+  - `pause_game`, `speed_1x/2x/4x` still unbound on the pad (they have no consumer on the keyboard either).
+  - No focus-chain retrofit (`focus_mode`/`grab_focus` are still unused project-wide) — CURSOR mode covers UI instead. Revisit if a pad with a d-pad + 4 face buttons becomes a target.
+  - `hud_panel_hotbar.gd` still polls raw `KEY_0..KEY_9` and stays keyboard-only; its slots bind to nothing yet.
+  - No remap UI and no button glyph art — `data/gamepad.json` and plain-text hints.
+- Files added: 3 new (`data/gamepad.json`, `scripts/autoload/pad_input.gd`, `tests/gamepad_test.gd`); 6 modified (`project.godot`, `game_state.gd`, `event_bus.gd`, `crew_member.gd`, `crew_selection_manager.gd`, `world_camera.gd`)
+
+## Roster expansion: 5 new characters (Rainbow, Rush, Mister E, PrimeMax, Brandon)
+- Status: completed
+- Source: 5 Pixellab zip exports (`export_version` 3.1), each `Idle/rotations/{8 dirs}.png` + `metadata.json`. **Idle rotations only — no walk animation frames.** `_build_sprite_frames` already falls back to reusing the idle rotation for `walking_*`, so they animate direction-correctly but don't have a walk cycle.
+- Decisions taken (user):
+  - All five are a **new `Role.SPECIALIST`**, appended last in the enum so the existing role ints stay valid in save files. Specialists can scan; they cannot build (`construction_site.gd:94` gates on `ENGINEER`) or deploy probes (`crew_selection_manager.gd:90` gates on `SCIENTIST`).
+  - **Per-crew number keys dropped.** 11 crew outgrew the number row, so `select_crew_1..6` is gone and selection is a single cycle: **Tab** forward, **Shift+Tab** backward, through all 11 crew plus the free-explore slot. Same ring the gamepad cycle button drives, so keyboard and pad now share one selection model.
+  - **All sprites normalized** to a common on-screen height.
+- Implemented:
+  - **`assets/sprites/crew/{rainbow,rush,mistere,primemax,brandon}/rotations/*.png`** — extracted flat (the zips' `Idle/` level dropped) to match the existing `<folder>/rotations/<dir>.png` convention. Each folder also keeps `pixellab_metadata.json` for prompt provenance.
+  - **`scripts/crew/crew_member.gd`** — `Role.SPECIALIST` + its colour (steel grey) and label. New `@export var sprite_folder` with `_art_folder()` resolving per-crew override before the role default, because `CREW_FOLDER` is keyed by role and five crew now share one. New `TARGET_SPRITE_HEIGHT = 180.0`: `_ready` scales `AnimatedSprite2D` by `180 / texture_height`. Exports range 92×136 to 164×244, so without this Brandon and Rush rendered ~1.8× over Mister E. `offset` is applied before `scale`, so the existing feet-anchor Y-sort trick still holds.
+  - **`scripts/world/ground.gd`** — `CREW_ROSTER` grew to 11 with an `art` field per entry; `_spawn_crew` passes it to `crew.sprite_folder`. New crew occupy two more offset rows.
+  - **`scripts/autoload/game_state.gd`** — `select_crew_1..6` replaced by one `cycle_crew` action on `KEY_TAB`.
+  - **`scripts/crew/crew_selection_manager.gd`** — `MAX_CREW` 6 → 11; the six-way select poll replaced by a `cycle_crew` edge that calls `cycle_focus(-1 if shift else 1)`. Ring is now 12 slots. Polling `Input.is_action_pressed` rather than consuming the event means Godot's built-in `ui_focus_next` (also Tab) can't swallow it.
+  - **`crew_ids.json`** — the 5 new Pixellab character IDs recorded with import date and source.
+- Verified: all 11 crew resolve real art (`_use_animated == true`) and land on a 180 px screen height — measured scales 0.74 (Rush, Brandon) to 1.32 (Mister E). PNG import clean, no errors on boot.
+- Tests updated: `phase_4_test` (roster count 6→11, role range 0..5→0..6, `select_crew_3` press → `cycle_crew` press asserting crew 1→2), `phase_7_test` (post-landing crew count 6→11), `gamepad_test` (ring walks `range(2, MAX_CREW + 1)`).
+- Test: **PASS** — gamepad plus full regression phases 2–9.
+- Deferred:
+  - Walk-cycle animations for the 5 new characters (Pixellab `animate_character`); they currently reuse the idle rotation while moving.
+  - No per-specialist ability differentiation — all five behave identically. Split into distinct roles if they need their own kit.
+  - HUD crew panel is a flat `HBox` of portraits; at 11 crew it will want wrapping or scrolling.
+  - Sprite normalization keys off canvas height, not the character's actual pixel extent, so characters with unusual padding may still read slightly off.
+- Files added: 5 asset folders (40 PNGs + 5 metadata); modified: `crew_member.gd`, `ground.gd`, `game_state.gd`, `crew_selection_manager.gd`, `crew_ids.json`, `phase_4_test.gd`, `phase_7_test.gd`, `gamepad_test.gd`
+
+## Roster expansion (cont.): Athena
+- Status: completed
+- Same Pixellab zip shape as the previous five (export v3.1, 8 idle rotations + `metadata.json`, **no walk frames**), 172×256 — the tallest export so far.
+- Added as the 6th `Role.SPECIALIST`, `crew_id` 12, skill 89, spawn offset `Vector2(96, 144)`. `MAX_CREW` 11 → 12, so the focus ring is now 13 slots (12 crew + free explore). Pixellab id recorded in `crew_ids.json`.
+- Verified: all 12 crew resolve real art; Athena normalizes at scale 0.70 (256 → 180 px screen height).
+- Gotcha worth remembering: **new PNGs need an explicit import pass before a `-s` script run can see them.** `ResourceLoader.exists()` returns false until the `.import` files exist, so `_build_sprite_frames` silently falls back to the placeholder rect and the crew reads `_use_animated == false`. Earlier batches happened to get imported by an incidental `--quit-after` boot; Athena did not. Fix is one command before testing new art:
+  `Godot_v4.6.2/Godot_v4.6.2-stable_win64_console.exe --headless --path godot --import`
+- Tests updated: `phase_4_test` (12 crew), `phase_7_test` (post-landing count 12).
+- Test: **PASS** — gamepad plus full regression phases 2–9.
+- Files added: `assets/sprites/crew/athena/` (8 PNGs + metadata); modified: `ground.gd`, `crew_selection_manager.gd`, `crew_ids.json`, `phase_4_test.gd`, `phase_7_test.gd`
+
+## Art swap-in: MatterForge building sprite
+- Status: completed
+- User supplied `MatterForge.png` (1920×1080 "MOON FORGE" iso render). `building.gd::_load_building_texture` already looks for `assets/sprites/buildings/<building_key>.png`, so the only work was conditioning the image — no code change to the building path.
+- **`tools/import_building_art.gd`** (new, reusable) — `-s tools/import_building_art.gd -- <source.png> <building_key> [bg_tolerance] [max_width]`:
+  1. **Background → alpha by flood fill inward from the canvas border**, not a global colour threshold. A threshold would punch holes in the artwork's own dark pixels (vents, outlines, the shadowed furnace interior); only background connected to the edge is cleared. Tolerance defaults to 24/255 so a near-black export still keys out.
+  2. **Crop to `get_used_rect()`.** Required, not cosmetic: `_apply_iso_transform` scales by the texture rect, so leftover empty margin would shrink the visible building inside its footprint.
+  3. **Downscale to 512 px wide** (Lanczos). The source cropped to 1453×1044 at 1.9 MB against 28–42 KB siblings, and an 8-cell footprint only renders 356×256. With `textures/canvas_textures/default_texture_filter=0` (nearest), squeezing a 1453 px texture down at runtime just shimmers. 512 leaves headroom for the 2.85× zoom step and matches the existing `habitat_xl.png`.
+- Result: `assets/sprites/buildings/matter_forge.png`, 512×368, 327 KB. Verified in-engine — `_is_real_sprite == true`, scale 0.696, renders 356×256 inside the 8-cell (512×256) iso box.
+- Gotcha (same as the crew art): run `--headless --path godot --import` after dropping in a new PNG, or `ResourceLoader.exists` misses it and the building silently falls back to its placeholder rect.
+- Test: **PASS** — phases 5–9 plus gamepad.
+- Deferred: the other 9 buildings still render generated placeholder rects. `data/buildings.json` also points `matter_forge.icon` at `assets/sprites/ui/icon_matter_forge.png`, which does not exist yet — no consumer reads `icon` today.
+- Files added: `tools/import_building_art.gd`, `assets/sprites/buildings/matter_forge.png`
+
+## Build gate removed: any crew can construct
+- Status: completed
+- Answering "who can build?": before this, **only Alex**. Placement was never role-gated — anyone could open the build menu and drop a site — but `construction_site.gd::_engineer_in_reach()` only ticked the progress bar while a `Role.ENGINEER` stood within reach, so every construction job in the colony funnelled through one crew member. With a 12-strong roster (six sharing SPECIALIST) that was a hard bottleneck.
+- Change: `_engineer_in_reach()` → `_builder_in_reach()`, role check dropped; `ENGINEER_REACH` → `BUILD_REACH` (still 128 px). Any crew in the group now advances a site. No speed bonus for Engineers — the ask was flat parity; add a per-role multiplier in `tick()` later if building should still favour them.
+- Also updated: the tutorial panel line ("Engineer (Alex) ticks the construction bar" → "Any crew member…"), and the now-wrong SPECIALIST comment in `crew_member.gd` claiming they cannot build.
+- Test added — `phase_5_test` check 7: parks every Engineer 5000 px away, puts a non-Engineer on a fresh site, asserts progress advances.
+- **Headless trap found while writing that test** (worth remembering, cost a debugging round): *naming `CrewMember` inside a `SceneTree` test script silently breaks crew spawning.* `Ground._spawn_crew` prints `Crew=0` and the "crew" group comes back empty — GDScript's `class_name` discovery is order-sensitive in headless mode, the same failure already documented for `BuildPlacementController`/`ConstructionSite` in Phase 5. No error is raised; the roster just never spawns, so unrelated assertions in the same test keep passing and only crew-dependent ones fail. **Test scripts must duck-type crew** (`node.get("role")`, compare against a local role int) instead of casting to `CrewMember`.
+- Test: **PASS** — full regression phases 2–9 plus gamepad.
+- Files modified: `construction_site.gd`, `hud_panel_tutorial.gd`, `crew_member.gd` (comment), `phase_5_test.gd`
+
+## MatterForge scaled 2×
+- Status: completed
+- `data/buildings.json` → `matter_forge.footprint_cells` 8 → 16. That drives the visual iso-diamond fit, the inset collision diamond, and the nav obstacle together, so the building, its blocker, and its walkable perimeter all scale as one.
+- Re-imported the art at `max_width 1024` (was 512). The doubled footprint renders 712 px wide, so a 512 px texture would have been upscaled past native and gone soft under nearest filtering. Now 1024×736, 1.1 MB — heavier than the other buildings, justified for a hero structure at this size.
+- Verified in-engine: `cells=16`, scale 0.696, rendered **712×512** — exactly double the previous 356×256.
+- Note: `matter_forge.size` is still `[3, 3]`. Nothing reads `size` today (grid-footprint validation is still deferred); `footprint_cells` is the field that matters. Worth reconciling if size-based placement validation ever lands.
+- Test: **PASS** — full regression phases 2–9 plus gamepad.

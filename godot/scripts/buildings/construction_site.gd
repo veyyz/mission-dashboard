@@ -1,13 +1,13 @@
 class_name ConstructionSite
 extends Node2D
 ## Construction site. Spawns at placement, renders a wireframe ghost, and
-## ticks build progress while at least one Engineer is within
-## `ENGINEER_REACH` global pixels. On completion, replaces itself with the
+## ticks build progress while at least one crew member — any role — is within
+## `BUILD_REACH` global pixels. On completion, replaces itself with the
 ## finished building scene (per `BuildingDatabase.get_scene_path(key)`) and
 ## fires `EventBus.building_completed` (the building's own `_ready` does the
 ## emit).
 
-const ENGINEER_REACH: float = 128.0  # pixels — generous grid-cell radius
+const BUILD_REACH: float = 128.0  # pixels — generous grid-cell radius
 
 @export var building_key: String = "solar_array"
 
@@ -72,7 +72,7 @@ func _apply_iso_transform() -> void:
 
 
 func _process(delta: float) -> void:
-	if _engineer_in_reach():
+	if _builder_in_reach():
 		tick(delta)
 
 
@@ -87,13 +87,17 @@ func tick(seconds: float) -> void:
 		_complete()
 
 
-func _engineer_in_reach() -> bool:
+## Any crew member can build. The role gate that used to require an ENGINEER
+## was removed deliberately — with a 12-strong roster, six of whom share the
+## SPECIALIST role, funnelling every construction job through one crew member
+## made building a bottleneck.
+func _builder_in_reach() -> bool:
 	# CrewMember._ready() registers itself in the "crew" group.
 	for node in get_tree().get_nodes_in_group("crew"):
 		var crew := node as CrewMember
-		if crew == null or crew.role != CrewMember.Role.ENGINEER:
+		if crew == null:
 			continue
-		if crew.global_position.distance_to(global_position) <= ENGINEER_REACH:
+		if crew.global_position.distance_to(global_position) <= BUILD_REACH:
 			return true
 	return false
 

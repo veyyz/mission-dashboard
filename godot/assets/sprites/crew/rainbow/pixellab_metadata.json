@@ -1,0 +1,36 @@
+{
+  "group_id": "487edf5e-7101-4d98-bdd1-58eff1cb694d",
+  "states": [
+    {
+      "character": {
+        "id": "c32f390b-0c67-4d95-8018-5c51f9386639",
+        "name": "Idle",
+        "prompt": "Cute 64-bit pixel-art female astronaut character, full body, transparent background, no scenery. Dark brown skin, huge expressive brown eyes, rosy cheeks, enormous flowing golden-yellow hair, white-and-yellow astronaut helmet with blue visor reflections and pink side detail, bright pink and white futuristic space suit with Saturn emblem, white padded gloves, rainbow-striped legs, chunky white knee pads, and adorable purple/lavender astronaut boots with white cuffs and yellow accents. Cheerful low-gravity pose, slightly floating with one leg lifted. Crisp square pixels, bold dark outlines, vibrant retro-game palette, detailed blocky shading, polished 64-bit video-game sprite, charming futuristic Moon mission aesthetic.\n",
+        "size": {
+          "width": 124,
+          "height": 184
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-11T23:54:15.800898+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-12T00:32:08.245935"
+}

@@ -32,6 +32,7 @@ BuildingDatabase="*res://scripts/autoload/building_database.gd"
 RecipeProcessor="*res://scripts/autoload/recipe_processor.gd"
 EventManager="*res://scripts/autoload/event_manager.gd"
 WinLoseManager="*res://scripts/autoload/win_lose_manager.gd"
+PadInput="*res://scripts/autoload/pad_input.gd"
 
 [display]
 
