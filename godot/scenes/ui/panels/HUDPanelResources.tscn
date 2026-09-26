@@ -15,14 +15,10 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [node name="HUDPanelResources" type="PanelContainer"]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -380.0
+offset_left = 553.0
 offset_top = 16.0
-offset_right = 380.0
-offset_bottom = 90.0
-grow_horizontal = 2
+offset_right = 1431.0
+offset_bottom = 242.0
 theme_override_styles/panel = SubResource("SBF_1")
 script = ExtResource("1")
 
@@ -33,7 +29,38 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 14
 theme_override_constants/margin_bottom = 8
 
-[node name="HBox" type="HBoxContainer" parent="Margin"]
+[node name="VBox" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 6
+
+[node name="Vitals" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 18
 alignment = 1
+
+[node name="Divider" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Rule" type="ColorRect" parent="Margin/VBox/Divider"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+color = Color(0.36, 0.71, 0.84, 0.35)
+
+[node name="Toggle" type="Button" parent="Margin/VBox/Divider"]
+layout_mode = 2
+flat = true
+text = "▾ STOCKPILE"
+
+[node name="Rule2" type="ColorRect" parent="Margin/VBox/Divider"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+color = Color(0.36, 0.71, 0.84, 0.35)
+
+[node name="Stock" type="VBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4

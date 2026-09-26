@@ -13,6 +13,7 @@ const BUILDING_SPRITE_ROOT := "res://assets/sprites/buildings/"
 var definition: Dictionary = {}
 var _produces_applied: Dictionary = {}
 var _consumes_applied: Dictionary = {}
+var _caps_applied: Dictionary = {}
 var _is_real_sprite: bool = false
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -124,6 +125,8 @@ func _exit_tree() -> void:
 		ResourceManager.add_to_rate(r_name, -_produces_applied[r_name])
 	for r_name in _consumes_applied.keys():
 		ResourceManager.add_to_rate(r_name, _consumes_applied[r_name])
+	for r_name in _caps_applied.keys():
+		ResourceManager.set_max(r_name, ResourceManager.get_max(r_name) - _caps_applied[r_name])
 
 
 func _apply_rates() -> void:
@@ -137,6 +140,12 @@ func _apply_rates() -> void:
 		var amount: float = float(consumes[r_name])
 		ResourceManager.add_to_rate(r_name, -amount)
 		_consumes_applied[r_name] = amount
+	# Storage buildings raise caps instead of rates (buildings.json `raises_cap`).
+	var raises: Dictionary = definition.get("raises_cap", {})
+	for r_name in raises.keys():
+		var amount: float = float(raises[r_name])
+		ResourceManager.set_max(r_name, ResourceManager.get_max(r_name) + amount)
+		_caps_applied[r_name] = amount
 
 
 func _grid_position() -> Vector2i:
@@ -179,4 +188,9 @@ func _palette_for_key() -> Color:
 		"storage_silo":   return Color(0.55, 0.55, 0.60)
 		"comms_dish":     return Color(0.80, 0.80, 0.85)
 		"research_lab":   return Color(0.65, 0.55, 0.85)
+		"regolith_excavator": return Color(0.80, 0.65, 0.35)
+		"sintering_kiln": return Color(0.85, 0.50, 0.30)
+		"reduction_plant": return Color(0.60, 0.45, 0.45)
+		"mre_smelter":    return Color(0.75, 0.75, 0.60)
+		"hospital":       return Color(0.95, 0.95, 0.95)
 		_:                return Color(0.60, 0.60, 0.65)

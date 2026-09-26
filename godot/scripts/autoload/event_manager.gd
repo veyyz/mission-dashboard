@@ -65,7 +65,7 @@ func _fire(event_id: String, ev: Dictionary) -> void:
 		match t:
 			"add_resource":
 				ResourceManager.add(
-					effect.get("resource", "materials"),
+					effect.get("resource", "machine_parts"),
 					float(effect.get("amount", 0)),
 				)
 			_:

@@ -15,14 +15,10 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [node name="HUDPanelCrew" type="PanelContainer"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = -160.0
-offset_right = 540.0
-offset_bottom = -50.0
-grow_vertical = 0
+offset_left = 358.0
+offset_top = 941.0
+offset_right = 1561.0
+offset_bottom = 1064.0
 theme_override_styles/panel = SubResource("SBF_1")
 script = ExtResource("1")
 
@@ -44,3 +40,4 @@ theme_override_colors/font_color = Color(0.36, 0.71, 0.84, 1)
 [node name="HBox" type="HBoxContainer" parent="Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 6
+alignment = 1

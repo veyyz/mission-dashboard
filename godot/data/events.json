@@ -10,12 +10,14 @@
   },
   "supply_drop": {
     "display_name": "Resupply from Earth",
-    "description": "An automated capsule arrives with materials.",
+    "description": "An automated capsule arrives with Earth-made parts the colony cannot fabricate yet.",
     "trigger_chance_per_day": 0.08,
     "min_day": 3,
     "requires_building": "comms_dish",
     "effects": [
-      { "type": "add_resource", "resource": "materials", "amount": 200 }
+      { "type": "add_resource", "resource": "electronics", "amount": 6 },
+      { "type": "add_resource", "resource": "rare_metals", "amount": 8 },
+      { "type": "add_resource", "resource": "machine_parts", "amount": 6 }
     ]
   },
   "equipment_failure": {

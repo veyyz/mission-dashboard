@@ -50,7 +50,7 @@ func _verify_autoloads() -> bool:
 
 func _print_smoke_test() -> void:
 	print("\nResources at boot:")
-	for r_name in ["power", "oxygen", "food", "materials", "science", "crew"]:
+	for r_name in ["power", "oxygen", "water", "food", "science", "crew"]:
 		print("  %-10s %d / %d" % [
 			r_name,
 			ResourceManager.get_current(r_name),

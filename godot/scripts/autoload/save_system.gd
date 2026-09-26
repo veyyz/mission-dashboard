@@ -251,7 +251,7 @@ func _restore_resource_nodes(arr: Array) -> void:
 	var packed: PackedScene = load("res://scenes/world/ResourceNode.tscn") as PackedScene
 	for entry in arr:
 		var rn: Node2D = packed.instantiate()
-		rn.deposit_type = entry.get("deposit_type", "iron")
+		rn.deposit_type = entry.get("deposit_type", "ilmenite")
 		rn.amount = int(entry.get("amount", 0))
 		var pos: Array = entry.get("position", [0, 0])
 		rn.position = Vector2(pos[0], pos[1])

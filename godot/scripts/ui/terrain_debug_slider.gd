@@ -3,7 +3,6 @@ extends CanvasLayer
 ## opacity. Values reported in labels so user can read them and bake
 ## into `terrain_overlay.gd` as defaults.
 
-@onready var collapse_btn: Button = $Panel/Margin/VBox/Header/CollapseButton
 @onready var content: VBoxContainer = $Panel/Margin/VBox/Content
 @onready var rot_slider: HSlider = $Panel/Margin/VBox/Content/RotSlider
 @onready var rot_label: Label = $Panel/Margin/VBox/Content/RotLabel
@@ -22,7 +21,7 @@ var _terrain: Sprite2D = null
 
 
 func _ready() -> void:
-	collapse_btn.pressed.connect(_on_collapse_pressed)
+	preload("res://scripts/ui/hud_chrome.gd").install($Panel, "TERRAIN DEBUG", "", true)
 	var nodes: Array = get_tree().get_nodes_in_group("terrain_overlay")
 	if not nodes.is_empty():
 		_terrain = nodes[0]
@@ -42,11 +41,6 @@ func _ready() -> void:
 	shear_y_slider.value_changed.connect(_on_shear_y)
 	opacity_slider.value_changed.connect(_on_opacity)
 	_refresh_labels()
-
-
-func _on_collapse_pressed() -> void:
-	content.visible = not content.visible
-	collapse_btn.text = "▼" if content.visible else "▶"
 
 
 func _on_rot(v: float) -> void:

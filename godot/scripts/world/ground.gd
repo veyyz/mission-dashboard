@@ -117,12 +117,12 @@ func _spawn_crew(landing_pos: Vector2) -> void:
 ## tile layer's map_to_local helper.
 func _spawn_resource_nodes() -> void:
 	const NODE_LAYOUT: Array = [
-		{"type": "iron",        "amount": 12, "cell": Vector2i(-50, -10)},
-		{"type": "silicon",     "amount": 10, "cell": Vector2i( 50, -10)},
+		{"type": "ilmenite",    "amount": 12, "cell": Vector2i(-50, -10)},
+		{"type": "anorthite",   "amount": 10, "cell": Vector2i( 50, -10)},
 		{"type": "water_ice",   "amount":  8, "cell": Vector2i(-15, -45)},
-		{"type": "titanium",    "amount":  9, "cell": Vector2i( 15, -45)},
+		{"type": "ilmenite",    "amount":  9, "cell": Vector2i( 15, -45)},
 		{"type": "helium3",     "amount":  7, "cell": Vector2i(-15,  45)},
-		{"type": "rare_metals", "amount":  5, "cell": Vector2i( 15,  45)},
+		{"type": "kreep",       "amount":  5, "cell": Vector2i( 15,  45)},
 	]
 	var node_scene: PackedScene = preload("res://scenes/world/ResourceNode.tscn")
 	for entry in NODE_LAYOUT:

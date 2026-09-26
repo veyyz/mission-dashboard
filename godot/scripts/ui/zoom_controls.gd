@@ -12,6 +12,7 @@ var _camera: Camera2D = null
 
 
 func _ready() -> void:
+	preload("res://scripts/ui/hud_chrome.gd").install($Panel, "ZOOM")
 	zoom_in_btn.pressed.connect(_on_zoom_in)
 	zoom_out_btn.pressed.connect(_on_zoom_out)
 	mode_button.pressed.connect(_on_mode_pressed)

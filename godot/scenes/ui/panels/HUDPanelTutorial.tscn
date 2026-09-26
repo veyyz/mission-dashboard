@@ -15,14 +15,10 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [node name="HUDPanelTutorial" type="PanelContainer"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -360.0
-offset_top = 80.0
-offset_right = -16.0
-offset_bottom = 280.0
-grow_horizontal = 0
+offset_left = 16.0
+offset_top = 720.0
+offset_right = 358.0
+offset_bottom = 1064.0
 theme_override_styles/panel = SubResource("SBF_1")
 script = ExtResource("1")
 

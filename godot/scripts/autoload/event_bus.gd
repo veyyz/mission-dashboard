@@ -11,6 +11,7 @@ signal mission_day_advanced(day: int)
 # --- Resources ---
 signal resource_changed(resource_name: String, current: float, maximum: float, rate_per_min: float)
 signal resource_depleted(resource_name: String)
+signal resource_inspect_requested(resource_name: String)  # vital/chip clicked → inspector panel
 
 # --- Time ---
 signal time_tick(in_game_minutes: int)

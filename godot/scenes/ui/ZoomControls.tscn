@@ -18,10 +18,10 @@ corner_radius_bottom_left = 6
 script = ExtResource("1_zoom")
 
 [node name="Panel" type="PanelContainer" parent="."]
-offset_left = 1560.0
+offset_left = 1561.0
 offset_top = 16.0
-offset_right = 1900.0
-offset_bottom = 64.0
+offset_right = 1904.0
+offset_bottom = 84.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="Margin" type="MarginContainer" parent="Panel"]

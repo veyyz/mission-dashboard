@@ -5,7 +5,7 @@ extends Node2D
 ## (R) sweeps within radius. `collect_one()` decrements `amount` and emits
 ## `EventBus.sample_collected`.
 
-@export var deposit_type: String = "iron"
+@export var deposit_type: String = "ilmenite"
 @export var amount: int = 5
 
 const SAMPLE_RANGE: float = 80.0  # crew must be within this to G-collect
@@ -29,7 +29,7 @@ func reveal() -> void:
 		return
 	discovered = true
 	_refresh()
-	EventBus.log_message.emit("Discovered %s deposit" % deposit_type, "selection")
+	EventBus.log_message.emit("Discovered %s deposit" % ResourceManager.display_name(deposit_type), "selection")
 
 
 func can_be_sampled_by(crew_pos: Vector2) -> bool:
@@ -53,7 +53,7 @@ func _grid_pos() -> Vector2i:
 func _refresh() -> void:
 	if discovered:
 		modulate = Color(1, 1, 1, 1)
-		label.text = "%s (%d)" % [deposit_type, amount]
+		label.text = "%s (%d)" % [ResourceManager.display_name(deposit_type), amount]
 		label.visible = true
 	else:
 		modulate = Color(0.5, 0.5, 0.55, 0.45)
@@ -70,10 +70,9 @@ func _build_placeholder() -> Texture2D:
 	const TYPE_COLOR := {
 		"water_ice":   Color(0.36, 0.81, 0.95),
 		"helium3":     Color(0.66, 0.45, 0.85),
-		"iron":        Color(0.85, 0.45, 0.40),
-		"titanium":    Color(0.55, 0.75, 0.85),
-		"silicon":     Color(0.50, 0.85, 0.55),
-		"rare_metals": Color(0.95, 0.71, 0.30),
+		"ilmenite":    Color(0.55, 0.40, 0.42),
+		"anorthite":   Color(0.80, 0.80, 0.72),
+		"kreep":       Color(0.85, 0.60, 0.30),
 	}
 	var c: Color = TYPE_COLOR.get(deposit_type, Color(0.7, 0.7, 0.75))
 	var img := Image.create(32, 24, false, Image.FORMAT_RGBA8)

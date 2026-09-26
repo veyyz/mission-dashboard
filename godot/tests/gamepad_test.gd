@@ -159,8 +159,8 @@ func _run() -> void:
 	if placement == null:
 		failures.append("BuildPlacementController missing in Ground.tscn")
 	else:
-		resource_manager.add("materials", 500.0)
-		resource_manager.add("silicon", 500.0)
+		for r_name in ["solar_cells", "alloy_beams", "wiring"]:
+			resource_manager.add(r_name, 100.0)
 		var sites_before: int = get_nodes_in_group("construction_sites").size()
 		placement.start_placement("solar_array")
 		if not placement.is_placing():

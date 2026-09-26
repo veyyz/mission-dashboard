@@ -14,6 +14,11 @@ var resource_manager: Node
 var building_database: Node
 
 var _building_completed_events: Array[Dictionary] = []
+var _last_log: String = ""
+
+
+func _on_log_message(message: String, _category: String) -> void:
+	_last_log = message
 
 
 func _init() -> void:
@@ -73,11 +78,15 @@ func _run() -> void:
 	if time_manager != null:
 		time_manager.set_time_scale(0.0)
 
-	# 3. place_building deducts materials + silicon.
+	# 3. place_building deducts every component in the cost dict
+	#    (solar_cells + alloy_beams + wiring for a Solar Array).
 	var solar_def: Dictionary = building_database.get_definition("solar_array")
 	var cost: Dictionary = solar_def.get("cost", {})
-	var before_materials: float = resource_manager.get_current("materials")
-	var before_silicon: float = resource_manager.get_current("silicon")
+	if cost.is_empty():
+		failures.append("solar_array has no cost")
+	var before_cost: Dictionary = {}
+	for r_name in cost.keys():
+		before_cost[r_name] = resource_manager.get_current(r_name)
 	var before_power_rate: float = resource_manager.get_rate("power")
 
 	event_bus.building_completed.connect(_on_building_completed)
@@ -89,22 +98,12 @@ func _run() -> void:
 		return
 	await process_frame
 
-	var after_materials: float = resource_manager.get_current("materials")
-	var after_silicon: float = resource_manager.get_current("silicon")
-	if not is_equal_approx(before_materials - after_materials, float(cost.get("materials", 0))):
-		failures.append(
-			"materials deduction wrong: expected %d, got %.1f" % [
-				int(cost.get("materials", 0)),
-				before_materials - after_materials,
-			]
-		)
-	if not is_equal_approx(before_silicon - after_silicon, float(cost.get("silicon", 0))):
-		failures.append(
-			"silicon deduction wrong: expected %d, got %.1f" % [
-				int(cost.get("silicon", 0)),
-				before_silicon - after_silicon,
-			]
-		)
+	for r_name in cost.keys():
+		var spent: float = before_cost[r_name] - resource_manager.get_current(r_name)
+		if not is_equal_approx(spent, float(cost[r_name])):
+			failures.append(
+				"%s deduction wrong: expected %d, got %.1f" % [r_name, int(cost[r_name]), spent]
+			)
 
 	# 4. ConstructionSite spawned.
 	if not site.is_inside_tree():
@@ -142,10 +141,22 @@ func _run() -> void:
 			]
 		)
 
+	# 7. Unaffordable placement names every short line in the chat log.
+	event_bus.log_message.connect(_on_log_message)
+	resource_manager.add("solar_cells", -resource_manager.get_current("solar_cells"))  # → 0
+	_last_log = ""
+	var refused = placement.place_building("solar_array", Vector2(900, 900))
+	if refused != null:
+		failures.append("place_building should refuse with 0 solar cells")
+	if not _last_log.contains("Solar Cells") or not _last_log.contains("have 0"):
+		failures.append("shortfall message should name Solar Cells and the amount held, got: '%s'" % _last_log)
+	if not _last_log.contains("Alloy Beams"):
+		failures.append("shortfall message should list the full cost, got: '%s'" % _last_log)
+
 	# 8. Any role can build — the ENGINEER gate on construction was removed.
 	# Park a non-Engineer next to a fresh site and check the bar advances.
-	resource_manager.add("materials", 500.0)
-	resource_manager.add("silicon", 500.0)
+	for r_name in ["solar_cells", "alloy_beams", "wiring"]:
+		resource_manager.add(r_name, 100.0)
 	var site2 = placement.place_building("solar_array", Vector2(600, 600))
 	if site2 == null:
 		failures.append("place_building returned null for the any-role check")

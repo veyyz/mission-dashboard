@@ -16,6 +16,11 @@ const SCENE_PATHS := {
 	"comms_dish":     "res://scenes/buildings/CommsDish.tscn",
 	"research_lab":   "res://scenes/buildings/ResearchLab.tscn",
 	"matter_forge":   "res://scenes/buildings/MatterForge.tscn",
+	"regolith_excavator": "res://scenes/buildings/RegolithExcavator.tscn",
+	"sintering_kiln": "res://scenes/buildings/SinteringKiln.tscn",
+	"reduction_plant": "res://scenes/buildings/ReductionPlant.tscn",
+	"mre_smelter":    "res://scenes/buildings/MRESmelter.tscn",
+	"hospital":       "res://scenes/buildings/Hospital.tscn",
 }
 
 var _defs: Dictionary = {}
@@ -31,7 +36,9 @@ func _ready() -> void:
 	if typeof(parsed) != TYPE_DICTIONARY:
 		push_error("[BuildingDatabase] %s did not parse to a dictionary" % BUILDINGS_PATH)
 		return
-	_defs = parsed
+	for key in (parsed as Dictionary).keys():
+		if not String(key).begins_with("_"):
+			_defs[key] = parsed[key]
 	print("[BuildingDatabase] Ready. %d definitions loaded." % _defs.size())
 
 

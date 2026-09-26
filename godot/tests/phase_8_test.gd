@@ -68,7 +68,7 @@ func _run() -> void:
 		# (Ground is rotated 5° so cell→world has a tilt offset).
 		var iron_node: Node2D = null
 		for n in nodes:
-			if n.deposit_type == "iron":
+			if n.deposit_type == "ilmenite":
 				iron_node = n
 				break
 		if iron_node != null:

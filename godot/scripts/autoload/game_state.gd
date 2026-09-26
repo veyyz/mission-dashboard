@@ -102,6 +102,7 @@ func _setup_input_map() -> void:
 		"speed_1x":         [KEY_F1],
 		"speed_2x":         [KEY_F2],
 		"speed_4x":         [KEY_F3],
+		"reset_hud":        [KEY_F9],
 	}
 	for action_name in bindings:
 		if InputMap.has_action(action_name):

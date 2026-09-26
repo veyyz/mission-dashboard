@@ -116,9 +116,18 @@ func place_building(key: String, world_pos: Vector2) -> Node2D:
 	var cost: Dictionary = def.get("cost", {})
 	if not ResourceManager.can_afford(cost):
 		emit_signal("placement_failed", "insufficient resources")
+		# Spell out every line that is short: "Solar Cells 8 (have 3)".
+		var short: Array[String] = []
+		for r_name in cost.keys():
+			var have: float = ResourceManager.get_current(r_name)
+			var need: float = float(cost[r_name])
+			if have < need:
+				short.append("%s %d (have %d)" % [ResourceManager.display_name(r_name), int(need), int(have)])
 		EventBus.log_message.emit(
-			"Cannot afford %s — short on resources." % def.get("display_name", key),
-			"build",
+			"Cannot build %s — need %s. Full cost: %s." % [
+				def.get("display_name", key), ", ".join(short), ResourceManager.format_cost(cost),
+			],
+			"alert",
 		)
 		return null
 	if not ResourceManager.deduct(cost):

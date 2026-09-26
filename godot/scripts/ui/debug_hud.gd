@@ -3,14 +3,14 @@ extends CanvasLayer
 ## Subscribes to EventBus signals — does NOT poll managers.
 
 const RESOURCE_ORDER: Array[String] = [
-	"power", "oxygen", "food", "materials", "science", "crew",
+	"power", "oxygen", "water", "food", "science", "crew",
 ]
 
 const RESOURCE_GLYPH := {
 	"power":     "P",
 	"oxygen":    "O",
 	"food":      "F",
-	"materials": "M",
+	"water":     "W",
 	"science":   "S",
 	"crew":      "C",
 }

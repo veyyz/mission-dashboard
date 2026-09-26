@@ -1,25 +1,30 @@
 extends CanvasLayer
 ## Phase-5 build menu (placeholder UX). Lists the 3 v1 buildings and routes
-## the click to the BuildPlacementController. Replaced by the proper hotbar
-## in Phase 6.
+## the click to the BuildPlacementController.
 
+## Listed in bootstrap order (same sequence as the Guide tip and
+## economy_test check 9): power → ore → life support → refining → fabrication
+## → bulk regolith, then expansion.
 const BUILDABLE_KEYS: Array[String] = [
 	"solar_array",
-	"habitat_module",
 	"mining_drill",
-	"matter_forge",
-	"rtg",
 	"electrolyzer",
-	"hydroponics_bay",
-	"storage_silo",
+	"reduction_plant",
+	"matter_forge",
+	"mre_smelter",
+	"regolith_excavator",
+	"sintering_kiln",
 	"comms_dish",
+	"rtg",
+	"storage_silo",
+	"habitat_module",
+	"hydroponics_bay",
 	"research_lab",
+	"hospital",
 ]
 
 @export var placement_controller_path: NodePath
 
-@onready var collapse_btn: Button = $Panel/Margin/VBox/Header/CollapseButton
-@onready var content: VBoxContainer = $Panel/Margin/VBox/Content
 @onready var button_box: VBoxContainer = $Panel/Margin/VBox/Content/Buttons
 @onready var status_label: Label = $Panel/Margin/VBox/Content/StatusLabel
 
@@ -27,7 +32,8 @@ var _placement: Node = null
 
 
 func _ready() -> void:
-	collapse_btn.pressed.connect(_on_collapse_pressed)
+	# Header bar (drag / collapse / dock / resize) comes from the shared chrome.
+	preload("res://scripts/ui/hud_chrome.gd").install($Panel, "BUILD")
 	_placement = get_node_or_null(placement_controller_path)
 	for key in BUILDABLE_KEYS:
 		var def: Dictionary = BuildingDatabase.get_definition(key)
@@ -55,10 +61,10 @@ func _on_demolish_pressed() -> void:
 
 func _format_cost_tooltip(def: Dictionary) -> String:
 	var cost: Dictionary = def.get("cost", {})
-	var parts: Array[String] = []
-	for r_name in cost.keys():
-		parts.append("%s %d" % [r_name, int(cost[r_name])])
-	return "Cost: " + ", ".join(parts)
+	var text: String = "Cost: " + (ResourceManager.format_cost(cost) if not cost.is_empty() else "free")
+	if def.has("description"):
+		text = String(def["description"]) + "\n" + text
+	return text
 
 
 func _on_button_pressed(key: String) -> void:
@@ -67,8 +73,3 @@ func _on_button_pressed(key: String) -> void:
 		return
 	_placement.start_placement(key)
 	status_label.text = "Click to place %s. Right-click to cancel." % key
-
-
-func _on_collapse_pressed() -> void:
-	content.visible = not content.visible
-	collapse_btn.text = "▼" if content.visible else "▶"

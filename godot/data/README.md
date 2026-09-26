@@ -5,8 +5,9 @@ Loaded at runtime by relevant systems — never hard-code these values in script
 
 ## Files
 
-- `buildings.json` — building definitions (cost, size, production, consumption)
-- `recipes.json` — crafting / extraction / research recipes
+- `resources.json` — every tracked resource: display, HUD group, start/cap, per-crew life-support drain. Display order = file order.
+- `buildings.json` — building definitions (cost in fabricated components, size, production, consumption, raises_cap)
+- `recipes.json` — extraction / refining / fabrication recipes. `stop_at` idles a recipe once an output stock is reached.
 - `events.json` — random mission events
 
 ## Loader Convention

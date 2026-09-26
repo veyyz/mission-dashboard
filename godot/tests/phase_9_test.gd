@@ -88,14 +88,14 @@ func _run() -> void:
 		failures.append("EventBus.victory did not fire after 3 sustainable day-advances")
 
 	# 3. EventManager.try_event applies add_resource effect.
-	var materials_before: float = resource_manager.get_current("materials")
+	var materials_before: float = resource_manager.get_current("machine_parts")
 	var ran: bool = event_manager.try_event("supply_drop")
 	await process_frame
 	if not ran:
 		failures.append("EventManager.try_event('supply_drop') returned false")
-	var materials_after: float = resource_manager.get_current("materials")
+	var materials_after: float = resource_manager.get_current("machine_parts")
 	if materials_after - materials_before < 1.0:
-		failures.append("supply_drop did not add materials (before=%.1f after=%.1f)" % [materials_before, materials_after])
+		failures.append("supply_drop did not add machine_parts (before=%.1f after=%.1f)" % [materials_before, materials_after])
 	if _random_event_id != "supply_drop":
 		failures.append("EventBus.random_event_fired event_id mismatch: '%s' vs 'supply_drop'" % _random_event_id)
 

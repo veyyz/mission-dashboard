@@ -1,32 +1,174 @@
 {
-  "extract_water": {
+  "_schema": "A recipe runs on a timer while a building of `building` stands and every `input` is in stock; each cycle scales with how many of that building stand. Extraction recipes use `input_resource` (a deposit node type) instead of `input`: a drill within 1 cell of that deposit yields the full `output`, any other drill yields `output × trace_factor` (the ore is thin in bulk regolith everywhere). `stop_at` pauses the recipe once an output reaches that stock level, so the fabricator maintains stocks instead of draining one input into one part.",
+
+  "drill_regolith": {
+    "display_name": "Drill Regolith",
+    "input": {},
+    "output": { "regolith": 3 },
+    "duration_seconds": 6,
+    "building": "mining_drill"
+  },
+  "extract_water_ice": {
     "display_name": "Extract Water Ice",
     "input_resource": "water_ice_node",
-    "output": { "water": 10 },
+    "output": { "water_ice": 6 },
+    "trace_factor": 0.1,
     "duration_seconds": 8,
     "building": "mining_drill"
   },
-  "extract_iron": {
-    "display_name": "Extract Iron Ore",
-    "input_resource": "iron_node",
-    "output": { "iron": 8 },
+  "extract_ilmenite": {
+    "display_name": "Extract Ilmenite",
+    "input_resource": "ilmenite_node",
+    "output": { "ilmenite": 5 },
+    "trace_factor": 0.25,
+    "duration_seconds": 10,
+    "building": "mining_drill"
+  },
+  "extract_anorthite": {
+    "display_name": "Extract Anorthite",
+    "input_resource": "anorthite_node",
+    "output": { "anorthite": 5 },
+    "trace_factor": 0.25,
     "duration_seconds": 10,
     "building": "mining_drill"
   },
   "extract_helium3": {
     "display_name": "Extract Helium-3",
     "input_resource": "helium3_node",
-    "output": { "helium3": 5 },
+    "output": { "helium3": 2 },
+    "trace_factor": 0.15,
     "duration_seconds": 15,
     "building": "mining_drill"
   },
-  "forge_materials": {
-    "display_name": "Forge Materials",
-    "input": { "iron": 1, "silicon": 1 },
-    "output": { "materials": 100 },
+  "extract_kreep": {
+    "display_name": "Extract KREEP",
+    "input_resource": "kreep_node",
+    "output": { "kreep": 2 },
+    "trace_factor": 0.0,
+    "duration_seconds": 15,
+    "building": "mining_drill"
+  },
+
+  "excavate_regolith": {
+    "display_name": "Excavate Regolith",
+    "input": {},
+    "output": { "regolith": 6 },
+    "duration_seconds": 6,
+    "building": "regolith_excavator"
+  },
+
+  "melt_ice": {
+    "display_name": "Melt Water Ice",
+    "input": { "water_ice": 4 },
+    "output": { "water": 4 },
     "duration_seconds": 8,
+    "building": "electrolyzer"
+  },
+  "electrolyze_water": {
+    "display_name": "Electrolyze Water",
+    "input": { "water": 2 },
+    "output": { "oxygen": 2, "hydrogen": 1 },
+    "duration_seconds": 10,
+    "stop_at": { "oxygen": 950, "hydrogen": 150 },
+    "building": "electrolyzer"
+  },
+
+  "sinter_bricks": {
+    "display_name": "Sinter Regolith Bricks",
+    "input": { "regolith": 10 },
+    "output": { "regolith_bricks": 5 },
+    "duration_seconds": 10,
+    "building": "sintering_kiln"
+  },
+  "melt_glass": {
+    "display_name": "Melt Glass",
+    "input": { "regolith": 8 },
+    "output": { "glass": 2 },
+    "duration_seconds": 12,
+    "stop_at": { "glass": 150 },
+    "building": "sintering_kiln"
+  },
+
+  "reduce_ilmenite": {
+    "display_name": "Reduce Ilmenite (H₂)",
+    "input": { "ilmenite": 4, "hydrogen": 1 },
+    "output": { "iron": 2, "titanium": 1, "water": 1 },
+    "duration_seconds": 12,
+    "building": "reduction_plant"
+  },
+  "refine_kreep": {
+    "display_name": "Refine KREEP",
+    "input": { "kreep": 4 },
+    "output": { "rare_metals": 1 },
+    "duration_seconds": 20,
+    "building": "reduction_plant"
+  },
+
+  "smelt_anorthite": {
+    "display_name": "Smelt Anorthite (MRE)",
+    "input": { "anorthite": 4 },
+    "output": { "aluminum": 2, "silicon": 1, "oxygen": 2 },
+    "duration_seconds": 15,
+    "building": "mre_smelter"
+  },
+  "smelt_regolith": {
+    "display_name": "Smelt Bulk Regolith (MRE)",
+    "input": { "regolith": 10 },
+    "output": { "oxygen": 3, "iron": 1, "silicon": 1 },
+    "duration_seconds": 20,
+    "stop_at": { "oxygen": 900 },
+    "building": "mre_smelter"
+  },
+
+  "fab_alloy_beams": {
+    "display_name": "Fabricate Alloy Beams",
+    "input": { "iron": 3, "titanium": 1 },
+    "output": { "alloy_beams": 2 },
+    "duration_seconds": 10,
+    "stop_at": { "alloy_beams": 100 },
     "building": "matter_forge"
   },
+  "fab_hull_panels": {
+    "display_name": "Fabricate Hull Panels",
+    "input": { "aluminum": 3, "titanium": 1 },
+    "output": { "hull_panels": 1 },
+    "duration_seconds": 12,
+    "stop_at": { "hull_panels": 60 },
+    "building": "matter_forge"
+  },
+  "fab_solar_cells": {
+    "display_name": "Fabricate Solar Cells",
+    "input": { "silicon": 2, "glass": 1, "aluminum": 1 },
+    "output": { "solar_cells": 2 },
+    "duration_seconds": 10,
+    "stop_at": { "solar_cells": 60 },
+    "building": "matter_forge"
+  },
+  "fab_wiring": {
+    "display_name": "Draw Wiring",
+    "input": { "aluminum": 1 },
+    "output": { "wiring": 2 },
+    "duration_seconds": 6,
+    "stop_at": { "wiring": 120 },
+    "building": "matter_forge"
+  },
+  "fab_machine_parts": {
+    "display_name": "Machine Parts",
+    "input": { "iron": 3, "rare_metals": 1 },
+    "output": { "machine_parts": 1 },
+    "duration_seconds": 15,
+    "stop_at": { "machine_parts": 60 },
+    "building": "matter_forge"
+  },
+  "fab_electronics": {
+    "display_name": "Fabricate Electronics",
+    "input": { "silicon": 2, "rare_metals": 1, "wiring": 1 },
+    "output": { "electronics": 1 },
+    "duration_seconds": 20,
+    "stop_at": { "electronics": 30 },
+    "building": "matter_forge"
+  },
+
   "analyze_sample": {
     "display_name": "Analyze Sample",
     "input": { "samples": 1 },
@@ -34,13 +176,5 @@
     "duration_seconds": 30,
     "required_building": "research_lab",
     "required_role": "scientist"
-  },
-  "cultivate_crop": {
-    "display_name": "Cultivate Crop",
-    "input": { "water": 2, "power": 6 },
-    "output": { "food": 10 },
-    "duration_seconds": 60,
-    "required_building": "hydroponics_bay",
-    "required_role": "botanist"
   }
 }

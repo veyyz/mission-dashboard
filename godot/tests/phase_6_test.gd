@@ -2,12 +2,11 @@ extends SceneTree
 ## Phase-6 functional test.
 ## Verifies:
 ##   1. HUD.tscn exists as a CanvasLayer
-##   2. All 8 panels exist as their own .tscn files under scenes/ui/panels/
+##   2. All 6 panels exist as their own .tscn files under scenes/ui/panels/
 ##   3. Each panel scene loads and is instantiated under HUD
 ##   4. Resource bar binds to EventBus.resource_changed
 ##   5. Crew bar binds to crew selection (EventBus.crew_selected)
-##   6. Hotbar 0-9 respond to KEY_0..KEY_9 rising edges
-##   7. Tutorial guide can be toggled with F1
+##   6. Tutorial guide can be toggled with F1
 
 var event_bus: Node
 
@@ -37,9 +36,7 @@ func _run() -> void:
 		"res://scenes/ui/panels/HUDPanelTutorial.tscn",
 		"res://scenes/ui/panels/HUDPanelLog.tscn",
 		"res://scenes/ui/panels/HUDPanelCrew.tscn",
-		"res://scenes/ui/panels/HUDPanelActions.tscn",
 		"res://scenes/ui/panels/HUDPanelMinimap.tscn",
-		"res://scenes/ui/panels/HUDPanelHotbar.tscn",
 	]
 	for p in panel_paths:
 		if not ResourceLoader.exists(p):
@@ -68,8 +65,8 @@ func _run() -> void:
 
 	for panel_name in [
 		"HUDPanelDayTime", "HUDPanelResources", "HUDPanelTutorial",
-		"HUDPanelLog", "HUDPanelCrew", "HUDPanelActions",
-		"HUDPanelMinimap", "HUDPanelHotbar",
+		"HUDPanelLog", "HUDPanelCrew",
+		"HUDPanelMinimap",
 	]:
 		if hud.find_child(panel_name, true, false) == null:
 			failures.append("Panel instance missing: %s" % panel_name)
@@ -130,30 +127,7 @@ func _run() -> void:
 			elif not portrait_4.button_pressed:
 				failures.append("Crew bar did not press portrait 4 after crew_selected emission")
 
-	# 6. Hotbar 0-9 respond to number keys.
-	var hotbar := hud.find_child("HUDPanelHotbar", true, false)
-	if hotbar == null:
-		failures.append("HUDPanelHotbar not found")
-	else:
-		Input.action_press("dummy_unused_action_for_focus_steal")
-		Input.action_release("dummy_unused_action_for_focus_steal")
-		# Use direct key state via parse_input_event since hotbar polls Input.is_key_pressed.
-		var press_event := InputEventKey.new()
-		press_event.physical_keycode = KEY_5
-		press_event.pressed = true
-		Input.parse_input_event(press_event)
-		await physics_frame
-		await physics_frame
-		var release_event := InputEventKey.new()
-		release_event.physical_keycode = KEY_5
-		release_event.pressed = false
-		Input.parse_input_event(release_event)
-		await physics_frame
-		var current_slot: int = hotbar.current_slot()
-		if current_slot != 5:
-			failures.append("Hotbar did not select slot 5 after KEY_5 press (current=%d)" % current_slot)
-
-	# 7. Tutorial guide can be toggled with F1.
+	# 6. Tutorial guide can be toggled with F1.
 	var tutorial := hud.find_child("HUDPanelTutorial", true, false)
 	if tutorial == null:
 		failures.append("HUDPanelTutorial not found")
@@ -167,6 +141,25 @@ func _run() -> void:
 		await process_frame
 		if tutorial.visible == was_visible:
 			failures.append("Tutorial visibility did not toggle on F1")
+
+	# 7. Resource inspector: hidden by default, opens on resource_inspect_requested
+	#    with the right subject, and lists a building that costs that resource.
+	var info := hud.find_child("HUDPanelResourceInfo", true, false)
+	if info == null:
+		failures.append("HUDPanelResourceInfo not found")
+	else:
+		if info.visible:
+			failures.append("Resource inspector should start hidden")
+		event_bus.resource_inspect_requested.emit("alloy_beams")
+		await process_frame
+		if not info.visible:
+			failures.append("Resource inspector did not open on resource_inspect_requested")
+		if info.subject != "alloy_beams":
+			failures.append("Resource inspector subject is '%s', expected alloy_beams" % info.subject)
+		# find_child: hud_chrome re-parents the panel's content under Frame/Content.
+		var body_text: String = info.find_child("Body", true, false).text
+		if not body_text.contains("Solar Array") or not body_text.contains("to build"):
+			failures.append("Resource inspector REQUIRED BY does not list Solar Array build cost")
 
 	_done(failures)
 

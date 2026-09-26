@@ -4,10 +4,10 @@
   "tiles": [
     {"col": 1, "row": 2, "id": "B3", "terrain": "Cratered Mare", "hazards": "Impact debris", "recommendation": "Resource-rich but rough", "deposits": {"water_ice": "high"}},
     {"col": 5, "row": 2, "id": "F3", "terrain": "Highland Plateau", "hazards": "Solar exposure", "recommendation": "Moderate yield", "deposits": {"helium3": "medium"}},
-    {"col": 8, "row": 3, "id": "I4", "terrain": "Iron-Rich Regolith", "hazards": "Sharp rock fields", "recommendation": "Heavy industry potential", "deposits": {"iron": "high"}},
-    {"col": 3, "row": 6, "id": "D7", "terrain": "Layered Maria", "hazards": "Loose dust", "recommendation": "Decent secondary site", "deposits": {"titanium": "medium"}},
-    {"col": 6, "row": 7, "id": "G8", "terrain": "Crystalline Plain", "hazards": "Static discharge", "recommendation": "Solar array friendly", "deposits": {"silicon": "high"}},
-    {"col": 8, "row": 8, "id": "I9", "terrain": "Outer Rim", "hazards": "Long resupply distance", "recommendation": "Trace deposits only", "deposits": {"rare_metals": "low"}},
-    {"col": 4, "row": 4, "id": "E5", "terrain": "Mostly Flat Plains", "hazards": "Impact Craters, Sharp Rock Fields", "recommendation": "Good for Base Expansion, Resource Rich Area", "deposits": {"silicon": "low", "iron": "low"}}
+    {"col": 8, "row": 3, "id": "I4", "terrain": "Ilmenite-Rich Mare", "hazards": "Sharp rock fields", "recommendation": "Heavy industry potential", "deposits": {"ilmenite": "high"}},
+    {"col": 3, "row": 6, "id": "D7", "terrain": "Layered Maria", "hazards": "Loose dust", "recommendation": "Decent secondary site", "deposits": {"ilmenite": "medium"}},
+    {"col": 6, "row": 7, "id": "G8", "terrain": "Anorthositic Highland", "hazards": "Static discharge", "recommendation": "Solar array friendly", "deposits": {"anorthite": "high"}},
+    {"col": 8, "row": 8, "id": "I9", "terrain": "Outer Rim", "hazards": "Long resupply distance", "recommendation": "Trace deposits only", "deposits": {"kreep": "low"}},
+    {"col": 4, "row": 4, "id": "E5", "terrain": "Mostly Flat Plains", "hazards": "Impact Craters, Sharp Rock Fields", "recommendation": "Good for Base Expansion, Resource Rich Area", "deposits": {"anorthite": "low", "ilmenite": "low"}}
   ]
 }

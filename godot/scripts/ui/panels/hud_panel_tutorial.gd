@@ -3,13 +3,14 @@ extends PanelContainer
 ## once dismissed, stays dismissed for the session.
 
 const TIPS: Array[String] = [
-	"WASD or arrow keys move the selected crew",
-	"Press 1–6 to select crew (Shift+# to multi-select)",
-	"Click on the ground to send selected crew there",
-	"Build menu (bottom-left) places construction sites",
-	"Any crew member ticks the construction bar when adjacent",
-	"+ / − (top-right) zoom the camera in 10 steps",
-	"Press F1 to hide this guide",
+	"WASD / arrows move the selected crew · click the ground to send them",
+	"Tab / Shift+Tab cycle the selected crew",
+	"R  Scan for deposits    F  Deploy probe    G  Collect sample",
+	"Build menu (right) places sites; any adjacent crew builds",
+	"+ / − (top-right) zoom in 10 steps    Space pause    F1–F3 speed",
+	"Drag a panel header to move; ▾ collapses; right-click docks; F9 resets layout",
+	"Build order: Solar ×2 → Drill (ilmenite) → Electrolyzer → Reduction Plant → Solar ×3 → MatterForge → MRE Smelter → Excavator → Kiln. Keep power positive — 0 power = mission lost",
+	"F1 hides this guide",
 ]
 
 

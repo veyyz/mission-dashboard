@@ -333,3 +333,166 @@
 - Verified in-engine: `cells=16`, scale 0.696, rendered **712×512** — exactly double the previous 356×256.
 - Note: `matter_forge.size` is still `[3, 3]`. Nothing reads `size` today (grid-footprint validation is still deferred); `footprint_cells` is the field that matters. Worth reconciling if size-based placement validation ever lands.
 - Test: **PASS** — full regression phases 2–9 plus gamepad.
+
+## Economy overhaul: realistic lunar ISRU resource chain
+- Status: completed
+- Replaced the abstract `materials` stockpile (and the "1 iron + 1 silicon → 100 materials" MatterForge) with a three-tier chain modelled on real in-situ resource utilisation:
+  - **Raw** (extracted): `regolith` (excavator, anywhere), `water_ice`, `ilmenite` (FeTiO₃), `anorthite` (plagioclase), `helium3`, `kreep`, `samples`.
+  - **Refined**: `hydrogen`, `iron`, `titanium`, `aluminum`, `silicon`, `glass`, `regolith_bricks`, `rare_metals`.
+  - **Components** (all building costs are paid in these): `alloy_beams`, `hull_panels`, `solar_cells`, `wiring`, `machine_parts`, `electronics`.
+  - Vitals unchanged: `power`, `oxygen`, `water`, `food`, `science`, `crew`.
+- **`data/resources.json`** (new) is the single source for every resource: display name, glyph, colour, HUD group, start stock, cap, `per_crew_drain`, description. `ResourceManager` now loads it instead of hard-coding 13 entries; exposes `ordered_keys()`, `keys_in_group()`, `display_name()`, `glyph()`, `color()`, `format_cost()`.
+- **Crew life support**: each crew member drains O₂ 0.15, water 0.10, food 0.10 per minute, published as a negative rate so the HUD and the win/lose day checkpoint see the real net figure. Re-derived whenever the `crew` resource changes. Habitat no longer conjures oxygen; O₂ comes from the Electrolyzer (water → O₂ + H₂) and the MRE Smelter.
+- **Processing loop** (`data/recipes.json`): drill → ilmenite; Reduction Plant does `ilmenite + hydrogen → iron + titanium + water` (hydrogen reduction; the water goes back through the Electrolyzer, which is the classic closed ISRU loop). MRE Smelter: `anorthite → aluminum + silicon + oxygen`, or bulk `regolith → oxygen + iron + silicon`. Sintering Kiln: regolith → bricks / glass. MatterForge is now the fabricator with six component recipes.
+- **`stop_at`** recipe field (RecipeProcessor `_outputs_wanted`): a recipe idles once any output reaches its stop level, or when every output is at cap. That is what stops the fabricator draining all iron into beams before it ever makes machine parts. Published HUD rates now only count recipes that would actually cycle (inputs in stock, outputs wanted) — no more phantom +/min on a starved recipe.
+- **`raises_cap` was never wired up** — Storage Silo did nothing. `building.gd` now applies it on `_ready` and unwinds on `_exit_tree`, same pattern as rates.
+- Four new buildings + scenes (placeholder rects): Regolith Excavator, Sintering Kiln, Reduction Plant, MRE Smelter. Supply-drop event now delivers electronics + rare metals + machine parts ("imported from Earth" lever). Deposits renamed everywhere (ground layout, orbit_deposits, save default, node colours): iron→ilmenite, silicon→anorthite, titanium merged into ilmenite, rare_metals→kreep.
+- **HUD**: `hud_panel_resources.gd` builds from `resources.json` — vitals row on top, collapsible 10-column stockpile grid beneath. Values tint amber at cap, red at zero; tooltips carry the description and the current life-support drain.
+- Starter kit (lander) is sized so the opening order — 2× Solar Array, Excavator, Drill, Kiln, Electrolyzer, Reduction Plant — is affordable; after that the loop has to close. `economy_test` check 9 asserts this against the data so rebalancing can't silently strand a new game.
+- Test added — `tests/economy_test.gd`: resources load + grouped, life-support drain scales with crew, every building cost / recipe input / output / stop_at names a real resource and every recipe a real building, zero-input excavator recipe runs, reduction loop returns water, `stop_at` halts/resumes, silo cap applies and unwinds, starter kit affords the opening order.
+- Tests updated: `phase_5` (cost assertion now iterates the whole cost dict instead of hard-coding materials/silicon), `phase_8` (iron → ilmenite deposit), `phase_9` (supply drop asserts machine_parts), `gamepad` (tops up solar components).
+- Test: **PASS** — economy + full regression phases 2–9 plus gamepad. Headless 120-frame boot clean.
+- Not done / deferred: `active_phases` on solar is still ignored (solar produces at night); extraction recipes still run once per drill *type* rather than per drill instance; no per-recipe job queue on the fabricator (stop_at is the stand-in); old saves carry a `materials` entry that is now ignored on load.
+- Files added: `data/resources.json`, `scenes/buildings/{RegolithExcavator,SinteringKiln,ReductionPlant,MRESmelter}.tscn`, `tests/economy_test.gd`; modified: `data/{buildings,recipes,events,orbit_deposits}.json`, `resource_manager.gd`, `recipe_processor.gd`, `building_database.gd`, `building.gd`, `event_manager.gd`, `save_system.gd`, `main.gd`, `build_menu.gd`, `debug_hud.gd`, `hud_panel_resources.gd`, `ground.gd`, `resource_node.gd`, tests 5/8/9/gamepad
+
+## Stockpile HUD redesign
+- Status: completed
+- `HUDPanelResources` rebuilt as a two-tier instrument strip (860 px wide). Vitals stay large on top, each with a 3-px stock bar (current / cap) in its resource colour and a ▲/▼ rate in green/red. Below a hairline divider with a `▾ STOCKPILE` collapse button, three labelled rows — **RAW** (amber tick), **REFINED** (cyan), **COMPONENTS** (violet) — one chip per resource: tier-tinted glyph badge, value, small ▲/▼ rate, fill bar. Chip state: amber border + amber bar when pinned at cap (production being wasted), dimmed value + faint border when empty, normal otherwise. Tooltip carries display name, cap, description and current life-support drain.
+- The `.tscn` now owns the structure (`Margin/VBox/{Vitals,Divider,Stock}`); the script only fills it. Vitals keep the `Col_<key>` node names and the `[glyph, value]` HBox shape that `phase_6_test` walks, so the test contract held.
+- **`tools/screenshot.gd`** (new) — `Godot_console.exe --path godot --resolution 1920x1080 -s tools/screenshot.gd -- out.png [frames] [seed]`. Boots Ground, confirms a landing, waits N frames, saves the viewport. `seed` fills stockpiles to a spread of 0 / 15 / 40 / 70 / 100 % with mixed rates so every chip state is visible in one shot. Needs a real renderer (no `--headless`). Used to iterate this layout without launching the editor.
+- Test: **PASS** — phase 6, phase 9, economy.
+- Files added: `tools/screenshot.gd`; modified: `scenes/ui/panels/HUDPanelResources.tscn`, `scripts/ui/panels/hud_panel_resources.gd`
+
+## HUD chrome: every panel movable, collapsible, resizable, dockable
+- Status: completed
+- **`scripts/ui/hud_chrome.gd`** (new, no `class_name` — headless discovery trap) — one component installed into a PanelContainer at runtime; nothing per-scene to author. `hud.gd` installs it on all eight `HUDPanel*` children; `build_menu.gd`, `terrain_debug_slider.gd`, `zoom_controls.gd` install it on their `$Panel`. Old `floating_panel.gd` (drag only) deleted, and the hand-built Header/CollapseButton rows in `BuildMenu.tscn` / `TerrainDebugSlider.tscn` removed — the chrome header replaces them.
+- What each panel gets:
+  - **Header bar** — ⠿ grip glyph, title, ▾ collapse. Panels that drew their own title Label (Log, Crew, Minimap, Tutorial) have it hidden via `inner_header` so titles don't double up.
+  - **Move** — drag the header. Edges are magnetic: snap within 14 px to the 16 px screen margin and to every other chrome'd panel's edges (left↔left/right, top↔top/bottom), so panels butt up cleanly.
+  - **Collapse** — ▾ button or double-click the header. Folds to the header; width kept, expanded size remembered.
+  - **Resize** — ⋱ grip bottom-right, drawn as three cyan dots. Clamped to the panel's combined minimum and the screen. Grip is a `top_level` Control so the PanelContainer's layout skips it.
+  - **Dock** — right-click the header: Float, eight edge/corner slots (Top-Left … Bottom-Right), Reset this panel. A docked panel re-seats itself after collapse/resize so a bottom-docked bar stays on the bottom edge. Dragging undocks.
+  - **Persist** — `user://hud_layout.json`, keyed by panel node name (x, y, w, h, collapsed, dock). Writes are coalesced 0.5 s after the last change. Restored on install, clamped to screen.
+  - **Reset all** — new `reset_hud` action (F9, `game_state.gd`), handled in `hud.gd`: wipes the file and returns every panel to its scene rect.
+- Install runs deferred so the panel's own `@onready` lookups resolve before its children are re-parented under `Frame/Content`. A second deferred step (`_settle`) fixes the rect once the header has been laid out: keeps the scene's anchored edge fixed (a bottom-anchored hotbar grows *upward* when the header adds 22 px), then clamps to screen.
+- **Pre-existing bug surfaced while doing this:** `HUDPanelTutorial` was 7027 px tall at boot — its autowrapped tip labels get measured at zero width during its own `_ready`, report a giant minimum height, and containers never shrink. The bottom border was simply off-screen so nobody noticed. `_settle` treats any scene rect larger than the screen as blown and falls back to the real minimum; the guide is now 344×267 at (1560, 80). Root cause in the tutorial (autowrap before first layout) left as-is, since the chrome guard fixes it generically.
+- Default layout still has the historical overlaps (Zoom over Terrain Debug, Guide under it, Actions over Crew, Minimap under Build) — every one is now draggable, so left for the player.
+- Tutorial tip updated (stale "Press 1–6" line → Tab/Shift+Tab, plus the drag/collapse/dock/F9 hint).
+- Test: **PASS** — full regression phases 2–9, gamepad, economy. `phase_6` still walks `Col_power` under the Resources panel through `find_child(recursive)`, so the re-parent under `Frame/Content` didn't break it. Rendered screenshots via `tools/screenshot.gd` used to verify all eleven panels seat correctly.
+- Files added: `scripts/ui/hud_chrome.gd`; deleted: `scripts/ui/floating_panel.gd`; modified: `hud.gd`, `build_menu.gd`, `terrain_debug_slider.gd`, `zoom_controls.gd`, `game_state.gd`, `hud_panel_tutorial.gd`, `BuildMenu.tscn`, `TerrainDebugSlider.tscn`
+
+## HUD default layout baked from the player's arrangement
+- Status: completed
+- User arranged the panels in-game and the rects were lifted from `user://hud_layout.json` and written into each scene as plain top-left offsets (anchors/grow removed — the chrome freezes to top-left anyway). Defaults, 1920×1080 logical: Mission Clock (16,16) 342×178 · Messages (16,194) 342×590 · Guide (16,800) 342×264 · Resources (553,16) 878×226 · Actions (358,850) 564×91 · Hotbar (947,850) 614×91 · Crew (358,941) 1203×123 · Zoom (1561,16) 343×68 · Minimap (1561,94) 343×302 · Terrain Debug (1561,420) 343×364 **collapsed** · Build (1561,494) 343×570 (its 15-button minimum is ~610 tall, so the screen clamp seats it at y≈462). Left column, bottom strip and right column are edge-to-edge; F9 and fresh installs land here.
+- Two chrome bugs surfaced by the exercise:
+  - **Layout key collision** — Build, Zoom and Terrain Debug each wrap a node literally named `Panel`, so all three saved under one `"Panel"` entry and the last one to move won on reload. Keys are now `<owner scene>/<node>` (`BuildMenu/Panel`, `HUD/HUDPanelLog`). Old files are orphaned, not migrated.
+  - **Boot wrote the layout file** — applying a default-collapsed state went through `set_collapsed()`, which queued a save, so a scene default got persisted on first run and could never be changed by editing the scene again. `set_collapsed(collapsed, persist)` now takes `persist=false` from `_settle` and `_load_layout`; only player actions write.
+- New `install(..., start_collapsed)` option; Terrain Debug uses it.
+- Test: **PASS** — phases 5, 6, 7, 9, gamepad, economy. Rendered screenshot matches the reference arrangement.
+- Files modified: `hud_chrome.gd`, `terrain_debug_slider.gd`, all eight `HUDPanel*.tscn`, `BuildMenu.tscn`, `ZoomControls.tscn`, `TerrainDebugSlider.tscn`
+
+## Hotbar removed
+- Status: completed
+- `HUDPanelHotbar` was a Phase-6 placeholder whose "Phase 8 wiring" never landed: ten toggle buttons, 0–9 keys selected a slot, and the only effect was a log line. Nothing read `current_slot()`. Dropped per user decision ("drop it for now"); the Build menu already covers placement. If it comes back, the spec's intent (§8 / §5.3) is build shortcuts on 1–9, demolish on 0.
+- Removed: `HUDPanelHotbar.tscn`, `hud_panel_hotbar.gd`; HUD.tscn instance and `hud.gd` chrome entry; `phase_6_test` check 6 (renumbered, 7 panels).
+- Its slot in the default layout — (947,850) 614×91, right of Actions — is now empty.
+- Also noted: `HUDPanelActions` is the same kind of stub. The five buttons log "Action: X (Phase 8 wiring)"; the real Scan / Probe / Sample actions run off R / F / G in `crew_selection_manager.gd`, so the panel is a key-hint strip only. Left in place pending a decision.
+- Test: **PASS** — phase 6, phase 7.
+
+## Actions panel removed; key hints folded into the Guide
+- Status: completed
+- `HUDPanelActions` was the same Phase-6 stub as the hotbar: five buttons whose click only logged "Action: X (Phase 8 wiring)". The real Scan / Probe / Sample already run off R / F / G in `crew_selection_manager.gd`; "Crew Menu [C]" had no handler at all. Dropped per user decision.
+- Guide (`hud_panel_tutorial.gd` TIPS) rewritten to carry the hints instead: movement + click-to-send, Tab cycling, **R scan / F probe / G sample** on one line, build menu (corrected — it's on the right, not bottom-left), zoom + Space pause + F1–F3 speed, panel chrome, F1 to hide.
+- Seven tips at 342 px wide wrap to ~290 px, which pushed the Guide up into Messages. Defaults re-seated: Messages (16,194) 342×510, Guide (16,720) 342×344 (eight tips incl. build order). Left column is Clock / Messages / Guide edge to edge again.
+- Note for later: **F1 is double-bound** — `speed_1x` in `game_state.gd` and the guide toggle in `hud_panel_tutorial.gd`. Pre-existing; the tip lists both truthfully. Worth moving speed to 1/2/3 or the guide to H.
+- Removed: `HUDPanelActions.tscn`, `hud_panel_actions.gd`; HUD.tscn instance; `hud.gd` chrome entry; `phase_6_test` panel lists (6 panels).
+- Test: **PASS** — phase 6. Screenshot verified.
+
+## Economy: machine-parts bootstrap deadlock fixed
+- Status: completed
+- Found while writing the recommended build order. Machine parts are made only by the MatterForge, and the forge's recipe needed aluminum, which needs the MRE Smelter. Parts to reach a working forge + smelter: Drill 6 + Electrolyzer 4 + Reduction Plant 8 + Smelter 8 + Forge 10 = 36, kit had 32 — unreachable without a random supply drop. Also: build the Excavator or Kiln first (9 parts) and you were stuck even earlier.
+- Fix: `fab_machine_parts` = iron 3 + rare_metals 1 (aluminum dropped — bearings and motors are iron; rare metals cover magnets), so parts flow as soon as the Reduction Plant runs. Kit `machine_parts` 32 → 40 for slack. Rare metals remain the true bottleneck (kit 12 → 12 parts; then KREEP refining or supply drops), which is the intended pressure.
+- `economy_test` check 9 now asserts the *full* bootstrap — Solar ×2, Drill, Electrolyzer, Reduction Plant, MatterForge, Solar, MRE Smelter — is affordable from the kit, not just the first six buildings.
+- Test: **PASS** — economy.
+
+## Economy: power bootstrap gap fixed (user-caught)
+- Status: completed
+- User checked the recommended order and found the arithmetic fails at the smelter: 3 kit arrays = 45 power, chain to a running smelter draws 55, and new solar cells need smelter silicon + kiln glass + forge — so there's no way to add PV before going negative. Worse than "short": nothing pauses a building, and `WinLoseManager` treats power 0 as **defeat**. With a 400 buffer at −10/min the plan lost the game ~40 min after the smelter went up.
+- Fix is in the kit, not the order: lander now carries `solar_cells` 40 (5 arrays = 75/min), `alloy_beams` 72, `wiring` 56 and `machine_parts` 48 — enough to erect the arrays and the whole 12-building bootstrap from cargo alone, before the forge makes a single part. Opening order Solar ×2 → Drill → Electrolyzer → Reduction → Solar ×3 → Forge → Smelter → Excavator → Kiln stays ≥ +6/min at every step (30 → 25 → 17 → 5 → 50 → 40 → 20 → 16 → 6). Second drill (−5) and RTG (+8) fit after; further arrays come from the forge once silicon and glass flow.
+- `economy_test` check 9 now walks that 12-building order tracking net power per step and fails if it ever goes negative, alongside the kit-affordability check.
+- Guide tip updated with the corrected order and "keep power positive — 0 power = mission lost".
+- Still open (pre-existing): solar `active_phases` is ignored, so arrays produce at night. When that lands the night budget will need RTGs or batteries and this margin will not survive — revisit then.
+- Test: **PASS** — economy.
+
+## Build menu reordered to bootstrap sequence
+- Status: completed
+- `build_menu.gd` `BUILDABLE_KEYS` now lists buildings in the order they need to go up, matching the Guide tip and `economy_test` check 9: Solar Array, Mining Drill, Electrolyzer, Reduction Plant, MatterForge, MRE Smelter, Regolith Excavator, Sintering Kiln, then expansion — Comms Dish, RTG, Storage Silo, Habitat, Hydroponics, Research Lab. Previously in Phase-5/8 authoring order.
+- Test: **PASS** — phase 5.
+
+## Art swap-in: Mining Drill + Electrolyzer sprites
+- Status: completed
+- User supplied `level-1-drill.png` and `level-1-electrolyzer.png` (1536×1024 iso renders on black). Ran each through `tools/import_building_art.gd` at tolerance 24 / max width 512 — flood-fill background to alpha, crop to used rect (1410×991 and 1319×908), Lanczos downscale. Results: `assets/sprites/buildings/mining_drill.png` 512×360 (313 KB), `electrolyzer.png` 512×352 (277 KB). Import pass run.
+- Verified in-engine: both `_is_real_sprite == true`; at the default 6-cell footprint (384×192 box) they render 273×192 and 279×192, height-limited. Reads well next to the crew at gameplay zoom. If they should read larger relative to the 16-cell MatterForge, bump `footprint_cells` to 8 in `buildings.json` — that scales the visual, blocker and nav obstacle together.
+- `tools/screenshot.gd` gained a `place:SceneA,SceneB` arg that drops finished building scenes beside the landing site, so art swaps can be eyeballed at game scale without playing to a build.
+- Cosmetic: Godot's import pass logs "Cannot navigate to hud_panel_actions.gd" — the editor's layout cache (`.godot/editor/editor_layout.cfg`) still remembers the deleted script as an open tab. Clears on next editor launch; not tracked in git.
+- Files added: `assets/sprites/buildings/{mining_drill,electrolyzer}.png` (+ `.import`); modified: `tools/screenshot.gd`
+
+## Resource inspector panel
+- Status: completed
+- Clicking any vital column or stockpile chip in the Resources panel opens **HUDPanelResourceInfo** (new scene + `hud_panel_resource_info.gd`), a real HUD panel with the same chrome as the rest — drag, dock, collapse, resize, layout persisted. Hidden at boot; ✕ closes; clicking another resource retargets it. Default rect (553,258) 440×600, directly under the Resources bar.
+- Content, for the selected resource:
+  - Title: glyph, name, tier tag (VITAL / RAW / REFINED / COMPONENT), description from `resources.json`.
+  - **STOCK** — stored / cap (amber + "production wasted" when full), net rate, and "empty in / full in N min" at the current rate.
+  - **CURRENT FLOW** — live contributors, sorted: standing buildings' flat produces/consumes (×count), recipes that are actually cycling (from the new `RecipeProcessor.applied_rates()`), crew life support with crew count.
+  - **REQUIRED BY** — from data: every building that costs it ("8 to build"), consumes it ("8/min to run"), or feeds it into a recipe ("2 per cycle → 2 Oxygen, 1 Hydrogen (Electrolyze Water)").
+  - **PRODUCED BY** — buildings' flat production, storage-cap raisers, recipes with per-cycle amount, /min and inputs ("+4 per 8s (30.0/min) from Water Ice 4").
+- Live refresh throttled to 4×/s while visible; re-renders on building completed/destroyed so the flow section tracks the base.
+- Wiring: new `EventBus.resource_inspect_requested(name)`; Resources panel columns/chips get pointer cursor and emit it on left-click (inner HBox/badge set to MOUSE_FILTER_IGNORE so the whole chip is the hit target). `RecipeProcessor` gained `get_recipe()` and `applied_rates()`.
+- HUD.tscn's node list had been left with concatenated lines by the hotbar/actions removals (Godot parsed it, but it was wrong); rewritten cleanly while registering the new panel.
+- Test added — `phase_6_test` check 7: inspector hidden at boot, opens on the signal with the right subject, REQUIRED BY lists Solar Array's alloy_beams build cost. `find_child` is used because chrome re-parents content under Frame/Content.
+- Test: **PASS** — phase 5, phase 6, economy. Screenshot verified (`tools/screenshot.gd` gained `inspect:<resource>`).
+- Files added: `scenes/ui/panels/HUDPanelResourceInfo.tscn`, `scripts/ui/panels/hud_panel_resource_info.gd`; modified: `event_bus.gd`, `recipe_processor.gd`, `hud_panel_resources.gd`, `hud.gd`, `HUD.tscn`, `phase_6_test.gd`, `tools/screenshot.gd`
+
+## Drill + Electrolyzer scaled to the MatterForge
+- Status: completed
+- `buildings.json`: `mining_drill` and `electrolyzer` get `footprint_cells: 16` (was default 6) so they occupy the same 1024×512 iso box as the forge — visual, blocker and nav obstacle scale together. Art re-imported at `max_width 1024` (1024×720 and 1024×705, ~1 MB each) so nothing is upscaled at the new size.
+- Note: `size` is still `[2, 2]` for both; nothing reads it (same caveat as the forge).
+
+## Drills: regolith anywhere, full ore on a hotspot, trace ore elsewhere
+- Status: completed
+- Ask: a Mining Drill on a resource hotspot should still mine regolith, and mine that resource faster than a drill placed on plain ground. Doing it exposed a bigger limitation — `RecipeProcessor` fired each recipe **once per recipe type**, not per building, so a second drill, electrolyzer or forge did nothing. Fixed at the root.
+- **Per-building scaling** (`recipe_processor.gd` rewritten): every cycle scales with `multiplier(key)` = number of standing buildings of the recipe's type. Input-driven recipes run in whole units and fall back to as many units as stock affords (two forges with iron for one batch make one, not zero). Published HUD rates carry the same multiplier.
+- **Extraction** (`input_resource` recipes): each drill is classified ON a matching deposit (within 1 cell, same radius rule as before, now per drill via `_near_node`) or OFF. Multiplier = on-deposit drills + off-deposit drills × `trace_factor`. New `trace_factor` field in `recipes.json`: ilmenite 0.25, anorthite 0.25, water ice 0.1, helium-3 0.15, KREEP 0 (only in hotspots). So one drill on an ilmenite hotspot + one in open ground = 1.25× the recipe.
+- New `drill_regolith` recipe: any Mining Drill yields 3 regolith / 6 s (half an Excavator), on or off a deposit.
+- Mining Drill description and the inspector's PRODUCED BY line updated ("+5 per 10s on an Ilmenite deposit, ×0.25 elsewhere").
+- Gotcha: GDScript's `%` formatting has no `%g`. Two `×%.2g` strings threw "String formatting error: unsupported format character" at runtime (not parse time), caught only because the economy test's cycle log fired. Replaced with `str(snappedf(x, 0.01))`.
+- Test added — `economy_test` check 6b: second excavator → multiplier 2 and 12 regolith/cycle; off-deposit drill drills regolith, yields 1.25 ilmenite (×0.25) and no KREEP; an ilmenite node placed beside it → multiplier 1.0 and 5 ilmenite; drill on a deposit still drills regolith.
+- Test: **PASS** — economy, phase 5, 6, 8, 9.
+- Files modified: `recipe_processor.gd`, `data/recipes.json`, `data/buildings.json`, `hud_panel_resource_info.gd`, `tests/economy_test.gd`
+
+## Recipes made rate-driven; full stocks no longer flicker
+- Status: completed
+- User report: water and water ice bounced between max and max-1. Two causes.
+  1. At cap the recipe idled (`_outputs_wanted` false), consumers kept drawing, stock dipped, next 1 s refresh woke the recipe, its lump refilled to cap — a visible 600 / 599 oscillation.
+  2. **Recipe output was double-counted.** Since Phase 8 the processor both published a per-minute rate (which `ResourceManager._process` integrates every frame) *and* added a lump each cycle. Every recipe ran at ~2×. Pre-existing; carried through the economy overhaul unnoticed because tests drive `try_run()` directly.
+- Fix: the simulation loop is now purely rate-driven — active recipes publish rates, nothing lumps. `try_run()` survives as the manual "one discrete cycle" used by tests (and a future craft-now action). `_timers` gone. Net effect on balance: recipe throughput halves to the number the data actually says.
+- `_outputs_wanted(key, recipe)`: a capped output idles the recipe only if nothing *else* is draining that resource (`get_rate(r) − this recipe's published rate ≥ 0`). If something is, the recipe keeps running, the clamp holds the stock at max, and only when drain exceeds production does the number fall — exactly the asked-for rule. `stop_at` unchanged.
+- New `active_multiplier(key)` — the multiplier a recipe actually runs at (0 when idle, floored / stock-limited for input recipes). `_refresh_rates` publishes from it; tests read it.
+- Test added — `economy_test` check 6c: sinter_bricks with bricks at cap and no consumer → idle; add an external drain → active. (First draft used water and failed correctly: crew drink water, so water is always drained. Kept as a comment in the test.)
+- Test: **PASS** — economy, phase 5, 6, 8, 9.
+- Files modified: `recipe_processor.gd`, `tests/economy_test.gd`
+
+## Shortfall messages on placement; Messages panel renamed Chat
+- Status: completed
+- `build_placement_controller.gd::place_building`: an unaffordable placement now logs every short line with what you hold, then the full cost — e.g. *"Cannot build Solar Array — need Solar Cells 8 (have 3), Alloy Beams 4 (have 0). Full cost: Solar Cells 8, Alloy Beams 4, Wiring 4."* Category changed `build` → `alert` so it renders red in the log, not amber like a normal build event. Uses `ResourceManager.display_name` / `format_cost`, so names track `resources.json`.
+- `HUDPanelLog` chrome title and inner header label renamed **MESSAGES → CHAT** (`hud.gd`, `HUDPanelLog.tscn`). Node name unchanged, so saved layouts and `phase_6_test` are unaffected.
+- Test added — `phase_5_test` check 7: with solar cells at 0, `place_building("solar_array")` returns null and the logged message names Solar Cells, "have 0", and the rest of the cost.
+- Test: **PASS** — phase 5, phase 6.
+
+## Hospital building
+- Status: completed
+- New `hospital` in `buildings.json`: **`cost: {}` — free to place** (user: "not supposed to need any materials to build or run"; a first cut with a component cost was corrected); build 120 s; `footprint_cells` 16 (same box as the forge, drill, electrolyzer). **No `produces` / `consumes`** per the ask — it's a placed structure with no grid draw; crew health / radiation treatment can hook onto it later (crew_member.gd already tracks health and the solar-flare event is a stub).
+- Scene `Hospital.tscn` (MatterForge template), registered in `BuildingDatabase.SCENE_PATHS`, last entry in the Build menu (expansion tier), placeholder palette white.
+- Art: user's `level-1-hospital.png` through `import_building_art.gd` at 1024 → `assets/sprites/buildings/hospital.png` 1024×648. Verified in-engine at game scale.
+- Test: **PASS** — economy (validates the cost lines against resources.json and that a scene exists), phase 5.
+- Files added: `scenes/buildings/Hospital.tscn`, `assets/sprites/buildings/hospital.png`; modified: `buildings.json`, `building_database.gd`, `build_menu.gd`, `building.gd`
